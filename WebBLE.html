@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>NMES Web Remote</title>
+    <style>
+        /* Basic CSS for a clean, mobile-first interface */
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+        }
+        .card {
+            background-color: var(--card-background);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        h1, h2 {
+            text-align: center;
+            margin-top: 0;
+            color: var(--text-color);
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        h2 {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+        .control-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .control-group-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        input[type="range"] {
+            flex-grow: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 5px;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: var(--primary-color);
+            cursor: pointer;
+            border-radius: 50%;
+            border: 4px solid var(--card-background);
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: var(--primary-color);
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        .slider-value {
+            font-weight: bold;
+            min-width: 45px;
+            text-align: right;
+        }
+        button {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        #connectButton {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        #connectButton.connected {
+            background-color: var(--danger-color);
+        }
+        .status {
+            text-align: center;
+            margin-top: 1rem;
+            padding: 0.8rem;
+            border-radius: 8px;
+            background-color: var(--border-color);
+            display: none; /* Hidden by default */
+        }
+        .status.active {
+            display: block;
+        }
+        /* Toggle Switch Styling */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .switch-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .switch-slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .switch-slider {
+            background-color: var(--success-color);
+        }
+        input:checked + .switch-slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="card">
+            <h1>NMES Controller</h1>
+            <p id="status" class="status">Disconnected</p>
+            <button id="connectButton">Connect to Device</button>
+        </div>
+
+        <div class="card">
+             <!-- Channel 1 Controls -->
+            <div class="control-group">
+                <div class="control-group-header">
+                    <h3>Channel 1</h3>
+                    <label class="switch">
+                        <input type="checkbox" id="ch1Enable">
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+                
+                <label for="ch1Amplitude">Amplitude</label>
+                <div class="slider-container">
+                    <input type="range" id="ch1Amplitude" min="0" max="255" value="0">
+                    <span id="ch1AmplitudeValue" class="slider-value">0</span>
+                </div>
+            </div>
+            
+             <!-- Channel 2 Controls -->
+            <div class="control-group">
+                <div class="control-group-header">
+                    <h3>Channel 2</h3>
+                     <label class="switch">
+                        <input type="checkbox" id="ch2Enable">
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+
+                <label for="ch2Amplitude">Amplitude</label>
+                <div class="slider-container">
+                    <input type="range" id="ch2Amplitude" min="0" max="255" value="0">
+                    <span id="ch2AmplitudeValue" class="slider-value">0</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+             <h2>Advanced Settings</h2>
+             <!-- Common Settings -->
+             <div class="control-group">
+                <label for="pulseWidth">Pulse Width (µs)</label>
+                <div class="slider-container">
+                    <input type="range" id="pulseWidth" min="50" max="1000" value="200" step="10">
+                    <span id="pulseWidthValue" class="slider-value">200 µs</span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label for="frequency">Frequency (Hz)</label>
+                <div class="slider-container">
+                    <input type="range" id="frequency" min="1" max="100" value="30">
+                    <span id="frequencyValue" class="slider-value">30 Hz</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================================
+        // == JAVASCRIPT LOGIC FOR WEB BLUETOOTH REMOTE                       ==
+        // =====================================================================
+
+        // --- Get references to all our HTML elements ---
+        const connectButton = document.getElementById('connectButton');
+        const statusDisplay = document.getElementById('status');
+        
+        const ch1Enable = document.getElementById('ch1Enable');
+        const ch1AmplitudeSlider = document.getElementById('ch1Amplitude');
+        const ch1AmplitudeValue = document.getElementById('ch1AmplitudeValue');
+        
+        const ch2Enable = document.getElementById('ch2Enable');
+        const ch2AmplitudeSlider = document.getElementById('ch2Amplitude');
+        const ch2AmplitudeValue = document.getElementById('ch2AmplitudeValue');
+
+        const pulseWidthSlider = document.getElementById('pulseWidth');
+        const pulseWidthValue = document.getElementById('pulseWidthValue');
+        const frequencySlider = document.getElementById('frequency');
+        const frequencyValue = document.getElementById('frequencyValue');
+
+        // --- BLE UUIDs (must match the ESP32 code) ---
+        const SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
+        const CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
+
+        // --- Global variables for BLE objects ---
+        let bleDevice;
+        let bleServer;
+        let nmesService;
+        let nmesCharacteristic;
+        let isConnected = false;
+
+        // --- Event Listener for the Connect Button ---
+        connectButton.addEventListener('click', async () => {
+            if (!isConnected) {
+                await connect();
+            } else {
+                await disconnect();
+            }
+        });
+
+        // --- Main Connect Function ---
+        async function connect() {
+            try {
+                updateStatus("Requesting Bluetooth Device...");
+                
+                // Scan for devices with our specific service UUID
+                bleDevice = await navigator.bluetooth.requestDevice({
+                    filters: [{ services: [SERVICE_UUID] }]
+                });
+
+                updateStatus("Connecting to GATT Server...");
+                bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
+                bleServer = await bleDevice.gatt.connect();
+                
+                updateStatus("Getting NMES Service...");
+                nmesService = await bleServer.getPrimaryService(SERVICE_UUID);
+
+                updateStatus("Getting NMES Characteristic...");
+                nmesCharacteristic = await nmesService.getCharacteristic(CHARACTERISTIC_UUID);
+
+                isConnected = true;
+                updateStatus("Connected!");
+                updateConnectButton();
+
+            } catch (error) {
+                console.error("Connection Error:", error);
+                updateStatus(`Error: ${error.message}`);
+                isConnected = false;
+                updateConnectButton();
+            }
+        }
+        
+        // --- Disconnect Function ---
+        async function disconnect() {
+            if (!bleDevice) {
+                return;
+            }
+            if (bleDevice.gatt.connected) {
+                bleDevice.gatt.disconnect();
+            } else {
+                console.log("> Bluetooth Device is already disconnected");
+            }
+        }
+
+        function onDisconnected(event) {
+            updateStatus("Device Disconnected");
+            isConnected = false;
+            updateConnectButton();
+        }
+
+        // --- Function to send data to the ESP32 ---
+        async function sendCommand(command) {
+            if (isConnected && nmesCharacteristic) {
+                try {
+                    const encoder = new TextEncoder('utf-8');
+                    await nmesCharacteristic.writeValue(encoder.encode(command));
+                } catch (error) {
+                    console.error("Send Error:", error);
+                    updateStatus(`Send Error: ${error.message}`);
+                }
+            }
+        }
+        
+        // --- UI Update Functions ---
+        function updateStatus(message) {
+            console.log(message);
+            statusDisplay.textContent = message;
+            statusDisplay.classList.add('active');
+        }
+
+        function updateConnectButton() {
+             if (isConnected) {
+                connectButton.textContent = "Disconnect";
+                connectButton.classList.add("connected");
+            } else {
+                connectButton.textContent = "Connect to Device";
+                connectButton.classList.remove("connected");
+            }
+        }
+
+        // --- Add Event Listeners to all sliders and toggles ---
+        ch1Enable.addEventListener('change', () => sendCommand(`C1:E:${ch1Enable.checked ? 1 : 0}`));
+        ch1AmplitudeSlider.addEventListener('input', () => {
+            const value = ch1AmplitudeSlider.value;
+            ch1AmplitudeValue.textContent = value;
+            sendCommand(`C1:A:${value}`);
+        });
+
+        ch2Enable.addEventListener('change', () => sendCommand(`C2:E:${ch2Enable.checked ? 1 : 0}`));
+        ch2AmplitudeSlider.addEventListener('input', () => {
+            const value = ch2AmplitudeSlider.value;
+            ch2AmplitudeValue.textContent = value;
+            sendCommand(`C2:A:${value}`);
+        });
+
+        pulseWidthSlider.addEventListener('input', () => {
+            const value = pulseWidthSlider.value;
+            pulseWidthValue.textContent = `${value} µs`;
+            // Send to both channels
+            sendCommand(`C1:W:${value}`);
+            sendCommand(`C2:W:${value}`);
+        });
+
+        frequencySlider.addEventListener('input', () => {
+            const value = frequencySlider.value;
+            frequencyValue.textContent = `${value} Hz`;
+            // Send to both channels
+            sendCommand(`C1:F:${value}`);
+            sendCommand(`C2:F:${value}`);
+        });
+
+    </script>
+</body>
+</html>
