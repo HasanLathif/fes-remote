@@ -6,193 +6,45 @@
     <title>NMES Web Remote</title>
     <style>
         :root {
-            --primary-color: #1a7431; /* A nice, rich green */
-            --primary-hover: #135523;
-            --background-color: #f0f2f5; /* Light grey background */
-            --card-background: #ffffff;
-            --text-color: #1c1e21;
-            --text-secondary: #65676b;
-            --border-color: #ced0d4;
-            --success-color: #42b72a;
-            --danger-color: #fa383e;
-            --slider-track: #e4e6eb;
+            --primary-color: #1a7431; --primary-hover: #135523; --background-color: #f0f2f5;
+            --card-background: #ffffff; --text-color: #1c1e21; --text-secondary: #65676b;
+            --border-color: #ced0d4; --success-color: #42b72a; --danger-color: #fa383e;
+            --slider-track: #e4e6eb; --gauge-background: #e9ecef; --gauge-fill: #1a7431;
         }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 1rem;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-            box-sizing: border-box;
-        }
-        .container {
-            width: 100%;
-            max-width: 500px;
-        }
-        .card {
-            background-color: var(--card-background);
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-        }
-        h1, h2, h3 {
-            margin-top: 0;
-            color: var(--text-color);
-            text-align: center;
-        }
-        h1 {
-            font-size: 1.8rem;
-            margin-bottom: 1.5rem;
-        }
-        h2 {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 0.75rem;
-        }
-        .control-group {
-            margin-bottom: 2rem;
-        }
-        .control-group:last-child {
-            margin-bottom: 0.5rem;
-        }
-        .control-group-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-        .control-group-header h3 {
-            margin: 0;
-            font-size: 1.2rem;
-            text-align: left;
-        }
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-        }
-        .slider-container {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            height: 8px;
-            background: var(--slider-track);
-            border-radius: 5px;
-            outline: none;
-            transition: opacity .2s;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            background: var(--primary-color);
-            cursor: pointer;
-            border-radius: 50%;
-            border: 4px solid var(--card-background);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-        }
-        input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            background: var(--primary-color);
-            cursor: pointer;
-            border-radius: 50%;
-        }
-        .slider-value {
-            font-weight: 600;
-            min-width: 55px;
-            text-align: right;
-            font-size: 1rem;
-            color: var(--primary-color);
-        }
-        button {
-            width: 100%;
-            padding: 0.9rem 1rem;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-        }
-        button:active {
-            transform: scale(0.98);
-        }
-        #connectButton {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        #connectButton:hover {
-            background-color: var(--primary-hover);
-        }
-        #connectButton.connected {
-            background-color: var(--danger-color);
-        }
-        #status {
-            text-align: center;
-            padding: 0.8rem;
-            border-radius: 8px;
-            font-weight: 500;
-            margin-bottom: 1rem;
-            display: none; /* Hidden by default */
-        }
-        #status.active {
-            display: block;
-        }
-        /* Toggle Switch Styling */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 28px;
-        }
-        .switch input { 
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .switch-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 28px;
-        }
-        .switch-slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        input:checked + .switch-slider {
-            background-color: var(--success-color);
-        }
-        input:checked + .switch-slider:before {
-            transform: translateX(22px);
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: var(--background-color); color: var(--text-color); margin: 0; padding: 1rem; display: flex; justify-content: center; min-height: 100vh; box-sizing: border-box; }
+        .container { width: 100%; max-width: 500px; }
+        .card { background-color: var(--card-background); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 1.5rem; margin-bottom: 1rem; }
+        h1, h2, h3 { margin-top: 0; color: var(--text-color); text-align: center; }
+        h1 { font-size: 1.8rem; margin-bottom: 1.5rem; }
+        h2 { font-size: 1.3rem; font-weight: 600; margin-bottom: 1.5rem; text-align: left; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; }
+        .control-group { margin-bottom: 2rem; }
+        .control-group:last-child { margin-bottom: 0.5rem; }
+        .control-group-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .control-group-header h3 { margin: 0; font-size: 1.2rem; text-align: left; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--text-secondary); }
+        .slider-container { display: flex; align-items: center; gap: 1rem; }
+        input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; background: var(--slider-track); border-radius: 5px; outline: none; transition: opacity .2s; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; background: var(--primary-color); cursor: pointer; border-radius: 50%; border: 4px solid var(--card-background); box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+        input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; background: var(--primary-color); cursor: pointer; border-radius: 50%; }
+        .slider-value { font-weight: 600; min-width: 55px; text-align: right; font-size: 1rem; color: var(--primary-color); }
+        button { width: 100%; padding: 0.9rem 1rem; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.2s ease, transform 0.1s ease; }
+        button:active { transform: scale(0.98); }
+        #connectButton { background-color: var(--primary-color); color: white; }
+        #connectButton:hover { background-color: var(--primary-hover); }
+        #connectButton.connected { background-color: var(--danger-color); }
+        #status { text-align: center; padding: 0.8rem; border-radius: 8px; font-weight: 500; margin-bottom: 1rem; display: none; }
+        #status.active { display: block; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .switch-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 28px; }
+        .switch-slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .switch-slider { background-color: var(--success-color); }
+        input:checked + .switch-slider:before { transform: translateX(22px); }
+        /* --- GAUGE STYLING (BARU) --- */
+        .gauge-container { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; }
+        .gauge { width: 100%; height: 30px; background-color: var(--gauge-background); border-radius: 15px; overflow: hidden; border: 1px solid var(--border-color); }
+        .gauge-fill { width: 0%; height: 100%; background-color: var(--gauge-fill); transition: width 0.1s linear; }
+        .gauge-label { font-size: 1.5rem; font-weight: 600; color: var(--text-color); }
     </style>
 </head>
 <body>
@@ -204,99 +56,79 @@
             <div id="status">Disconnected</div>
         </div>
 
-        <div class="card">
-             <h2>Channels</h2>
-             <!-- Channel 1 Controls -->
-            <div class="control-group">
-                <div class="control-group-header">
-                    <h3>Channel 1</h3>
-                    <label class="switch">
-                        <input type="checkbox" id="ch1Enable">
-                        <span class="switch-slider"></span>
-                    </label>
-                </div>
-                
-                <label for="ch1Amplitude">Amplitude</label>
-                <div class="slider-container">
-                    <input type="range" id="ch1Amplitude" min="0" max="255" value="0">
-                    <span id="ch1AmplitudeValue" class="slider-value">0</span>
+        <!-- KARTU BARU UNTUK BIOFEEDBACK -->
+        <div class="card" id="biofeedbackCard" style="display: none;">
+            <h2>Biofeedback</h2>
+            <div class="gauge-container">
+                <div class="gauge-label" id="angleValue">0.00°</div>
+                <div class="gauge">
+                    <div class="gauge-fill" id="angleGauge"></div>
                 </div>
             </div>
-            
-             <!-- Channel 2 Controls -->
-            <div class="control-group">
-                <div class="control-group-header">
-                    <h3>Channel 2</h3>
-                     <label class="switch">
-                        <input type="checkbox" id="ch2Enable">
-                        <span class="switch-slider"></span>
-                    </label>
-                </div>
+        </div>
 
+        <div class="card">
+             <h2>Channels</h2>
+            <div class="control-group">
+                <div class="control-group-header"><h3>Channel 1</h3><label class="switch"><input type="checkbox" id="ch1Enable"><span class="switch-slider"></span></label></div>
+                <label for="ch1Amplitude">Amplitude</label>
+                <div class="slider-container"><input type="range" id="ch1Amplitude" min="0" max="255" value="0"><span id="ch1AmplitudeValue" class="slider-value">0</span></div>
+            </div>
+            <div class="control-group">
+                <div class="control-group-header"><h3>Channel 2</h3><label class="switch"><input type="checkbox" id="ch2Enable"><span class="switch-slider"></span></label></div>
                 <label for="ch2Amplitude">Amplitude</label>
-                <div class="slider-container">
-                    <input type="range" id="ch2Amplitude" min="0" max="255" value="0">
-                    <span id="ch2AmplitudeValue" class="slider-value">0</span>
-                </div>
+                <div class="slider-container"><input type="range" id="ch2Amplitude" min="0" max="255" value="0"><span id="ch2AmplitudeValue" class="slider-value">0</span></div>
             </div>
         </div>
         
         <div class="card">
              <h2>Advanced Settings</h2>
-             <!-- Common Settings -->
              <div class="control-group">
                 <label for="pulseWidth">Pulse Width (µs)</label>
-                <div class="slider-container">
-                    <!-- UPDATE: New max range -->
-                    <input type="range" id="pulseWidth" min="50" max="3000" value="200" step="10">
-                    <span id="pulseWidthValue" class="slider-value">200 µs</span>
-                </div>
+                <div class="slider-container"><input type="range" id="pulseWidth" min="50" max="3000" value="200" step="10"><span id="pulseWidthValue" class="slider-value">200 µs</span></div>
             </div>
             <div class="control-group">
                 <label for="frequency">Frequency (Hz)</label>
-                <div class="slider-container">
-                    <!-- UPDATE: New max range -->
-                    <input type="range" id="frequency" min="1" max="150" value="30">
-                    <span id="frequencyValue" class="slider-value">30 Hz</span>
-                </div>
+                <div class="slider-container"><input type="range" id="frequency" min="1" max="150" value="30"><span id="frequencyValue" class="slider-value">30 Hz</span></div>
             </div>
         </div>
     </div>
 
     <script>
-        // Get references to HTML elements
+        // --- Referensi Elemen HTML ---
         const connectButton = document.getElementById('connectButton');
         const statusDisplay = document.getElementById('status');
-        
         const ch1Enable = document.getElementById('ch1Enable');
         const ch1AmplitudeSlider = document.getElementById('ch1Amplitude');
         const ch1AmplitudeValue = document.getElementById('ch1AmplitudeValue');
-        
         const ch2Enable = document.getElementById('ch2Enable');
         const ch2AmplitudeSlider = document.getElementById('ch2Amplitude');
         const ch2AmplitudeValue = document.getElementById('ch2AmplitudeValue');
-
         const pulseWidthSlider = document.getElementById('pulseWidth');
         const pulseWidthValue = document.getElementById('pulseWidthValue');
         const frequencySlider = document.getElementById('frequency');
         const frequencyValue = document.getElementById('frequencyValue');
+        // Elemen BARU untuk Biofeedback
+        const biofeedbackCard = document.getElementById('biofeedbackCard');
+        const angleValue = document.getElementById('angleValue');
+        const angleGauge = document.getElementById('angleGauge');
 
-        // BLE UUIDs (must match the ESP32 code)
+        // --- Konfigurasi BLE ---
         const SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
-        const CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
+        const CONTROL_CHAR_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
+        const FLEX_SENSOR_CHAR_UUID = "1c95d5e3-d8f8-4ab9-915d-3b56a946b26c";
 
-        // Global BLE objects
+        // --- Variabel Global ---
         let bleDevice;
-        let nmesCharacteristic;
+        let controlCharacteristic;
+        let flexSensorCharacteristic;
         let isConnected = false;
         const encoder = new TextEncoder('utf-8');
+        const decoder = new TextDecoder('utf-8');
 
-        // --- Event Listeners ---
-        connectButton.addEventListener('click', async () => {
-            isConnected ? await disconnect() : await connect();
-        });
+        // --- Fungsi Utama ---
+        connectButton.addEventListener('click', () => isConnected ? disconnect() : connect());
 
-        // --- Main Connect/Disconnect Functions ---
         async function connect() {
             try {
                 updateStatus("Requesting Device...");
@@ -312,18 +144,27 @@
                 updateStatus("Getting Service...");
                 const service = await server.getPrimaryService(SERVICE_UUID);
 
-                updateStatus("Getting Characteristic...");
-                nmesCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
+                updateStatus("Getting Control Characteristic...");
+                controlCharacteristic = await service.getCharacteristic(CONTROL_CHAR_UUID);
+                
+                // --- BAGIAN BARU: Get Sensor Characteristic & Subscribe ---
+                updateStatus("Getting Sensor Characteristic...");
+                flexSensorCharacteristic = await service.getCharacteristic(FLEX_SENSOR_CHAR_UUID);
+                
+                updateStatus("Subscribing to Sensor...");
+                await flexSensorCharacteristic.startNotifications();
+                flexSensorCharacteristic.addEventListener('characteristicvaluechanged', handleSensorNotification);
+                // --- AKHIR BAGIAN BARU ---
 
                 isConnected = true;
                 updateStatus("Connected!", true);
                 updateConnectButton();
+                biofeedbackCard.style.display = 'block'; // Tampilkan kartu biofeedback
 
             } catch (error) {
                 console.error("Connection Error:", error);
                 updateStatus(`Error: ${error.message}`);
-                isConnected = false;
-                updateConnectButton();
+                onDisconnected();
             }
         }
         
@@ -336,100 +177,70 @@
         function onDisconnected() {
             updateStatus("Device Disconnected");
             isConnected = false;
-            nmesCharacteristic = null;
+            controlCharacteristic = null;
+            flexSensorCharacteristic = null;
             updateConnectButton();
+            biofeedbackCard.style.display = 'none'; // Sembunyikan kartu biofeedback
         }
 
-        // Debounce function to prevent sending too many commands too quickly
-        function debounce(func, wait) {
-            let timeout;
-            return function(...args) {
-                const context = this;
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(context, args), wait);
-            };
+        // --- FUNGSI BARU: Menangani Data Sensor yang Masuk ---
+        function handleSensorNotification(event) {
+            const value = event.target.value;
+            const angleString = decoder.decode(value);
+            const angle = parseFloat(angleString);
+
+            if (!isNaN(angle)) {
+                angleValue.textContent = `${angle.toFixed(2)}°`;
+                const gaugePercentage = (angle / 90) * 100; // Asumsi sudut maks 90°
+                angleGauge.style.width = `${Math.min(100, Math.max(0, gaugePercentage))}%`;
+            }
         }
-        
-        // Function to send command
+
+        // --- Fungsi Pengiriman Perintah ---
         async function sendCommand(command) {
-            if (!isConnected || !nmesCharacteristic) return;
-            try {
-                await nmesCharacteristic.writeValue(encoder.encode(command));
-            } catch (error) {
-                console.error("Send Error:", error);
-            }
+            if (!isConnected || !controlCharacteristic) return;
+            try { await controlCharacteristic.writeValue(encoder.encode(command)); } 
+            catch (error) { console.error("Send Error:", error); }
         }
-        const debouncedSendCommand = debounce(sendCommand, 50); // Send command max every 50ms
+        const debounce = (func, wait) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), wait); }; };
+        const debouncedSendCommand = debounce(sendCommand, 50);
 
-        // --- Event Listeners for Controls ---
+        // --- Event Listener untuk Kontrol (tetap sama) ---
         ch1Enable.addEventListener('change', () => {
-            const isEnabled = ch1Enable.checked;
-            sendCommand(`C1:E:${isEnabled ? 1 : 0}`);
-            // SAFETY FIX: Also send amplitude command to ensure state is correct
-            if(isEnabled) {
-                 // If turning on, send the current slider value
-                sendCommand(`C1:A:${ch1AmplitudeSlider.value}`);
-            } else {
-                // If turning off, explicitly send amplitude 0
-                sendCommand(`C1:A:0`);
-            }
+            const isEnabled = ch1Enable.checked; sendCommand(`C1:E:${isEnabled ? 1 : 0}`);
+            if (isEnabled) { sendCommand(`C1:A:${ch1AmplitudeSlider.value}`); } else { sendCommand(`C1:A:0`); }
         });
         ch1AmplitudeSlider.addEventListener('input', () => {
-            const value = ch1AmplitudeSlider.value;
-            ch1AmplitudeValue.textContent = value;
-            // Only send amplitude if channel is enabled
-            if(ch1Enable.checked) {
-                debouncedSendCommand(`C1:A:${value}`);
-            }
+            ch1AmplitudeValue.textContent = ch1AmplitudeSlider.value;
+            if (ch1Enable.checked) { debouncedSendCommand(`C1:A:${ch1AmplitudeSlider.value}`); }
         });
-
         ch2Enable.addEventListener('change', () => {
-            const isEnabled = ch2Enable.checked;
-            sendCommand(`C2:E:${isEnabled ? 1 : 0}`);
-            if(isEnabled) {
-                sendCommand(`C2:A:${ch2AmplitudeSlider.value}`);
-            } else {
-                sendCommand(`C2:A:0`);
-            }
+            const isEnabled = ch2Enable.checked; sendCommand(`C2:E:${isEnabled ? 1 : 0}`);
+            if (isEnabled) { sendCommand(`C2:A:${ch2AmplitudeSlider.value}`); } else { sendCommand(`C2:A:0`); }
         });
         ch2AmplitudeSlider.addEventListener('input', () => {
-            const value = ch2AmplitudeSlider.value;
-            ch2AmplitudeValue.textContent = value;
-            if(ch2Enable.checked) {
-                debouncedSendCommand(`C2:A:${value}`);
-            }
+            ch2AmplitudeValue.textContent = ch2AmplitudeSlider.value;
+            if (ch2Enable.checked) { debouncedSendCommand(`C2:A:${ch2AmplitudeSlider.value}`); }
         });
-
         pulseWidthSlider.addEventListener('input', () => {
-            const value = pulseWidthSlider.value;
-            pulseWidthValue.textContent = `${value} µs`;
-            debouncedSendCommand(`C1:W:${value}`); // Affects both channels
+            pulseWidthValue.textContent = `${pulseWidthSlider.value} µs`; debouncedSendCommand(`C1:W:${pulseWidthSlider.value}`);
         });
-
         frequencySlider.addEventListener('input', () => {
-            const value = frequencySlider.value;
-            frequencyValue.textContent = `${value} Hz`;
-            debouncedSendCommand(`C1:F:${value}`); // Affects both channels
+            frequencyValue.textContent = `${frequencySlider.value} Hz`; debouncedSendCommand(`C1:F:${frequencySlider.value}`);
         });
 
-        // UI Update Functions
+        // --- Fungsi Update UI ---
         function updateStatus(message, isSuccess = false) {
             console.log(message);
-            statusDisplay.textContent = message;
-            statusDisplay.className = 'active';
+            statusDisplay.textContent = message; statusDisplay.className = 'active';
             statusDisplay.style.backgroundColor = isSuccess ? 'var(--success-color)' : 'var(--border-color)';
             statusDisplay.style.color = isSuccess ? '#fff' : 'var(--text-color)';
         }
-
         function updateConnectButton() {
-             if (isConnected) {
-                connectButton.textContent = "Disconnect";
-                connectButton.classList.add("connected");
-            } else {
-                connectButton.textContent = "Connect to Device";
-                connectButton.classList.remove("connected");
-            }
+            if (isConnected) { connectButton.textContent = "Disconnect"; connectButton.classList.add("connected"); } 
+            else { connectButton.textContent = "Connect to Device"; connectButton.classList.remove("connected"); }
         }
     </script>
 </body>
 </html>
+
