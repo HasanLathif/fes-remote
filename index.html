@@ -1,129 +1,302 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>FES Web Remote</title>
+    <title>NMES Web Remote</title>
     <style>
         :root {
-            --primary-color: #1a7431; --primary-hover: #135523; --background-color: #f0f2f5;
-            --card-background: #ffffff; --text-color: #1c1e21; --text-secondary: #65676b;
-            --border-color: #ced0d4; --success-color: #42b72a; --danger-color: #fa383e;
+            --primary-color: #1a7431; /* A nice, rich green */
+            --primary-hover: #135523;
+            --background-color: #f0f2f5; /* Light grey background */
+            --card-background: #ffffff;
+            --text-color: #1c1e21;
+            --text-secondary: #65676b;
+            --border-color: #ced0d4;
+            --success-color: #42b72a;
+            --danger-color: #fa383e;
             --slider-track: #e4e6eb;
         }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: var(--background-color); color: var(--text-color); margin: 0; padding: 1rem; display: flex; justify-content: center; min-height: 100vh; box-sizing: border-box; }
-        .container { width: 100%; max-width: 500px; }
-        .card { background-color: var(--card-background); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 1.5rem; margin-bottom: 1rem; }
-        h1, h2, h3 { margin-top: 0; color: var(--text-color); text-align: center; }
-        h1 { font-size: 1.8rem; margin-bottom: 1.5rem; }
-        h2 { font-size: 1.3rem; font-weight: 600; margin-bottom: 1.5rem; text-align: left; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; }
-        .control-group { margin-bottom: 2rem; }
-        .control-group:last-child { margin-bottom: 0.5rem; }
-        .control-group-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-        .control-group-header h3 { margin: 0; font-size: 1.2rem; text-align: left; }
-        label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--text-secondary); }
-        .slider-container { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
-        input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; background: var(--slider-track); border-radius: 5px; outline: none; transition: opacity .2s; cursor: pointer;}
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; background: var(--primary-color); cursor: pointer; border-radius: 50%; border: 4px solid var(--card-background); box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
-        input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; background: var(--primary-color); cursor: pointer; border-radius: 50%; }
-        .input-value-container { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; }
-        input[type="number"] { width: 70px; padding: 0.3rem 0.5rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.95rem; text-align: right; -moz-appearance: textfield; }
-        input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        .unit-label { font-weight: normal; color: var(--text-secondary); font-size: 0.95rem;}
-        button { width: 100%; padding: 0.9rem 1rem; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.2s ease, transform 0.1s ease; }
-        button:active { transform: scale(0.98); }
-        #connectButton { background-color: var(--primary-color); color: white; }
-        #connectButton:hover { background-color: var(--primary-hover); }
-        #connectButton.connected { background-color: var(--danger-color); }
-        #status { text-align: center; padding: 0.8rem; border-radius: 8px; font-weight: 500; margin-bottom: 1rem; display: none; }
-        #status.active { display: block; }
-        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .switch-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 28px; }
-        .switch-slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .switch-slider { background-color: var(--success-color); }
-        input:checked + .switch-slider:before { transform: translateX(22px); }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+        }
+        .card {
+            background-color: var(--card-background);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        h1, h2, h3 {
+            margin-top: 0;
+            color: var(--text-color);
+            text-align: center;
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+        }
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+        }
+        .control-group {
+            margin-bottom: 2rem;
+        }
+        .control-group:last-child {
+            margin-bottom: 0.5rem;
+        }
+        .control-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .control-group-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: var(--slider-track);
+            border-radius: 5px;
+            outline: none;
+            transition: opacity .2s;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: var(--primary-color);
+            cursor: pointer;
+            border-radius: 50%;
+            border: 4px solid var(--card-background);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        .slider-value {
+            font-weight: 600;
+            min-width: 55px;
+            text-align: right;
+            font-size: 1rem;
+            color: var(--primary-color);
+        }
+        button {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        #connectButton {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        #connectButton:hover {
+            background-color: var(--primary-hover);
+        }
+        #connectButton.connected {
+            background-color: var(--danger-color);
+        }
+        #status {
+            text-align: center;
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            display: none; /* Hidden by default */
+        }
+        #status.active {
+            display: block;
+        }
+        /* Toggle Switch Styling */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .switch-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 28px;
+        }
+        .switch-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .switch-slider {
+            background-color: var(--success-color);
+        }
+        input:checked + .switch-slider:before {
+            transform: translateX(22px);
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
         <div class="card">
-            <h1>FES Controller</h1>
+            <h1>NMES Controller</h1>
             <button id="connectButton">Connect to Device</button>
             <div id="status">Disconnected</div>
         </div>
 
         <div class="card">
              <h2>Channels</h2>
+             <!-- Channel 1 Controls -->
             <div class="control-group">
-                <div class="control-group-header"><h3>Channel 1</h3><label class="switch"><input type="checkbox" id="ch1Enable"><span class="switch-slider"></span></label></div>
-                <label for="ch1AmplitudeSlider">Amplitude</label>
-                <div class="slider-container"><input type="range" id="ch1AmplitudeSlider" min="0" max="255" value="0"></div>
-                <div class="input-value-container">
-                    <input type="number" id="ch1AmplitudeInput" min="0" max="255" value="0">
-                    <span class="unit-label"></span>
+                <div class="control-group-header">
+                    <h3>Channel 1</h3>
+                    <label class="switch">
+                        <input type="checkbox" id="ch1Enable">
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+                
+                <label for="ch1Amplitude">Amplitude</label>
+                <div class="slider-container">
+                    <input type="range" id="ch1Amplitude" min="0" max="255" value="0">
+                    <span id="ch1AmplitudeValue" class="slider-value">0</span>
                 </div>
             </div>
+            
+             <!-- Channel 2 Controls -->
             <div class="control-group">
-                <div class="control-group-header"><h3>Channel 2</h3><label class="switch"><input type="checkbox" id="ch2Enable"><span class="switch-slider"></span></label></div>
-                <label for="ch2AmplitudeSlider">Amplitude</label>
-                <div class="slider-container"><input type="range" id="ch2AmplitudeSlider" min="0" max="255" value="0"></div>
-                 <div class="input-value-container">
-                    <input type="number" id="ch2AmplitudeInput" min="0" max="255" value="0">
-                     <span class="unit-label"></span>
+                <div class="control-group-header">
+                    <h3>Channel 2</h3>
+                     <label class="switch">
+                        <input type="checkbox" id="ch2Enable">
+                        <span class="switch-slider"></span>
+                    </label>
+                </div>
+
+                <label for="ch2Amplitude">Amplitude</label>
+                <div class="slider-container">
+                    <input type="range" id="ch2Amplitude" min="0" max="255" value="0">
+                    <span id="ch2AmplitudeValue" class="slider-value">0</span>
                 </div>
             </div>
         </div>
-
+        
         <div class="card">
              <h2>Advanced Settings</h2>
+             <!-- Common Settings -->
              <div class="control-group">
-                <label for="pulseWidthSlider">Pulse Width</label>
-                <div class="slider-container"><input type="range" id="pulseWidthSlider" min="50" max="3000" value="200" step="10"></div>
-                 <div class="input-value-container">
-                    <input type="number" id="pulseWidthInput" min="50" max="3000" value="200" step="10">
-                    <span class="unit-label">µs</span>
+                <label for="pulseWidth">Pulse Width (µs)</label>
+                <div class="slider-container">
+                    <!-- UPDATE: New max range -->
+                    <input type="range" id="pulseWidth" min="50" max="3000" value="200" step="10">
+                    <span id="pulseWidthValue" class="slider-value">200 µs</span>
                 </div>
             </div>
             <div class="control-group">
-                <label for="frequencySlider">Frequency</label>
-                <div class="slider-container"><input type="range" id="frequencySlider" min="1" max="150" value="30"></div>
-                 <div class="input-value-container">
-                    <input type="number" id="frequencyInput" min="1" max="150" value="30">
-                    <span class="unit-label">Hz</span>
+                <label for="frequency">Frequency (Hz)</label>
+                <div class="slider-container">
+                    <!-- UPDATE: New max range -->
+                    <input type="range" id="frequency" min="1" max="150" value="30">
+                    <span id="frequencyValue" class="slider-value">30 Hz</span>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- Referensi Elemen HTML ---
+        // Get references to HTML elements
         const connectButton = document.getElementById('connectButton');
         const statusDisplay = document.getElementById('status');
+        
         const ch1Enable = document.getElementById('ch1Enable');
-        const ch1AmplitudeSlider = document.getElementById('ch1AmplitudeSlider');
-        const ch1AmplitudeInput = document.getElementById('ch1AmplitudeInput');
+        const ch1AmplitudeSlider = document.getElementById('ch1Amplitude');
+        const ch1AmplitudeValue = document.getElementById('ch1AmplitudeValue');
+        
         const ch2Enable = document.getElementById('ch2Enable');
-        const ch2AmplitudeSlider = document.getElementById('ch2AmplitudeSlider');
-        const ch2AmplitudeInput = document.getElementById('ch2AmplitudeInput');
-        const pulseWidthSlider = document.getElementById('pulseWidthSlider');
-        const pulseWidthInput = document.getElementById('pulseWidthInput');
-        const frequencySlider = document.getElementById('frequencySlider');
-        const frequencyInput = document.getElementById('frequencyInput');
+        const ch2AmplitudeSlider = document.getElementById('ch2Amplitude');
+        const ch2AmplitudeValue = document.getElementById('ch2AmplitudeValue');
 
-        // --- Konfigurasi BLE ---
+        const pulseWidthSlider = document.getElementById('pulseWidth');
+        const pulseWidthValue = document.getElementById('pulseWidthValue');
+        const frequencySlider = document.getElementById('frequency');
+        const frequencyValue = document.getElementById('frequencyValue');
+
+        // BLE UUIDs (must match the ESP32 code)
         const SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
-        const CONTROL_CHAR_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
+        const CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
 
-        // --- Variabel Global ---
-        let bleDevice, controlCharacteristic;
+        // Global BLE objects
+        let bleDevice;
+        let nmesCharacteristic;
         let isConnected = false;
         const encoder = new TextEncoder('utf-8');
 
-        // --- Fungsi Utama ---
-        connectButton.addEventListener('click', () => isConnected ? disconnect() : connect());
+        // --- Event Listeners ---
+        connectButton.addEventListener('click', async () => {
+            isConnected ? await disconnect() : await connect();
+        });
 
+        // --- Main Connect/Disconnect Functions ---
         async function connect() {
             try {
                 updateStatus("Requesting Device...");
@@ -131,14 +304,16 @@
                     filters: [{ services: [SERVICE_UUID] }],
                     optionalServices: [SERVICE_UUID]
                 });
-
+                
                 bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
                 updateStatus("Connecting...");
                 const server = await bleDevice.gatt.connect();
+                
                 updateStatus("Getting Service...");
                 const service = await server.getPrimaryService(SERVICE_UUID);
-                updateStatus("Getting Control Characteristic...");
-                controlCharacteristic = await service.getCharacteristic(CONTROL_CHAR_UUID);
+
+                updateStatus("Getting Characteristic...");
+                nmesCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
 
                 isConnected = true;
                 updateStatus("Connected!", true);
@@ -147,94 +322,114 @@
             } catch (error) {
                 console.error("Connection Error:", error);
                 updateStatus(`Error: ${error.message}`);
-                onDisconnected();
+                isConnected = false;
+                updateConnectButton();
             }
         }
-
+        
         function disconnect() {
-            if (bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect();
+            if (bleDevice && bleDevice.gatt.connected) {
+                bleDevice.gatt.disconnect();
+            }
         }
 
         function onDisconnected() {
             updateStatus("Device Disconnected");
             isConnected = false;
-            controlCharacteristic = null;
+            nmesCharacteristic = null;
             updateConnectButton();
         }
 
-        // --- Fungsi Pengiriman Perintah ---
+        // Debounce function to prevent sending too many commands too quickly
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), wait);
+            };
+        }
+        
+        // Function to send command
         async function sendCommand(command) {
-            if (!isConnected || !controlCharacteristic) return;
-            try { await controlCharacteristic.writeValue(encoder.encode(command)); }
-            catch (error) { console.error("Send Error:", error); }
-        }
-        const debounce = (func, wait) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), wait); }; };
-        const debouncedSendCommand = debounce(sendCommand, 50);
-
-        // --- Sinkronisasi Input dan Slider ---
-        function syncSliderInput(slider, input, commandPrefix, channelEnable = null) {
-            function updateAndSendCommand() {
-                let value = parseInt(input.value);
-                const min = parseInt(input.min);
-                const max = parseInt(input.max);
-                const step = parseInt(input.step) || 1; // Ambil step atau default ke 1
-
-                 // Validasi dan snap ke step terdekat jika ada
-                if (isNaN(value)) {
-                    value = min;
-                } else {
-                    value = Math.max(min, Math.min(max, value));
-                    // Snap ke step terdekat
-                    value = Math.round((value - min) / step) * step + min;
-                }
-
-                slider.value = value;
-                input.value = value; // Update input jika value dikoreksi
-                if (!channelEnable || channelEnable.checked) {
-                    debouncedSendCommand(`${commandPrefix}:${value}`);
-                }
+            if (!isConnected || !nmesCharacteristic) return;
+            try {
+                await nmesCharacteristic.writeValue(encoder.encode(command));
+            } catch (error) {
+                console.error("Send Error:", error);
             }
-
-            slider.addEventListener('input', () => {
-                input.value = slider.value;
-                 if (!channelEnable || channelEnable.checked) {
-                     debouncedSendCommand(`${commandPrefix}:${slider.value}`);
-                }
-            });
-            input.addEventListener('input', updateAndSendCommand); // Update saat mengetik
-            input.addEventListener('change', updateAndSendCommand); // Update saat user selesai edit (misal klik di luar)
-            input.value = slider.value; // Inisialisasi
         }
+        const debouncedSendCommand = debounce(sendCommand, 50); // Send command max every 50ms
 
-
-        // --- Event Listener untuk Kontrol ---
+        // --- Event Listeners for Controls ---
         ch1Enable.addEventListener('change', () => {
-            const isEnabled = ch1Enable.checked; sendCommand(`C1:E:${isEnabled ? 1 : 0}`);
-            if (isEnabled) { sendCommand(`C1:A:${ch1AmplitudeSlider.value}`); } else { sendCommand(`C1:A:0`); }
+            const isEnabled = ch1Enable.checked;
+            sendCommand(`C1:E:${isEnabled ? 1 : 0}`);
+            // SAFETY FIX: Also send amplitude command to ensure state is correct
+            if(isEnabled) {
+                 // If turning on, send the current slider value
+                sendCommand(`C1:A:${ch1AmplitudeSlider.value}`);
+            } else {
+                // If turning off, explicitly send amplitude 0
+                sendCommand(`C1:A:0`);
+            }
         });
-        syncSliderInput(ch1AmplitudeSlider, ch1AmplitudeInput, 'C1:A', ch1Enable);
+        ch1AmplitudeSlider.addEventListener('input', () => {
+            const value = ch1AmplitudeSlider.value;
+            ch1AmplitudeValue.textContent = value;
+            // Only send amplitude if channel is enabled
+            if(ch1Enable.checked) {
+                debouncedSendCommand(`C1:A:${value}`);
+            }
+        });
 
         ch2Enable.addEventListener('change', () => {
-            const isEnabled = ch2Enable.checked; sendCommand(`C2:E:${isEnabled ? 1 : 0}`);
-            if (isEnabled) { sendCommand(`C2:A:${ch2AmplitudeSlider.value}`); } else { sendCommand(`C2:A:0`); }
+            const isEnabled = ch2Enable.checked;
+            sendCommand(`C2:E:${isEnabled ? 1 : 0}`);
+            if(isEnabled) {
+                sendCommand(`C2:A:${ch2AmplitudeSlider.value}`);
+            } else {
+                sendCommand(`C2:A:0`);
+            }
         });
-        syncSliderInput(ch2AmplitudeSlider, ch2AmplitudeInput, 'C2:A', ch2Enable);
+        ch2AmplitudeSlider.addEventListener('input', () => {
+            const value = ch2AmplitudeSlider.value;
+            ch2AmplitudeValue.textContent = value;
+            if(ch2Enable.checked) {
+                debouncedSendCommand(`C2:A:${value}`);
+            }
+        });
 
-        syncSliderInput(pulseWidthSlider, pulseWidthInput, 'C1:W');
-        syncSliderInput(frequencySlider, frequencyInput, 'C1:F');
+        pulseWidthSlider.addEventListener('input', () => {
+            const value = pulseWidthSlider.value;
+            pulseWidthValue.textContent = `${value} µs`;
+            debouncedSendCommand(`C1:W:${value}`); // Affects both channels
+        });
 
-        // --- Fungsi Update UI ---
+        frequencySlider.addEventListener('input', () => {
+            const value = frequencySlider.value;
+            frequencyValue.textContent = `${value} Hz`;
+            debouncedSendCommand(`C1:F:${value}`); // Affects both channels
+        });
+
+        // UI Update Functions
         function updateStatus(message, isSuccess = false) {
             console.log(message);
-            statusDisplay.textContent = message; statusDisplay.className = 'active';
+            statusDisplay.textContent = message;
+            statusDisplay.className = 'active';
             statusDisplay.style.backgroundColor = isSuccess ? 'var(--success-color)' : 'var(--border-color)';
             statusDisplay.style.color = isSuccess ? '#fff' : 'var(--text-color)';
         }
+
         function updateConnectButton() {
-            if (isConnected) { connectButton.textContent = "Disconnect"; connectButton.classList.add("connected"); }
-            else { connectButton.textContent = "Connect to Device"; connectButton.classList.remove("connected"); }
+             if (isConnected) {
+                connectButton.textContent = "Disconnect";
+                connectButton.classList.add("connected");
+            } else {
+                connectButton.textContent = "Connect to Device";
+                connectButton.classList.remove("connected");
+            }
         }
     </script>
 </body>
 </html>
-
