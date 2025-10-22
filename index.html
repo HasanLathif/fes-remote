@@ -136,7 +136,6 @@
         const pulseWidthInput = document.getElementById('pulseWidthInput');
         const frequencySlider = document.getElementById('frequencySlider');
         const frequencyInput = document.getElementById('frequencyInput');
-        // Elemen Baru untuk Visualisasi
         const waveformCanvas = document.getElementById('waveformCanvas');
         const ctx = waveformCanvas.getContext('2d');
 
@@ -148,35 +147,58 @@
         let bleDevice, controlCharacteristic;
         let isConnected = false;
         const encoder = new TextEncoder('utf-8');
-        let currentParams = { // Untuk menyimpan nilai parameter terkini
-            amplitude: 0,
-            pulseWidth: 200,
-            frequency: 30,
-            interPhaseGap: 50 // Asumsi gap tetap
-        };
+        let currentParams = { amplitude: 0, pulseWidth: 200, frequency: 30, interPhaseGap: 50 };
 
         // --- Fungsi Utama ---
-        connectButton.addEventListener('click', () => isConnected ? disconnect() : connect());
+        connectButton.addEventListener('click', () => {
+             // *** TAMBAHAN DEBUGGING ***
+             console.log("Connect button clicked. isConnected:", isConnected);
+             // *** AKHIR TAMBAHAN ***
+             isConnected ? disconnect() : connect();
+        });
 
         async function connect() {
-            // ... (Kode koneksi tetap sama) ...
+            // *** TAMBAHAN DEBUGGING ***
+            console.log("Connect function called.");
+            // *** AKHIR TAMBAHAN ***
             try {
+                // *** TAMBAHAN DEBUGGING ***
+                console.log("Checking navigator.bluetooth support...");
+                if (!navigator.bluetooth) {
+                    console.error("Web Bluetooth API is not available on this browser/platform.");
+                    updateStatus("Error: Web Bluetooth not supported.");
+                    return; // Hentikan eksekusi jika tidak didukung
+                }
+                console.log("navigator.bluetooth is available.");
+                // *** AKHIR TAMBAHAN ***
+
                 updateStatus("Requesting Device...");
+                console.log("Requesting Bluetooth device..."); // Tambahan log
                 bleDevice = await navigator.bluetooth.requestDevice({
                     filters: [{ services: [SERVICE_UUID] }],
                     optionalServices: [SERVICE_UUID]
                 });
+                console.log("Device selected:", bleDevice.name); // Tambahan log
+
                 bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
                 updateStatus("Connecting...");
+                console.log("Connecting to GATT server..."); // Tambahan log
                 const server = await bleDevice.gatt.connect();
+                console.log("GATT server connected."); // Tambahan log
+
                 updateStatus("Getting Service...");
+                console.log("Getting primary service..."); // Tambahan log
                 const service = await server.getPrimaryService(SERVICE_UUID);
+                console.log("Service found."); // Tambahan log
+
                 updateStatus("Getting Control Characteristic...");
+                console.log("Getting control characteristic..."); // Tambahan log
                 controlCharacteristic = await service.getCharacteristic(CONTROL_CHAR_UUID);
+                console.log("Control characteristic found."); // Tambahan log
+
                 isConnected = true;
                 updateStatus("Connected!", true);
                 updateConnectButton();
-                // Gambar waveform awal saat terhubung
                 drawWaveform();
             } catch (error) {
                 console.error("Connection Error:", error);
@@ -186,95 +208,92 @@
         }
 
         function disconnect() {
-            if (bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect();
+            console.log("Disconnect function called."); // Tambahan log
+            if (bleDevice && bleDevice.gatt.connected) {
+                 console.log("Disconnecting from GATT server..."); // Tambahan log
+                 bleDevice.gatt.disconnect();
+            } else {
+                 console.log("Device not connected or already disconnected."); // Tambahan log
+            }
         }
 
         function onDisconnected() {
+             console.log("onDisconnected event triggered."); // Tambahan log
             updateStatus("Device Disconnected");
             isConnected = false;
             controlCharacteristic = null;
             updateConnectButton();
-            // Kosongkan canvas saat disconnected
              ctx.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height);
         }
 
 
         // ===============================================
-        // == FUNGSI BARU: MENGGAMBAR BENTUK GELOMBANG ==
+        // == FUNGSI MENGGAMBAR BENTUK GELOMBANG ==
         // ===============================================
         function drawWaveform() {
-            // Set ukuran canvas sesuai CSS (penting untuk resolusi)
-            waveformCanvas.width = waveformCanvas.offsetWidth;
-            waveformCanvas.height = waveformCanvas.offsetHeight;
+            try { // Tambahkan try-catch untuk menangkap error gambar
+                waveformCanvas.width = waveformCanvas.offsetWidth;
+                waveformCanvas.height = waveformCanvas.offsetHeight;
+                ctx.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height);
+                ctx.strokeStyle = 'var(--waveform-color)'; // Gunakan variabel CSS
+                ctx.lineWidth = 2;
+                const canvasWidth = waveformCanvas.width;
+                const canvasHeight = waveformCanvas.height;
+                const midY = canvasHeight / 2;
+                const maxAmplitudeHeight = (canvasHeight / 2) * 0.8;
+                const amplitude = parseInt(ch1AmplitudeInput.value) || 0;
+                const pulseWidth = parseInt(pulseWidthInput.value) || 200;
+                const frequency = parseInt(frequencyInput.value) || 30;
+                const interPhaseGap = currentParams.interPhaseGap;
+                const period_us = (frequency > 0) ? (1000000 / frequency) : canvasWidth;
+                const scaleX = canvasWidth / period_us;
+                const scaleY = maxAmplitudeHeight / 255;
+                const scaledAmplitude = amplitude * scaleY;
+                const pulseWidthPx = pulseWidth * scaleX;
+                const gapPx = interPhaseGap * scaleX;
 
-            ctx.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height); // Bersihkan canvas
-            ctx.strokeStyle = var(--waveform-color);
-            ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(0, midY);
+                // Fase 1
+                ctx.lineTo(0, midY - scaledAmplitude);
+                ctx.lineTo(pulseWidthPx, midY - scaledAmplitude);
+                ctx.lineTo(pulseWidthPx, midY);
+                // Gap
+                const endGap1 = pulseWidthPx + gapPx;
+                ctx.lineTo(endGap1, midY);
+                // Fase 2
+                const startPhase2 = endGap1;
+                const endPhase2 = startPhase2 + pulseWidthPx;
+                ctx.lineTo(startPhase2, midY + scaledAmplitude);
+                ctx.lineTo(endPhase2, midY + scaledAmplitude);
+                ctx.lineTo(endPhase2, midY);
+                // Sisa
+                ctx.lineTo(canvasWidth, midY);
+                ctx.stroke();
 
-            const canvasWidth = waveformCanvas.width;
-            const canvasHeight = waveformCanvas.height;
-            const midY = canvasHeight / 2; // Garis tengah (0 Volt)
-            const maxAmplitudeHeight = (canvasHeight / 2) * 0.8; // Gunakan 80% tinggi untuk amplitudo max
-
-            // Ambil nilai parameter terkini (gunakan channel 1 sebagai referensi amplitudo)
-            const amplitude = parseInt(ch1AmplitudeInput.value) || 0; // Ambil dari input
-            const pulseWidth = parseInt(pulseWidthInput.value) || 200;
-            const frequency = parseInt(frequencyInput.value) || 30;
-            const interPhaseGap = currentParams.interPhaseGap;
-
-            // Hitung periode dalam mikrodetik
-            const period_us = (frequency > 0) ? (1000000 / frequency) : canvasWidth; // Hindari pembagian dengan nol
-
-            // Skalakan waktu ke lebar canvas
-            const scaleX = canvasWidth / period_us;
-
-            // Skalakan amplitudo 0-255 ke tinggi canvas
-            const scaleY = maxAmplitudeHeight / 255;
-            const scaledAmplitude = amplitude * scaleY;
-
-            // Hitung lebar komponen dalam piksel
-            const pulseWidthPx = pulseWidth * scaleX;
-            const gapPx = interPhaseGap * scaleX;
-
-            ctx.beginPath();
-            ctx.moveTo(0, midY); // Mulai dari tengah kiri
-
-            // Fase 1 (Positif)
-            ctx.lineTo(0, midY - scaledAmplitude); // Naik
-            ctx.lineTo(pulseWidthPx, midY - scaledAmplitude); // Datar selama pulse width
-            ctx.lineTo(pulseWidthPx, midY); // Turun ke tengah
-
-            // Interphase Gap
-            const endGap1 = pulseWidthPx + gapPx;
-            ctx.lineTo(endGap1, midY); // Datar selama gap
-
-            // Fase 2 (Negatif)
-            const startPhase2 = endGap1;
-            const endPhase2 = startPhase2 + pulseWidthPx;
-            ctx.lineTo(startPhase2, midY + scaledAmplitude); // Turun
-            ctx.lineTo(endPhase2, midY + scaledAmplitude); // Datar selama pulse width
-            ctx.lineTo(endPhase2, midY); // Naik ke tengah
-
-            // Sisa Periode
-            ctx.lineTo(canvasWidth, midY); // Datar sampai akhir canvas
-
-            ctx.stroke(); // Gambar garis
-
-            // Gambar garis tengah (sumbu X)
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(0, midY);
-            ctx.lineTo(canvasWidth, midY);
-            ctx.stroke();
+                // Garis tengah
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(0, midY);
+                ctx.lineTo(canvasWidth, midY);
+                ctx.stroke();
+            } catch (drawError) {
+                 console.error("Error drawing waveform:", drawError); // Log error gambar
+            }
         }
 
 
         // --- Fungsi Pengiriman Perintah ---
         async function sendCommand(command) {
-            if (!isConnected || !controlCharacteristic) return;
-            try { await controlCharacteristic.writeValue(encoder.encode(command)); }
-            catch (error) { console.error("Send Error:", error); }
+            if (!isConnected || !controlCharacteristic) {
+                 console.warn("Attempted to send command while disconnected:", command); // Tambahan log
+                 return;
+            }
+            try {
+                 // console.log("Sending command:", command); // Uncomment untuk log setiap command
+                 await controlCharacteristic.writeValue(encoder.encode(command));
+            } catch (error) { console.error("Send Error:", error); }
         }
         const debounce = (func, wait) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), wait); }; };
         const debouncedSendCommand = debounce(sendCommand, 50);
@@ -286,21 +305,18 @@
                 const min = parseInt(input.min);
                 const max = parseInt(input.max);
                 const step = parseInt(input.step) || 1;
-
                 if (isNaN(value)) value = min;
                 else { value = Math.max(min, Math.min(max, value)); value = Math.round((value - min) / step) * step + min; }
-
                 slider.value = value;
                 input.value = value;
                 if (!channelEnable || channelEnable.checked) {
                     debouncedSendCommand(`${commandPrefix}:${value}`);
                 }
-                // Update parameter global dan gambar ulang waveform jika ada nama parameter
                 if (paramName) {
                     currentParams[paramName] = value;
                     drawWaveform();
-                } else if (commandPrefix.includes(':A')) { // Khusus untuk amplitude
-                    drawWaveform(); // Gambar ulang jika amplitude berubah
+                } else if (commandPrefix.includes(':A') && slider === ch1AmplitudeSlider) { // Hanya update waveform dari Ch1 Amplitude
+                    drawWaveform();
                 }
             }
 
@@ -309,17 +325,16 @@
                  if (!channelEnable || channelEnable.checked) {
                      debouncedSendCommand(`${commandPrefix}:${slider.value}`);
                 }
-                 // Update parameter global dan gambar ulang waveform
                 if (paramName) {
                     currentParams[paramName] = parseInt(slider.value);
                     drawWaveform();
-                } else if (commandPrefix.includes(':A')) {
+                } else if (commandPrefix.includes(':A') && slider === ch1AmplitudeSlider) {
                      drawWaveform();
                 }
             });
             input.addEventListener('input', updateAndSendCommand);
             input.addEventListener('change', updateAndSendCommand);
-            input.value = slider.value; // Inisialisasi
+            input.value = slider.value;
         }
 
 
@@ -327,41 +342,41 @@
         ch1Enable.addEventListener('change', () => {
             const isEnabled = ch1Enable.checked; sendCommand(`C1:E:${isEnabled ? 1 : 0}`);
             if (isEnabled) { sendCommand(`C1:A:${ch1AmplitudeSlider.value}`); } else { sendCommand(`C1:A:0`); }
-            // Gambar ulang waveform karena amplitude mungkin berubah jadi 0
             drawWaveform();
         });
-        syncSliderInput(ch1AmplitudeSlider, ch1AmplitudeInput, 'C1:A', ch1Enable); // Akan trigger drawWaveform
+        syncSliderInput(ch1AmplitudeSlider, ch1AmplitudeInput, 'C1:A', ch1Enable);
 
         ch2Enable.addEventListener('change', () => {
             const isEnabled = ch2Enable.checked; sendCommand(`C2:E:${isEnabled ? 1 : 0}`);
             if (isEnabled) { sendCommand(`C2:A:${ch2AmplitudeSlider.value}`); } else { sendCommand(`C2:A:0`); }
-            // Tidak perlu gambar ulang, visualisasi pakai Ch1
         });
         syncSliderInput(ch2AmplitudeSlider, ch2AmplitudeInput, 'C2:A', ch2Enable);
 
-        // Berikan nama parameter agar waveform digambar ulang
         syncSliderInput(pulseWidthSlider, pulseWidthInput, 'C1:W', null, 'pulseWidth');
         syncSliderInput(frequencySlider, frequencyInput, 'C1:F', null, 'frequency');
 
         // --- Fungsi Update UI ---
-        function updateStatus(message, isSuccess = false) { /* ... (kode sama) ... */
-             console.log(message);
+        function updateStatus(message, isSuccess = false) {
+             console.log("Updating status:", message); // Tambahan log
             statusDisplay.textContent = message; statusDisplay.className = 'active';
             statusDisplay.style.backgroundColor = isSuccess ? 'var(--success-color)' : 'var(--border-color)';
             statusDisplay.style.color = isSuccess ? '#fff' : 'var(--text-color)';
         }
-        function updateConnectButton() { /* ... (kode sama) ... */
+        function updateConnectButton() {
+             console.log("Updating connect button. isConnected:", isConnected); // Tambahan log
             if (isConnected) { connectButton.textContent = "Disconnect"; connectButton.classList.add("connected"); }
             else { connectButton.textContent = "Connect to Device"; connectButton.classList.remove("connected"); }
         }
 
-        // Gambar waveform awal saat halaman load (meskipun kosong)
+        // --- Inisialisasi & Event Listener Global ---
          window.addEventListener('load', () => {
-             // Sedikit delay untuk memastikan ukuran canvas sudah benar
+             console.log("Page loaded. Drawing initial waveform."); // Tambahan log
              setTimeout(drawWaveform, 100);
          });
-         // Gambar ulang jika ukuran window berubah
-         window.addEventListener('resize', debounce(drawWaveform, 200));
+         window.addEventListener('resize', debounce(() => {
+             console.log("Window resized. Redrawing waveform."); // Tambahan log
+             drawWaveform();
+             }, 200));
 
     </script>
 </body>
