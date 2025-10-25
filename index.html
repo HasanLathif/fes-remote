@@ -260,7 +260,7 @@
             } catch (error) {
                 console.error("Connection Error:", error);
                 updateStatus(`Error: ${error.message}`, false);
-                if (bleDevice) bleDevice.gatt.disconnect();
+                if (bleDevice && bleDevice.gatt) bleDevice.gatt.disconnect();
                 onDisconnected();
             }
         }
@@ -381,7 +381,7 @@
         }
 
         // ===============================================
-        // == FUNGSI & EVENT LISTENER FES (PERBAIKAN v2.4) ==
+        // == FUNGSI & EVENT LISTENER FES (PERBAIKAN v2.5) ==
         // ===============================================
         
         function drawWaveform() { 
@@ -453,9 +453,12 @@
                 else { value = Math.max(min, Math.min(max, value)); value = Math.round((value - min) / step) * step + min; }
                 slider.value = value;
                 input.value = value;
-                if (!channelEnable || channelEnable.checked) {
+                
+                // (DIMODIFIKASI) Hanya kirim jika toggle 'nyala', ATAU jika ini BUKAN slider amplitudo (misal PW/Freq)
+                if ((channelEnable && channelEnable.checked) || !channelEnable) {
                     debouncedSendCommand(`${commandPrefix}:${value}`);
                 }
+                
                 if (paramName) {
                     currentParams[paramName] = value;
                     drawWaveform();
@@ -466,7 +469,8 @@
 
             slider.addEventListener('input', () => {
                 input.value = slider.value;
-                 if (!channelEnable || channelEnable.checked) {
+                // (DIMODIFIKASI) Hanya kirim jika toggle 'nyala', ATAU jika ini BUKAN slider amplitudo (misal PW/Freq)
+                 if ((channelEnable && channelEnable.checked) || !channelEnable) {
                       debouncedSendCommand(`${commandPrefix}:${slider.value}`);
                  }
                 if (paramName) {
@@ -481,37 +485,36 @@
             input.value = slider.value;
         }
 
-        // --- Setup Event Listener Kontrol FES ---
+        // --- (PERBAIKAN v2.5) Event Listener Kontrol FES ---
         ch1Enable.addEventListener('change', () => {
-            const isEnabled = ch1Enable.checked; 
+            const isEnabled = ch1Enable.checked;
+            console.log(`C1 Toggle: ${isEnabled}`);
             sendCommand(`C1:E:${isEnabled ? 1 : 0}`);
-            if (isEnabled) { 
-                sendCommand(`C1:A:${ch1AmplitudeSlider.value}`); 
-            } else { 
-                sendCommand(`C1:A:0`);
-                // (PERBAIKAN) Reset UI slider & input ke 0
-                ch1AmplitudeSlider.value = 0;
-                ch1AmplitudeInput.value = 0;
-            }
+            
+            // Selalu kirim A:0 dan reset UI, baik saat ON atau OFF
+            // Ini adalah perilaku paling aman
+            sendCommand(`C1:A:0`);
+            ch1AmplitudeSlider.value = 0;
+            ch1AmplitudeInput.value = 0;
+            
             drawWaveform();
         });
         syncSliderInput(ch1AmplitudeSlider, ch1AmplitudeInput, 'C1:A', ch1Enable);
         
         ch2Enable.addEventListener('change', () => {
             const isEnabled = ch2Enable.checked; 
+            console.log(`C2 Toggle: ${isEnabled}`);
             sendCommand(`C2:E:${isEnabled ? 1 : 0}`);
-            if (isEnabled) { 
-                sendCommand(`C2:A:${ch2AmplitudeSlider.value}`); 
-            } else { 
-                sendCommand(`C2:A:0`);
-                // (PERBAIKAN) Reset UI slider & input ke 0
-                ch2AmplitudeSlider.value = 0;
-                ch2AmplitudeInput.value = 0;
-            }
+            
+            // Selalu kirim A:0 dan reset UI, baik saat ON atau OFF
+            sendCommand(`C2:A:0`);
+            ch2AmplitudeSlider.value = 0;
+            ch2AmplitudeInput.value = 0;
         });
         syncSliderInput(ch2AmplitudeSlider, ch2AmplitudeInput, 'C2:A', ch2Enable);
         
         // --- Setup Event Listener Kontrol Global ---
+        // 'channelEnable' di-set ke null, sehingga mereka selalu mengirim update
         syncSliderInput(pulseWidthSlider, pulseWidthInput, 'C1:W', null, 'pulseWidth');
         syncSliderInput(frequencySlider, frequencyInput, 'C1:F', null, 'frequency');
 
