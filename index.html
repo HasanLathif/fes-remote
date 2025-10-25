@@ -107,7 +107,8 @@
                     <div class="input-value-container"><input type="number" id="ch2AmplitudeInput" min="0" max="255" value="0"></div>
                 </div>
             </div>
-        </div>
+
+            </div>
 
         <div id="autoModeScreen">
             <div class="card">
@@ -166,7 +167,7 @@
         const homeScreen = document.getElementById('homeScreen');
         const manualModeScreen = document.getElementById('manualModeScreen');
         const autoModeScreen = document.getElementById('autoModeScreen');
-        const globalSettingsCard = document.getElementById('globalSettingsCard'); 
+        const globalSettingsCard = document.getElementById('globalSettingsCard'); // (BARU)
 
         // --- Home ---
         const connectButton = document.getElementById('connectButton');
@@ -187,7 +188,7 @@
         // --- Sensor (Auto) ---
         const autoAngleValue = document.getElementById('autoAngleValue');
         const autoAngleGauge = document.getElementById('autoAngleGauge');
-        const autoStatusIndicator = document.getElementById('autoStatusIndicator'); 
+        const autoStatusIndicator = document.getElementById('autoStatusIndicator'); // (BARU)
         
         // --- Kontrol FES Manual ---
         const ch1Enable = document.getElementById('ch1Enable');
@@ -223,7 +224,7 @@
         let currentParams = { pulseWidth: 200, frequency: 30, interPhaseGap: 50 };
 
         // ===============================================
-        // == FUNGSI KONEKSI (v2.2) ==
+        // == FUNGSI KONEKSI (Sudah Diperbaiki v2.2) ==
         // ===============================================
         connectButton.addEventListener('click', () => isConnected ? disconnect() : connect());
 
@@ -260,7 +261,6 @@
             } catch (error) {
                 console.error("Connection Error:", error);
                 updateStatus(`Error: ${error.message}`, false);
-                if (bleDevice && bleDevice.gatt) bleDevice.gatt.disconnect();
                 onDisconnected();
             }
         }
@@ -299,23 +299,24 @@
         }
 
         function showScreen(screenName) {
+            // Sembunyikan semua layar/kartu
             homeScreen.style.display = 'none';
             manualModeScreen.style.display = 'none';
             autoModeScreen.style.display = 'none';
-            globalSettingsCard.style.display = 'none'; 
+            globalSettingsCard.style.display = 'none'; // (BARU)
 
             if (screenName === 'home') {
                 homeScreen.style.display = 'block';
             } else if (screenName === 'manual') {
                 manualModeScreen.style.display = 'block';
-                globalSettingsCard.style.display = 'block'; 
+                globalSettingsCard.style.display = 'block'; // (BARU) Tampilkan Global
                 currentModeDisplay.textContent = "Manual";
                 drawWaveform(); 
             } else if (screenName === 'auto') {
                 autoModeScreen.style.display = 'block';
-                globalSettingsCard.style.display = 'block'; 
+                globalSettingsCard.style.display = 'block'; // (BARU) Tampilkan Global
                 currentModeDisplay.textContent = "Otomatis";
-                drawWaveform(); 
+                drawWaveform(); // (BARU) Gambar juga di mode auto
             }
         }
 
@@ -337,7 +338,7 @@
         });
 
         // ===============================================
-        // == MENANGANI DATA SENSOR (v2.3) ==
+        // == MENANGANI DATA SENSOR (MODIFIKASI) ==
         // ===============================================
         function handleSensorNotification(event) {
             const payloadString = decoder.decode(event.target.value); // "85.20:30"
@@ -348,16 +349,17 @@
             const c1Amplitude = parseInt(parts[1]);
             if (isNaN(angle) || isNaN(c1Amplitude)) return;
 
+            // --- Update Nilai Sudut (di kedua layar) ---
             const maxAngle = 120.0; 
             const gaugePercentage = (angle / maxAngle) * 100;
             const clampedPercentage = `${Math.min(100, Math.max(0, gaugePercentage))}%`;
             const angleText = `${angle.toFixed(2)}°`;
-
             manualAngleValue.textContent = angleText;
             manualAngleGauge.style.width = clampedPercentage;
             autoAngleValue.textContent = angleText;
             autoAngleGauge.style.width = clampedPercentage;
 
+            // --- (BARU) Update Indikator Status Auto-Mode ---
             const targetAngle = parseInt(targetAngleInput.value) || 90;
             if (autoStatusIndicator) {
                 if (angle >= targetAngle) {
@@ -369,19 +371,21 @@
                 }
             }
 
+            // --- Update Nilai Amplitudo (di kedua layar) ---
             autoC1AmplitudeReadout.textContent = c1Amplitude;
             if (document.activeElement !== ch1AmplitudeSlider && document.activeElement !== ch1AmplitudeInput) {
                 ch1AmplitudeSlider.value = c1Amplitude;
                 ch1AmplitudeInput.value = c1Amplitude;
             }
             
+            // (DIMODIFIKASI) Gambar ulang waveform jika sedang TAMPIL
             if (globalSettingsCard.style.display === 'block') {
                 drawWaveform();
             }
         }
 
         // ===============================================
-        // == FUNGSI & EVENT LISTENER FES (PERBAIKAN v2.5) ==
+        // == FUNGSI & EVENT LISTENER FES ==
         // ===============================================
         
         function drawWaveform() { 
@@ -396,6 +400,7 @@
                 const midY = canvasHeight / 2;
                 const maxAmplitudeHeight = (canvasHeight / 2) * 0.8;
                 
+                // (DIMODIFIKASI) Baca amplitudo dari slider C1 (selalu update)
                 const amplitude = parseInt(ch1AmplitudeInput.value) || 0;
                 const pulseWidth = parseInt(pulseWidthInput.value) || 200;
                 const frequency = parseInt(frequencyInput.value) || 30;
@@ -453,12 +458,9 @@
                 else { value = Math.max(min, Math.min(max, value)); value = Math.round((value - min) / step) * step + min; }
                 slider.value = value;
                 input.value = value;
-                
-                // (DIMODIFIKASI) Hanya kirim jika toggle 'nyala', ATAU jika ini BUKAN slider amplitudo (misal PW/Freq)
-                if ((channelEnable && channelEnable.checked) || !channelEnable) {
+                if (!channelEnable || channelEnable.checked) {
                     debouncedSendCommand(`${commandPrefix}:${value}`);
                 }
-                
                 if (paramName) {
                     currentParams[paramName] = value;
                     drawWaveform();
@@ -469,8 +471,7 @@
 
             slider.addEventListener('input', () => {
                 input.value = slider.value;
-                // (DIMODIFIKASI) Hanya kirim jika toggle 'nyala', ATAU jika ini BUKAN slider amplitudo (misal PW/Freq)
-                 if ((channelEnable && channelEnable.checked) || !channelEnable) {
+                 if (!channelEnable || channelEnable.checked) {
                       debouncedSendCommand(`${commandPrefix}:${slider.value}`);
                  }
                 if (paramName) {
@@ -485,36 +486,21 @@
             input.value = slider.value;
         }
 
-        // --- (PERBAIKAN v2.5) Event Listener Kontrol FES ---
+        // --- Setup Event Listener Kontrol FES ---
         ch1Enable.addEventListener('change', () => {
-            const isEnabled = ch1Enable.checked;
-            console.log(`C1 Toggle: ${isEnabled}`);
-            sendCommand(`C1:E:${isEnabled ? 1 : 0}`);
-            
-            // Selalu kirim A:0 dan reset UI, baik saat ON atau OFF
-            // Ini adalah perilaku paling aman
-            sendCommand(`C1:A:0`);
-            ch1AmplitudeSlider.value = 0;
-            ch1AmplitudeInput.value = 0;
-            
+            const isEnabled = ch1Enable.checked; sendCommand(`C1:E:${isEnabled ? 1 : 0}`);
+            if (isEnabled) { sendCommand(`C1:A:${ch1AmplitudeSlider.value}`); } else { sendCommand(`C1:A:0`); }
             drawWaveform();
         });
         syncSliderInput(ch1AmplitudeSlider, ch1AmplitudeInput, 'C1:A', ch1Enable);
         
         ch2Enable.addEventListener('change', () => {
-            const isEnabled = ch2Enable.checked; 
-            console.log(`C2 Toggle: ${isEnabled}`);
-            sendCommand(`C2:E:${isEnabled ? 1 : 0}`);
-            
-            // Selalu kirim A:0 dan reset UI, baik saat ON atau OFF
-            sendCommand(`C2:A:0`);
-            ch2AmplitudeSlider.value = 0;
-            ch2AmplitudeInput.value = 0;
+            const isEnabled = ch2Enable.checked; sendCommand(`C2:E:${isEnabled ? 1 : 0}`);
+            if (isEnabled) { sendCommand(`C2:A:${ch2AmplitudeSlider.value}`); } else { sendCommand(`C2:A:0`); }
         });
         syncSliderInput(ch2AmplitudeSlider, ch2AmplitudeInput, 'C2:A', ch2Enable);
         
         // --- Setup Event Listener Kontrol Global ---
-        // 'channelEnable' di-set ke null, sehingga mereka selalu mengirim update
         syncSliderInput(pulseWidthSlider, pulseWidthInput, 'C1:W', null, 'pulseWidth');
         syncSliderInput(frequencySlider, frequencyInput, 'C1:F', null, 'frequency');
 
