@@ -35,7 +35,7 @@
         #connectButton { background-color: var(--primary-color); color: white; margin-bottom: 1rem;}
         #connectButton.connected { background-color: var(--danger-color); }
         #status { text-align: center; padding: 0.8rem; border-radius: 8px; font-weight: 500; margin-bottom: 1rem; display: none; }
-        #status.active { display: block; }
+        
         .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .switch-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 28px; }
@@ -81,7 +81,6 @@
             <div class="card">
                 <button id="backButtonManual" class="back-button">Keluar Mode Manual</button>
             </div>
-            
             <div class="card sensor-display-card">
                 <h2>Flex Sensor</h2>
                 <div id="manualAngleValue" class="angle-value">0.00°</div>
@@ -89,7 +88,6 @@
                     <div id="manualAngleGauge" class="angle-gauge"></div>
                 </div>
             </div>
-
             <div class="card">
                 <h2>Channels</h2>
                 <div class="control-group">
@@ -105,7 +103,6 @@
                     <div class="input-value-container"><input type="number" id="ch2AmplitudeInput" min="0" max="255" value="0"></div>
                 </div>
             </div>
-
             <div class="card">
                 <h2>Global Settings</h2>
                 <div class="control-group">
@@ -126,7 +123,6 @@
             <div class="card">
                 <button id="backButtonAuto" class="back-button">Keluar Mode Otomatis</button>
             </div>
-
             <div class="card sensor-display-card">
                 <h2>Flex Sensor (Live)</h2>
                 <div id="autoAngleValue" class="angle-value">0.00°</div>
@@ -134,7 +130,6 @@
                     <div id="autoAngleGauge" class="angle-gauge"></div>
                 </div>
             </div>
-            
             <div class="card">
                 <h2>Pengaturan Auto-Mode</h2>
                 <div class="auto-mode-setting">
@@ -157,33 +152,21 @@
         // ===============================================
         // == REFERENSI ELEMEN HTML ==
         // ===============================================
-        
-        // --- Layar ---
         const homeScreen = document.getElementById('homeScreen');
         const manualModeScreen = document.getElementById('manualModeScreen');
         const autoModeScreen = document.getElementById('autoModeScreen');
-
-        // --- Home ---
         const connectButton = document.getElementById('connectButton');
         const statusDisplay = document.getElementById('status');
         const modeSelection = document.getElementById('modeSelection');
         const currentModeDisplay = document.getElementById('currentModeDisplay');
         const selectManualButton = document.getElementById('selectManualButton');
         const selectAutoButton = document.getElementById('selectAutoButton');
-
-        // --- Tombol Kembali ---
         const backButtonManual = document.getElementById('backButtonManual');
         const backButtonAuto = document.getElementById('backButtonAuto');
-
-        // --- Sensor (Manual) ---
         const manualAngleValue = document.getElementById('manualAngleValue');
         const manualAngleGauge = document.getElementById('manualAngleGauge');
-
-        // --- Sensor (Auto) ---
         const autoAngleValue = document.getElementById('autoAngleValue');
         const autoAngleGauge = document.getElementById('autoAngleGauge');
-        
-        // --- Kontrol FES Manual ---
         const ch1Enable = document.getElementById('ch1Enable');
         const ch1AmplitudeSlider = document.getElementById('ch1AmplitudeSlider');
         const ch1AmplitudeInput = document.getElementById('ch1AmplitudeInput');
@@ -196,8 +179,6 @@
         const frequencyInput = document.getElementById('frequencyInput');
         const waveformCanvas = document.getElementById('waveformCanvas');
         const ctx = waveformCanvas.getContext('2d');
-        
-        // --- Kontrol Auto-Mode ---
         const targetAngleInput = document.getElementById('targetAngleInput');
         const autoC1AmplitudeReadout = document.getElementById('autoC1AmplitudeReadout');
 
@@ -208,7 +189,6 @@
         const FES_CONTROL_CHAR_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
         const SENSOR_SERVICE_UUID = "0000180f-0000-1000-8000-00805f9b34fb";
         const FLEX_SENSOR_CHAR_UUID = "00002a19-0000-1000-8000-00805f9b34fb";
-
         let bleDevice, controlCharacteristic, flexSensorCharacteristic;
         let isConnected = false;
         const encoder = new TextEncoder('utf-8');
@@ -216,21 +196,26 @@
         let currentParams = { pulseWidth: 200, frequency: 30, interPhaseGap: 50 };
 
         // ===============================================
-        // == FUNGSI KONEKSI ==
+        // == FUNGSI KONEKSI (PERBAIKAN KUNCI DI SINI) ==
         // ===============================================
-        connectButton.addEventListener('click', () => isConnected ? disconnect() : connect());
+        connectButton.addEventListener('click', () => {
+            console.log("Connect button clicked!"); // Log untuk konfirmasi klik
+            isConnected ? disconnect() : connect();
+        });
 
         async function connect() {
             console.log("Connect function called.");
             try {
-                updateStatus("Requesting Device...", false);
+                // (PERBAIKAN) Panggil requestDevice() SEKARANG, sebelum updateStatus()
                 bleDevice = await navigator.bluetooth.requestDevice({
                     filters: [{ services: [FES_SERVICE_UUID] }], 
                     optionalServices: [FES_SERVICE_UUID, SENSOR_SERVICE_UUID] 
                 });
-                bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
                 
-                updateStatus("Connecting...", false);
+                // (PERBAIKAN) Panggil updateStatus() SETELAH requestDevice() berhasil
+                updateStatus("Device selected. Connecting...", false);
+                
+                bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
                 const server = await bleDevice.gatt.connect();
                 
                 updateStatus("Getting FES Service...", false);
@@ -287,16 +272,19 @@
         // ===============================================
         // == MANAJEMEN LAYAR & UI HELPER ==
         // ===============================================
-
-        // function updateStatus(message, isSuccess = false) {
+        
+        // (PERBAIKAN) Fungsi updateStatus disederhanakan agar lebih aman
+        function updateStatus(message, isSuccess = false) {
             console.log("Updating status:", message);
-            statusDisplay.textContent = message; 
-            statusDisplay.style.display = 'block'; // Tampilkan elemen
-            statusDisplay.className = 'active';
-            statusDisplay.style.backgroundColor = isSuccess ? 'var(--success-color)' : 'var(--border-color)';
-            statusDisplay.style.color = isSuccess ? '#fff' : 'var(--text-color)';
+            if (statusDisplay) { // Cek jika elemen ada
+                statusDisplay.textContent = message; 
+                statusDisplay.style.display = 'block'; // Tampilkan elemen
+                statusDisplay.style.backgroundColor = isSuccess ? 'var(--success-color)' : 'var(--border-color)';
+                statusDisplay.style.color = isSuccess ? '#fff' : 'var(--text-color)';
+            }
         }
-        // function showScreen(screenName) {
+
+        function showScreen(screenName) {
             homeScreen.style.display = 'none';
             manualModeScreen.style.display = 'none';
             autoModeScreen.style.display = 'none';
@@ -347,15 +335,12 @@
             const clampedPercentage = `${Math.min(100, Math.max(0, gaugePercentage))}%`;
             const angleText = `${angle.toFixed(2)}°`;
 
-            // Update UI di kedua layar
             manualAngleValue.textContent = angleText;
             manualAngleGauge.style.width = clampedPercentage;
             autoAngleValue.textContent = angleText;
             autoAngleGauge.style.width = clampedPercentage;
             autoC1AmplitudeReadout.textContent = c1Amplitude;
 
-            // Selalu update slider/input C1 (bahkan di mode manual)
-            // Ini akan mencerminkan nilai dari auto-mode secara real-time
             if (document.activeElement !== ch1AmplitudeSlider && document.activeElement !== ch1AmplitudeInput) {
                 ch1AmplitudeSlider.value = c1Amplitude;
                 ch1AmplitudeInput.value = c1Amplitude;
