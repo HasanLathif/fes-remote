@@ -107,8 +107,7 @@
                     <div class="input-value-container"><input type="number" id="ch2AmplitudeInput" min="0" max="255" value="0"></div>
                 </div>
             </div>
-
-            </div>
+        </div>
 
         <div id="autoModeScreen">
             <div class="card">
@@ -167,7 +166,7 @@
         const homeScreen = document.getElementById('homeScreen');
         const manualModeScreen = document.getElementById('manualModeScreen');
         const autoModeScreen = document.getElementById('autoModeScreen');
-        const globalSettingsCard = document.getElementById('globalSettingsCard'); // (BARU)
+        const globalSettingsCard = document.getElementById('globalSettingsCard'); 
 
         // --- Home ---
         const connectButton = document.getElementById('connectButton');
@@ -188,7 +187,7 @@
         // --- Sensor (Auto) ---
         const autoAngleValue = document.getElementById('autoAngleValue');
         const autoAngleGauge = document.getElementById('autoAngleGauge');
-        const autoStatusIndicator = document.getElementById('autoStatusIndicator'); // (BARU)
+        const autoStatusIndicator = document.getElementById('autoStatusIndicator'); 
         
         // --- Kontrol FES Manual ---
         const ch1Enable = document.getElementById('ch1Enable');
@@ -224,7 +223,7 @@
         let currentParams = { pulseWidth: 200, frequency: 30, interPhaseGap: 50 };
 
         // ===============================================
-        // == FUNGSI KONEKSI (Sudah Diperbaiki v2.2) ==
+        // == FUNGSI KONEKSI (v2.2) ==
         // ===============================================
         connectButton.addEventListener('click', () => isConnected ? disconnect() : connect());
 
@@ -261,6 +260,7 @@
             } catch (error) {
                 console.error("Connection Error:", error);
                 updateStatus(`Error: ${error.message}`, false);
+                if (bleDevice) bleDevice.gatt.disconnect();
                 onDisconnected();
             }
         }
@@ -299,24 +299,23 @@
         }
 
         function showScreen(screenName) {
-            // Sembunyikan semua layar/kartu
             homeScreen.style.display = 'none';
             manualModeScreen.style.display = 'none';
             autoModeScreen.style.display = 'none';
-            globalSettingsCard.style.display = 'none'; // (BARU)
+            globalSettingsCard.style.display = 'none'; 
 
             if (screenName === 'home') {
                 homeScreen.style.display = 'block';
             } else if (screenName === 'manual') {
                 manualModeScreen.style.display = 'block';
-                globalSettingsCard.style.display = 'block'; // (BARU) Tampilkan Global
+                globalSettingsCard.style.display = 'block'; 
                 currentModeDisplay.textContent = "Manual";
                 drawWaveform(); 
             } else if (screenName === 'auto') {
                 autoModeScreen.style.display = 'block';
-                globalSettingsCard.style.display = 'block'; // (BARU) Tampilkan Global
+                globalSettingsCard.style.display = 'block'; 
                 currentModeDisplay.textContent = "Otomatis";
-                drawWaveform(); // (BARU) Gambar juga di mode auto
+                drawWaveform(); 
             }
         }
 
@@ -338,7 +337,7 @@
         });
 
         // ===============================================
-        // == MENANGANI DATA SENSOR (MODIFIKASI) ==
+        // == MENANGANI DATA SENSOR (v2.3) ==
         // ===============================================
         function handleSensorNotification(event) {
             const payloadString = decoder.decode(event.target.value); // "85.20:30"
@@ -349,17 +348,16 @@
             const c1Amplitude = parseInt(parts[1]);
             if (isNaN(angle) || isNaN(c1Amplitude)) return;
 
-            // --- Update Nilai Sudut (di kedua layar) ---
             const maxAngle = 120.0; 
             const gaugePercentage = (angle / maxAngle) * 100;
             const clampedPercentage = `${Math.min(100, Math.max(0, gaugePercentage))}%`;
             const angleText = `${angle.toFixed(2)}°`;
+
             manualAngleValue.textContent = angleText;
             manualAngleGauge.style.width = clampedPercentage;
             autoAngleValue.textContent = angleText;
             autoAngleGauge.style.width = clampedPercentage;
 
-            // --- (BARU) Update Indikator Status Auto-Mode ---
             const targetAngle = parseInt(targetAngleInput.value) || 90;
             if (autoStatusIndicator) {
                 if (angle >= targetAngle) {
@@ -371,21 +369,19 @@
                 }
             }
 
-            // --- Update Nilai Amplitudo (di kedua layar) ---
             autoC1AmplitudeReadout.textContent = c1Amplitude;
             if (document.activeElement !== ch1AmplitudeSlider && document.activeElement !== ch1AmplitudeInput) {
                 ch1AmplitudeSlider.value = c1Amplitude;
                 ch1AmplitudeInput.value = c1Amplitude;
             }
             
-            // (DIMODIFIKASI) Gambar ulang waveform jika sedang TAMPIL
             if (globalSettingsCard.style.display === 'block') {
                 drawWaveform();
             }
         }
 
         // ===============================================
-        // == FUNGSI & EVENT LISTENER FES ==
+        // == FUNGSI & EVENT LISTENER FES (PERBAIKAN v2.4) ==
         // ===============================================
         
         function drawWaveform() { 
@@ -400,7 +396,6 @@
                 const midY = canvasHeight / 2;
                 const maxAmplitudeHeight = (canvasHeight / 2) * 0.8;
                 
-                // (DIMODIFIKASI) Baca amplitudo dari slider C1 (selalu update)
                 const amplitude = parseInt(ch1AmplitudeInput.value) || 0;
                 const pulseWidth = parseInt(pulseWidthInput.value) || 200;
                 const frequency = parseInt(frequencyInput.value) || 30;
@@ -488,15 +483,31 @@
 
         // --- Setup Event Listener Kontrol FES ---
         ch1Enable.addEventListener('change', () => {
-            const isEnabled = ch1Enable.checked; sendCommand(`C1:E:${isEnabled ? 1 : 0}`);
-            if (isEnabled) { sendCommand(`C1:A:${ch1AmplitudeSlider.value}`); } else { sendCommand(`C1:A:0`); }
+            const isEnabled = ch1Enable.checked; 
+            sendCommand(`C1:E:${isEnabled ? 1 : 0}`);
+            if (isEnabled) { 
+                sendCommand(`C1:A:${ch1AmplitudeSlider.value}`); 
+            } else { 
+                sendCommand(`C1:A:0`);
+                // (PERBAIKAN) Reset UI slider & input ke 0
+                ch1AmplitudeSlider.value = 0;
+                ch1AmplitudeInput.value = 0;
+            }
             drawWaveform();
         });
         syncSliderInput(ch1AmplitudeSlider, ch1AmplitudeInput, 'C1:A', ch1Enable);
         
         ch2Enable.addEventListener('change', () => {
-            const isEnabled = ch2Enable.checked; sendCommand(`C2:E:${isEnabled ? 1 : 0}`);
-            if (isEnabled) { sendCommand(`C2:A:${ch2AmplitudeSlider.value}`); } else { sendCommand(`C2:A:0`); }
+            const isEnabled = ch2Enable.checked; 
+            sendCommand(`C2:E:${isEnabled ? 1 : 0}`);
+            if (isEnabled) { 
+                sendCommand(`C2:A:${ch2AmplitudeSlider.value}`); 
+            } else { 
+                sendCommand(`C2:A:0`);
+                // (PERBAIKAN) Reset UI slider & input ke 0
+                ch2AmplitudeSlider.value = 0;
+                ch2AmplitudeInput.value = 0;
+            }
         });
         syncSliderInput(ch2AmplitudeSlider, ch2AmplitudeInput, 'C2:A', ch2Enable);
         
