@@ -15,12 +15,7 @@
         .container { width: 100%; max-width: 500px; }
         .card { background-color: var(--card-background); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 1.5rem; margin-bottom: 1rem; }
         
-        /* === (BARU) Struktur Layar === */
-        /* Sembunyikan semua layar mode by default */
-        #manualModeScreen, #autoModeScreen {
-            display: none;
-        }
-        /* ============================== */
+        #manualModeScreen, #autoModeScreen { display: none; }
 
         h1, h2, h3 { margin-top: 0; color: var(--text-color); text-align: center; }
         h1 { font-size: 1.8rem; margin-bottom: 1.5rem; }
@@ -39,7 +34,8 @@
         
         #connectButton { background-color: var(--primary-color); color: white; margin-bottom: 1rem;}
         #connectButton.connected { background-color: var(--danger-color); }
-        #status { text-align: center; padding: 0.8rem; border-radius: 8px; font-weight: 500; margin-bottom: 1rem; }
+        #status { text-align: center; padding: 0.8rem; border-radius: 8px; font-weight: 500; margin-bottom: 1rem; display: none; }
+        #status.active { display: block; }
         .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .switch-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 28px; }
@@ -48,7 +44,6 @@
         input:checked + .switch-slider:before { transform: translateX(22px); }
         #waveformCanvas { width: 100%; height: 120px; border: 1px solid var(--border-color); border-radius: 8px; margin-top: 1rem; background-color: #f8f9fa; }
         
-        /* === (BARU) Gaya untuk Sensor & Auto-Mode === */
         .sensor-display-card { margin-bottom: 1.5rem; }
         .angle-value { font-size: 2.5rem; font-weight: 600; color: var(--primary-color); text-align: center; margin-bottom: 1rem; }
         .gauge-container { width: 100%; height: 24px; background-color: var(--slider-track); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); }
@@ -221,32 +216,32 @@
         let currentParams = { pulseWidth: 200, frequency: 30, interPhaseGap: 50 };
 
         // ===============================================
-        // == FUNGSI KONEKSI (TIDAK BERUBAH) ==
+        // == FUNGSI KONEKSI ==
         // ===============================================
         connectButton.addEventListener('click', () => isConnected ? disconnect() : connect());
 
         async function connect() {
             console.log("Connect function called.");
             try {
-                updateStatus("Requesting Device...");
+                updateStatus("Requesting Device...", false);
                 bleDevice = await navigator.bluetooth.requestDevice({
                     filters: [{ services: [FES_SERVICE_UUID] }], 
                     optionalServices: [FES_SERVICE_UUID, SENSOR_SERVICE_UUID] 
                 });
                 bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
                 
-                updateStatus("Connecting...");
+                updateStatus("Connecting...", false);
                 const server = await bleDevice.gatt.connect();
                 
-                updateStatus("Getting FES Service...");
+                updateStatus("Getting FES Service...", false);
                 const fesService = await server.getPrimaryService(FES_SERVICE_UUID);
                 controlCharacteristic = await fesService.getCharacteristic(FES_CONTROL_CHAR_UUID);
                 
-                updateStatus("Getting Sensor Service...");
+                updateStatus("Getting Sensor Service...", false);
                 const sensorService = await server.getPrimaryService(SENSOR_SERVICE_UUID);
                 flexSensorCharacteristic = await sensorService.getCharacteristic(FLEX_SENSOR_CHAR_UUID);
                 
-                updateStatus("Subscribing to Sensor...");
+                updateStatus("Subscribing to Sensor...", false);
                 await flexSensorCharacteristic.startNotifications();
                 flexSensorCharacteristic.addEventListener('characteristicvaluechanged', handleSensorNotification);
 
@@ -254,11 +249,11 @@
                 updateStatus("Connected!", true);
                 connectButton.textContent = "Disconnect";
                 connectButton.classList.add("connected");
-                modeSelection.style.display = 'block'; // Tampilkan pilihan mode
+                modeSelection.style.display = 'block'; 
 
             } catch (error) {
                 console.error("Connection Error:", error);
-                updateStatus(`Error: ${error.message}`);
+                updateStatus(`Error: ${error.message}`, false);
                 onDisconnected();
             }
         }
@@ -281,19 +276,27 @@
             controlCharacteristic = null;
             flexSensorCharacteristic = null; 
             
-            updateStatus("Device Disconnected");
+            updateStatus("Device Disconnected", false);
             connectButton.textContent = "Connect to Device";
             connectButton.classList.remove("connected");
-            modeSelection.style.display = 'none'; // Sembunyikan pilihan mode
+            modeSelection.style.display = 'none'; 
 
-            // Paksa kembali ke home screen jika koneksi terputus
             showScreen('home'); 
         }
 
         // ===============================================
-        // == (BARU) FUNGSI MANAJEMEN LAYAR ==
+        // == MANAJEMEN LAYAR & UI HELPER ==
         // ===============================================
-        function showScreen(screenName) {
+
+        // function updateStatus(message, isSuccess = false) {
+            console.log("Updating status:", message);
+            statusDisplay.textContent = message; 
+            statusDisplay.style.display = 'block'; // Tampilkan elemen
+            statusDisplay.className = 'active';
+            statusDisplay.style.backgroundColor = isSuccess ? 'var(--success-color)' : 'var(--border-color)';
+            statusDisplay.style.color = isSuccess ? '#fff' : 'var(--text-color)';
+        }
+        // function showScreen(screenName) {
             homeScreen.style.display = 'none';
             manualModeScreen.style.display = 'none';
             autoModeScreen.style.display = 'none';
@@ -303,75 +306,61 @@
             } else if (screenName === 'manual') {
                 manualModeScreen.style.display = 'block';
                 currentModeDisplay.textContent = "Manual";
-                drawWaveform(); // Gambar ulang canvas saat pindah
+                drawWaveform(); 
             } else if (screenName === 'auto') {
                 autoModeScreen.style.display = 'block';
                 currentModeDisplay.textContent = "Otomatis";
             }
         }
 
-        // --- Event Listener Navigasi Layar ---
         selectManualButton.addEventListener('click', () => {
             showScreen('manual');
-            // Pastikan auto-mode mati saat masuk manual
             sendCommand('AM:E:0');
         });
         
         selectAutoButton.addEventListener('click', () => {
             showScreen('auto');
-            // Otomatis kirim perintah 'Target Angle' saat ini
             targetAngleInput.dispatchEvent(new Event('change'));
-            // Otomatis kirim perintah 'Enable Auto-Mode'
             sendCommand('AM:E:1');
         });
 
-        backButtonManual.addEventListener('click', () => {
-            showScreen('home');
-            // Tidak perlu kirim 'AM:E:0' karena sudah dikirim saat masuk
-        });
-
+        backButtonManual.addEventListener('click', () => showScreen('home'));
         backButtonAuto.addEventListener('click', () => {
             showScreen('home');
-            // Kirim perintah 'Disable Auto-Mode' saat keluar
             sendCommand('AM:E:0');
         });
 
         // ===============================================
-        // == (DIMODIFIKASI) MENANGANI DATA SENSOR ==
+        // == MENANGANI DATA SENSOR (MODIFIKASI) ==
         // ===============================================
         function handleSensorNotification(event) {
-            const payloadString = decoder.decode(event.target.value); // misal: "85.20:30"
+            const payloadString = decoder.decode(event.target.value); // "85.20:30"
             const parts = payloadString.split(':'); // ["85.20", "30"]
             
-            if (parts.length < 2) return; // Data belum lengkap
-
+            if (parts.length < 2) return; 
             const angle = parseFloat(parts[0]);
             const c1Amplitude = parseInt(parts[1]);
-
             if (isNaN(angle) || isNaN(c1Amplitude)) return;
 
-            // --- Update Nilai Sudut (di kedua layar) ---
-            const maxAngle = 120.0; // Sesuaikan dengan kalibrasi max Anda
+            const maxAngle = 120.0; 
             const gaugePercentage = (angle / maxAngle) * 100;
             const clampedPercentage = `${Math.min(100, Math.max(0, gaugePercentage))}%`;
             const angleText = `${angle.toFixed(2)}°`;
 
+            // Update UI di kedua layar
             manualAngleValue.textContent = angleText;
             manualAngleGauge.style.width = clampedPercentage;
             autoAngleValue.textContent = angleText;
             autoAngleGauge.style.width = clampedPercentage;
-
-            // --- Update Nilai Amplitudo (di kedua layar) ---
-            
-            // 1. Update di layar Auto (Read-only text)
             autoC1AmplitudeReadout.textContent = c1Amplitude;
 
-            // 2. Update di layar Manual (Slider & Input)
-            // Ini penting agar slider sinkron jika user kembali ke mode manual
-            ch1AmplitudeSlider.value = c1Amplitude;
-            ch1AmplitudeInput.value = c1Amplitude;
+            // Selalu update slider/input C1 (bahkan di mode manual)
+            // Ini akan mencerminkan nilai dari auto-mode secara real-time
+            if (document.activeElement !== ch1AmplitudeSlider && document.activeElement !== ch1AmplitudeInput) {
+                ch1AmplitudeSlider.value = c1Amplitude;
+                ch1AmplitudeInput.value = c1Amplitude;
+            }
             
-            // 3. Gambar ulang waveform jika di layar manual
             if (manualModeScreen.style.display === 'block') {
                 drawWaveform();
             }
@@ -381,10 +370,10 @@
         // == FUNGSI & EVENT LISTENER FES ==
         // ===============================================
         
-        function drawWaveform() { /* ... (fungsi ini tidak berubah, disembunyikan agar ringkas) ... */ 
+        function drawWaveform() { 
             try { 
                 waveformCanvas.width = waveformCanvas.offsetWidth;
-                waveformCanvas.height = 120; // Tinggi tetap
+                waveformCanvas.height = 120; 
                 ctx.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height);
                 ctx.strokeStyle = '#1a7431'; 
                 ctx.lineWidth = 2;
@@ -393,12 +382,11 @@
                 const midY = canvasHeight / 2;
                 const maxAmplitudeHeight = (canvasHeight / 2) * 0.8;
                 
-                // (DIMODIFIKASI) Baca amplitudo dari slider C1
                 const amplitude = parseInt(ch1AmplitudeInput.value) || 0;
                 const pulseWidth = parseInt(pulseWidthInput.value) || 200;
                 const frequency = parseInt(frequencyInput.value) || 30;
 
-                const interPhaseGap = 50; // Asumsi
+                const interPhaseGap = 50; 
                 const period_us = (frequency > 0) ? (1000000 / frequency) : canvasWidth;
                 const scaleX = canvasWidth / period_us;
                 const scaleY = maxAmplitudeHeight / 255;
@@ -433,13 +421,9 @@
         }
 
         async function sendCommand(command) {
-            if (!isConnected || !controlCharacteristic) {
-                console.warn("Attempted to send FES command while disconnected:", command); 
-                return;
-            }
-            try {
-                await controlCharacteristic.writeValue(encoder.encode(command));
-            } catch (error) { console.error("Send Error:", error); }
+            if (!isConnected || !controlCharacteristic) { return; }
+            try { await controlCharacteristic.writeValue(encoder.encode(command)); } 
+            catch (error) { console.error("Send Error:", error); }
         }
         
         const debounce = (func, wait) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), wait); }; };
@@ -483,36 +467,31 @@
             input.value = slider.value;
         }
 
-        // --- Setup Event Listener Kontrol FES ---
         ch1Enable.addEventListener('change', () => {
             const isEnabled = ch1Enable.checked; sendCommand(`C1:E:${isEnabled ? 1 : 0}`);
             if (isEnabled) { sendCommand(`C1:A:${ch1AmplitudeSlider.value}`); } else { sendCommand(`C1:A:0`); }
             drawWaveform();
         });
         syncSliderInput(ch1AmplitudeSlider, ch1AmplitudeInput, 'C1:A', ch1Enable);
-
         ch2Enable.addEventListener('change', () => {
             const isEnabled = ch2Enable.checked; sendCommand(`C2:E:${isEnabled ? 1 : 0}`);
             if (isEnabled) { sendCommand(`C2:A:${ch2AmplitudeSlider.value}`); } else { sendCommand(`C2:A:0`); }
         });
         syncSliderInput(ch2AmplitudeSlider, ch2AmplitudeInput, 'C2:A', ch2Enable);
-
         syncSliderInput(pulseWidthSlider, pulseWidthInput, 'C1:W', null, 'pulseWidth');
         syncSliderInput(frequencySlider, frequencyInput, 'C1:F', null, 'frequency');
 
-        // --- Event Listener Kontrol Auto-Mode ---
         targetAngleInput.addEventListener('change', () => {
             let target = parseInt(targetAngleInput.value);
             if (isNaN(target)) target = 90;
-            target = Math.max(0, Math.min(120, target)); // clamp
+            target = Math.max(0, Math.min(120, target));
             targetAngleInput.value = target;
             debouncedSendCommand(`AM:T:${target}`);
         });
 
-        // --- Inisialisasi Awal ---
          window.addEventListener('load', () => {
-             showScreen('home'); // Mulai dari home
-             updateStatus("Disconnected"); // Set status awal
+             showScreen('home'); 
+             updateStatus("Disconnected", false); 
          });
          window.addEventListener('resize', debounce(drawWaveform, 200));
 
