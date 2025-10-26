@@ -93,85 +93,38 @@
         </div>
     </div> 
     <script>
-        // --- Referensi Elemen --- (Tidak Berubah)
-        const homeScreen = document.getElementById('homeScreen'); /*...*/ const autoC1AmplitudeReadout = document.getElementById('autoC1AmplitudeReadout');
-        const manualModeScreen = document.getElementById('manualModeScreen');
-        const autoModeScreen = document.getElementById('autoModeScreen');
-        const globalSettingsCard = document.getElementById('globalSettingsCard'); 
-        const connectButton = document.getElementById('connectButton');
-        const statusDisplay = document.getElementById('status');
-        const modeSelection = document.getElementById('modeSelection');
-        const currentModeDisplay = document.getElementById('currentModeDisplay');
-        const selectManualButton = document.getElementById('selectManualButton');
-        const selectAutoButton = document.getElementById('selectAutoButton');
-        const backButtonManual = document.getElementById('backButtonManual');
-        const backButtonAuto = document.getElementById('backButtonAuto');
-        const manualAngleValue = document.getElementById('manualAngleValue');
-        const manualAngleGauge = document.getElementById('manualAngleGauge');
-        const autoAngleValue = document.getElementById('autoAngleValue');
-        const autoAngleGauge = document.getElementById('autoAngleGauge');
-        const autoStatusIndicator = document.getElementById('autoStatusIndicator'); 
-        const ch1Enable = document.getElementById('ch1Enable');
-        const ch1AmplitudeSlider = document.getElementById('ch1AmplitudeSlider');
-        const ch1AmplitudeInput = document.getElementById('ch1AmplitudeInput');
-        const ch2Enable = document.getElementById('ch2Enable');
-        const ch2AmplitudeSlider = document.getElementById('ch2AmplitudeSlider');
-        const ch2AmplitudeInput = document.getElementById('ch2AmplitudeInput');
-        const pulseWidthSlider = document.getElementById('pulseWidthSlider');
-        const pulseWidthInput = document.getElementById('pulseWidthInput');
-        const frequencySlider = document.getElementById('frequencySlider');
-        const frequencyInput = document.getElementById('frequencyInput');
-        const waveformCanvas = document.getElementById('waveformCanvas');
-        const ctx = waveformCanvas.getContext('2d');
-        const targetAngleInput = document.getElementById('targetAngleInput');
-        // --- Konfigurasi & Variabel Global --- (Tidak Berubah)
-        const FES_SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b"; /*...*/ let currentParams = { pulseWidth: 200, frequency: 30, interPhaseGap: 50 };
-        const FES_CONTROL_CHAR_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
-        const SENSOR_SERVICE_UUID = "0000180f-0000-1000-8000-00805f9b34fb";
-        const FLEX_SENSOR_CHAR_UUID = "00002a19-0000-1000-8000-00805f9b34fb";
-        let bleDevice, controlCharacteristic, flexSensorCharacteristic;
-        let isConnected = false;
-        const encoder = new TextEncoder('utf-8');
-        const decoder = new TextDecoder('utf-8'); 
-        // --- Fungsi Koneksi --- (Tidak Berubah)
+        // --- Referensi Elemen ---
+        const homeScreen = document.getElementById('homeScreen'); const manualModeScreen = document.getElementById('manualModeScreen'); const autoModeScreen = document.getElementById('autoModeScreen'); const globalSettingsCard = document.getElementById('globalSettingsCard'); const connectButton = document.getElementById('connectButton'); const statusDisplay = document.getElementById('status'); const modeSelection = document.getElementById('modeSelection'); const currentModeDisplay = document.getElementById('currentModeDisplay'); const selectManualButton = document.getElementById('selectManualButton'); const selectAutoButton = document.getElementById('selectAutoButton'); const backButtonManual = document.getElementById('backButtonManual'); const backButtonAuto = document.getElementById('backButtonAuto'); const manualAngleValue = document.getElementById('manualAngleValue'); const manualAngleGauge = document.getElementById('manualAngleGauge'); const autoAngleValue = document.getElementById('autoAngleValue'); const autoAngleGauge = document.getElementById('autoAngleGauge'); const autoStatusIndicator = document.getElementById('autoStatusIndicator'); const ch1Enable = document.getElementById('ch1Enable'); const ch1AmplitudeSlider = document.getElementById('ch1AmplitudeSlider'); const ch1AmplitudeInput = document.getElementById('ch1AmplitudeInput'); const ch2Enable = document.getElementById('ch2Enable'); const ch2AmplitudeSlider = document.getElementById('ch2AmplitudeSlider'); const ch2AmplitudeInput = document.getElementById('ch2AmplitudeInput'); const pulseWidthSlider = document.getElementById('pulseWidthSlider'); const pulseWidthInput = document.getElementById('pulseWidthInput'); const frequencySlider = document.getElementById('frequencySlider'); const frequencyInput = document.getElementById('frequencyInput'); const waveformCanvas = document.getElementById('waveformCanvas'); const ctx = waveformCanvas.getContext('2d'); const targetAngleInput = document.getElementById('targetAngleInput'); const autoC1AmplitudeReadout = document.getElementById('autoC1AmplitudeReadout');
+        // --- Konfigurasi & Variabel Global ---
+        const FES_SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b"; const FES_CONTROL_CHAR_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"; const SENSOR_SERVICE_UUID = "0000180f-0000-1000-8000-00805f9b34fb"; const FLEX_SENSOR_CHAR_UUID = "00002a19-0000-1000-8000-00805f9b34fb"; let bleDevice, controlCharacteristic, flexSensorCharacteristic; let isConnected = false; const encoder = new TextEncoder('utf-8'); const decoder = new TextDecoder('utf-8'); let currentParams = { pulseWidth: 200, frequency: 30, interPhaseGap: 50 };
+        // --- Fungsi Koneksi ---
         connectButton.addEventListener('click', () => isConnected ? disconnect() : connect());
-        async function connect() { /*...*/ } 
-        async function disconnect() { /*...*/ }
-        function onDisconnected() { /*...*/ }
         async function connect() { console.log("Connect function called."); try { bleDevice = await navigator.bluetooth.requestDevice({ filters: [{ services: [FES_SERVICE_UUID] }], optionalServices: [FES_SERVICE_UUID, SENSOR_SERVICE_UUID] }); updateStatus("Device selected. Connecting...", false); bleDevice.addEventListener('gattserverdisconnected', onDisconnected); const server = await bleDevice.gatt.connect(); updateStatus("Getting FES Service...", false); const fesService = await server.getPrimaryService(FES_SERVICE_UUID); controlCharacteristic = await fesService.getCharacteristic(FES_CONTROL_CHAR_UUID); updateStatus("Getting Sensor Service...", false); const sensorService = await server.getPrimaryService(SENSOR_SERVICE_UUID); flexSensorCharacteristic = await sensorService.getCharacteristic(FLEX_SENSOR_CHAR_UUID); updateStatus("Subscribing to Sensor...", false); await flexSensorCharacteristic.startNotifications(); flexSensorCharacteristic.addEventListener('characteristicvaluechanged', handleSensorNotification); isConnected = true; updateStatus("Connected!", true); connectButton.textContent = "Disconnect"; connectButton.classList.add("connected"); modeSelection.style.display = 'block'; } catch (error) { console.error("Connection Error:", error); updateStatus(`Error: ${error.message}`, false); if (bleDevice && bleDevice.gatt) bleDevice.gatt.disconnect(); onDisconnected(); } }
         async function disconnect() { if (flexSensorCharacteristic) { try { await flexSensorCharacteristic.stopNotifications(); } catch(e) {console.error("Error stopping sensor notifications:", e);} } if (bleDevice && bleDevice.gatt.connected) { bleDevice.gatt.disconnect(); } else { onDisconnected(); } }
         function onDisconnected() { console.log("onDisconnected event triggered."); isConnected = false; controlCharacteristic = null; flexSensorCharacteristic = null; updateStatus("Device Disconnected", false); connectButton.textContent = "Connect to Device"; connectButton.classList.remove("connected"); modeSelection.style.display = 'none'; showScreen('home'); }
-
-        // --- Manajemen Layar & UI Helper --- (Tidak Berubah)
-        function updateStatus(message, isSuccess = false) { /*...*/ } 
-        function showScreen(screenName) { /*...*/ }
+        // --- Manajemen Layar & UI Helper ---
+        function updateStatus(message, isSuccess = false) { console.log("Updating status:", message); if (statusDisplay) { statusDisplay.textContent = message; statusDisplay.style.display = 'block'; statusDisplay.style.backgroundColor = isSuccess ? 'var(--success-color)' : 'var(--border-color)'; statusDisplay.style.color = isSuccess ? '#fff' : 'var(--text-color)'; } }
+        function showScreen(screenName) { homeScreen.style.display = 'none'; manualModeScreen.style.display = 'none'; autoModeScreen.style.display = 'none'; globalSettingsCard.style.display = 'none'; if (screenName === 'home') { homeScreen.style.display = 'block'; } else if (screenName === 'manual') { manualModeScreen.style.display = 'block'; globalSettingsCard.style.display = 'block'; currentModeDisplay.textContent = "Manual"; drawWaveform(); } else if (screenName === 'auto') { autoModeScreen.style.display = 'block'; globalSettingsCard.style.display = 'block'; currentModeDisplay.textContent = "Otomatis"; drawWaveform(); } }
         selectManualButton.addEventListener('click', () => { showScreen('manual'); sendCommand('AM:E:0'); });
         selectAutoButton.addEventListener('click', () => { showScreen('auto'); targetAngleInput.dispatchEvent(new Event('change')); sendCommand('AM:E:1'); });
         backButtonManual.addEventListener('click', () => showScreen('home'));
         backButtonAuto.addEventListener('click', () => { showScreen('home'); sendCommand('AM:E:0'); });
-        function updateStatus(message, isSuccess = false) { console.log("Updating status:", message); if (statusDisplay) { statusDisplay.textContent = message; statusDisplay.style.display = 'block'; statusDisplay.style.backgroundColor = isSuccess ? 'var(--success-color)' : 'var(--border-color)'; statusDisplay.style.color = isSuccess ? '#fff' : 'var(--text-color)'; } }
-        function showScreen(screenName) { homeScreen.style.display = 'none'; manualModeScreen.style.display = 'none'; autoModeScreen.style.display = 'none'; globalSettingsCard.style.display = 'none'; if (screenName === 'home') { homeScreen.style.display = 'block'; } else if (screenName === 'manual') { manualModeScreen.style.display = 'block'; globalSettingsCard.style.display = 'block'; currentModeDisplay.textContent = "Manual"; drawWaveform(); } else if (screenName === 'auto') { autoModeScreen.style.display = 'block'; globalSettingsCard.style.display = 'block'; currentModeDisplay.textContent = "Otomatis"; drawWaveform(); } }
-
-        // --- Menangani Data Sensor --- (Tidak Berubah)
-        function handleSensorNotification(event) { /*...*/ }
-        function handleSensorNotification(event) { const payloadString = decoder.decode(event.target.value); const parts = payloadString.split(':'); if (parts.length < 2) return; const angle = parseFloat(parts[0]); const c1Amplitude = parseInt(parts[1]); if (isNaN(angle) || isNaN(c1Amplitude)) return; const maxAngle = 120.0; const gaugePercentage = (angle / maxAngle) * 100; const clampedPercentage = `${Math.min(100, Math.max(0, gaugePercentage))}%`; const angleText = `${angle.toFixed(2)}°`; manualAngleValue.textContent = angleText; manualAngleGauge.style.width = clampedPercentage; autoAngleValue.textContent = angleText; autoAngleGauge.style.width = clampedPercentage; const targetAngle = parseInt(targetAngleInput.value) || 90; if (autoStatusIndicator) { if (angle >= targetAngle) { autoStatusIndicator.textContent = "Target Tercapai 👍"; autoStatusIndicator.style.color = 'var(--success-color)'; } else { autoStatusIndicator.textContent = "Mencoba Mencapai Target..."; autoStatusIndicator.style.color = 'var(--text-secondary)'; } } autoC1AmplitudeReadout.textContent = c1Amplitude; if (document.activeElement !== ch1AmplitudeSlider && document.activeElement !== ch1AmplitudeInput) { ch1AmplitudeSlider.value = c1Amplitude; ch1AmplitudeInput.value = c1Amplitude; } if (globalSettingsCard.style.display === 'block') { drawWaveform(); } }
+        // --- Menangani Data Sensor ---
+        function handleSensorNotification(event) { const payloadString = decoder.decode(event.target.value); const parts = payloadString.split(':'); if (parts.length < 2) return; const angle = parseFloat(parts[0]); const currentAmplitude = parseInt(parts[1]); if (isNaN(angle) || isNaN(currentAmplitude)) return; const maxAngle = 120.0; const gaugePercentage = (angle / maxAngle) * 100; const clampedPercentage = `${Math.min(100, Math.max(0, gaugePercentage))}%`; const angleText = `${angle.toFixed(2)}°`; manualAngleValue.textContent = angleText; manualAngleGauge.style.width = clampedPercentage; autoAngleValue.textContent = angleText; autoAngleGauge.style.width = clampedPercentage; const targetAngle = parseInt(targetAngleInput.value) || 90; if (autoStatusIndicator) { if (angle >= targetAngle) { autoStatusIndicator.textContent = "Target Tercapai 👍"; autoStatusIndicator.style.color = 'var(--success-color)'; } else { autoStatusIndicator.textContent = "Mencoba Mencapai Target..."; autoStatusIndicator.style.color = 'var(--text-secondary)'; } } autoC1AmplitudeReadout.textContent = currentAmplitude; if (document.activeElement !== ch1AmplitudeSlider && document.activeElement !== ch1AmplitudeInput) { ch1AmplitudeSlider.value = currentAmplitude; ch1AmplitudeInput.value = currentAmplitude; } if (document.activeElement !== ch2AmplitudeSlider && document.activeElement !== ch2AmplitudeInput) { ch2AmplitudeSlider.value = currentAmplitude; ch2AmplitudeInput.value = currentAmplitude; } if (globalSettingsCard.style.display === 'block') { drawWaveform(); } }
 
         // ===============================================
-        // == FUNGSI & EVENT LISTENER FES (PERBAIKAN v2.7) ==
+        // == FUNGSI & EVENT LISTENER FES (PERBAIKAN v2.8) ==
         // ===============================================
         
-        function drawWaveform() { /* ... (Kode tidak berubah) ... */ 
-             try { waveformCanvas.width = waveformCanvas.offsetWidth; waveformCanvas.height = 120; ctx.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height); ctx.strokeStyle = 'var(--primary-color)'; ctx.lineWidth = 2; const canvasWidth = waveformCanvas.width; const canvasHeight = waveformCanvas.height; const midY = canvasHeight / 2; const maxAmplitudeHeight = (canvasHeight / 2) * 0.8; const amplitude = parseInt(ch1AmplitudeInput.value) || 0; const pulseWidth = parseInt(pulseWidthInput.value) || 200; const frequency = parseInt(frequencyInput.value) || 30; const interPhaseGap = 50; const period_us = (frequency > 0) ? (1000000 / frequency) : canvasWidth; const scaleX = canvasWidth / period_us; const scaleY = maxAmplitudeHeight / 255; const scaledAmplitude = amplitude * scaleY; const pulseWidthPx = pulseWidth * scaleX; const gapPx = interPhaseGap * scaleX; ctx.beginPath(); ctx.moveTo(0, midY); ctx.lineTo(0, midY - scaledAmplitude); ctx.lineTo(pulseWidthPx, midY - scaledAmplitude); ctx.lineTo(pulseWidthPx, midY); const endGap1 = pulseWidthPx + gapPx; ctx.lineTo(endGap1, midY); const startPhase2 = endGap1; const endPhase2 = startPhase2 + pulseWidthPx; ctx.lineTo(startPhase2, midY + scaledAmplitude); ctx.lineTo(endPhase2, midY + scaledAmplitude); ctx.lineTo(endPhase2, midY); ctx.lineTo(canvasWidth, midY); ctx.stroke(); ctx.strokeStyle = 'var(--border-color)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, midY); ctx.lineTo(canvasWidth, midY); ctx.stroke(); } catch (drawError) { console.error("Error drawing waveform:", drawError); }
-        }
-
-        async function sendCommand(command) {
-            if (!isConnected || !controlCharacteristic) { return; }
-            try { await controlCharacteristic.writeValue(encoder.encode(command)); } 
-            catch (error) { console.error("Send Error:", error); }
-        }
-        
-        const debounce = (func, wait) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), wait); }; };
+        function drawWaveform() { /* ... */ } // Fungsi gambar tetap sama
+        async function sendCommand(command) { /* ... */ } // Fungsi send tetap sama
+        const debounce = (func, wait) => { /* ... */ }; // Fungsi debounce tetap sama
         const debouncedSendCommand = debounce(sendCommand, 50);
+
+        function drawWaveform() { try { waveformCanvas.width = waveformCanvas.offsetWidth; waveformCanvas.height = 120; ctx.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height); ctx.strokeStyle = 'var(--primary-color)'; ctx.lineWidth = 2; const canvasWidth = waveformCanvas.width; const canvasHeight = waveformCanvas.height; const midY = canvasHeight / 2; const maxAmplitudeHeight = (canvasHeight / 2) * 0.8; const amplitude = parseInt(ch1AmplitudeInput.value) || 0; const pulseWidth = parseInt(pulseWidthInput.value) || 200; const frequency = parseInt(frequencyInput.value) || 30; const interPhaseGap = 50; const period_us = (frequency > 0) ? (1000000 / frequency) : canvasWidth; const scaleX = canvasWidth / period_us; const scaleY = maxAmplitudeHeight / 255; const scaledAmplitude = amplitude * scaleY; const pulseWidthPx = pulseWidth * scaleX; const gapPx = interPhaseGap * scaleX; ctx.beginPath(); ctx.moveTo(0, midY); ctx.lineTo(0, midY - scaledAmplitude); ctx.lineTo(pulseWidthPx, midY - scaledAmplitude); ctx.lineTo(pulseWidthPx, midY); const endGap1 = pulseWidthPx + gapPx; ctx.lineTo(endGap1, midY); const startPhase2 = endGap1; const endPhase2 = startPhase2 + pulseWidthPx; ctx.lineTo(startPhase2, midY + scaledAmplitude); ctx.lineTo(endPhase2, midY + scaledAmplitude); ctx.lineTo(endPhase2, midY); ctx.lineTo(canvasWidth, midY); ctx.stroke(); ctx.strokeStyle = 'var(--border-color)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, midY); ctx.lineTo(canvasWidth, midY); ctx.stroke(); } catch (drawError) { console.error("Error drawing waveform:", drawError); } }
+        async function sendCommand(command) { if (!isConnected || !controlCharacteristic) { return; } try { await controlCharacteristic.writeValue(encoder.encode(command)); } catch (error) { console.error("Send Error:", error); } }
+        const debounce = (func, wait) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), wait); }; };
+
 
         function syncSliderInput(slider, input, commandPrefix, channelEnable = null, paramName = null) {
             function updateAndSendCommand() {
@@ -184,60 +137,70 @@
                 slider.value = value;
                 input.value = value;
                 
-                // (PERBAIKAN v2.7) Hanya kirim jika toggle 'nyala' ATAU BUKAN slider amplitudo
+                // Hanya kirim jika toggle 'nyala' ATAU BUKAN slider amplitudo
                 if ((channelEnable && channelEnable.checked) || !channelEnable) {
-                    debouncedSendCommand(`${commandPrefix}:${value}`);
+                    // (PERBAIKAN v2.8) Gunakan sendCommand biasa, bukan debounced, untuk update langsung
+                    sendCommand(`${commandPrefix}:${value}`);
                 }
                 
                 if (paramName) {
                     currentParams[paramName] = value;
                     drawWaveform();
-                } else if (commandPrefix.includes(':A') && slider === ch1AmplitudeSlider) { 
-                    drawWaveform();
+                } else if (commandPrefix.includes(':A')) { // Cek jika ini perintah Amplitudo
+                    drawWaveform(); // Gambar ulang waveform jika amplitudo berubah
                 }
             }
 
             slider.addEventListener('input', () => {
                 input.value = slider.value;
-                 // (PERBAIKAN v2.7) Hanya kirim jika toggle 'nyala' ATAU BUKAN slider amplitudo
+                 // Hanya kirim jika toggle 'nyala' ATAU BUKAN slider amplitudo
                  if ((channelEnable && channelEnable.checked) || !channelEnable) {
-                      debouncedSendCommand(`${commandPrefix}:${slider.value}`);
+                      debouncedSendCommand(`${commandPrefix}:${slider.value}`); // Debounce OK untuk slider
                  }
                 if (paramName) {
                     currentParams[paramName] = parseInt(slider.value);
                     drawWaveform();
-                } else if (commandPrefix.includes(':A') && slider === ch1AmplitudeSlider) {
+                } else if (commandPrefix.includes(':A')) {
                      drawWaveform();
                 }
             });
-            input.addEventListener('input', updateAndSendCommand);
-            input.addEventListener('change', updateAndSendCommand);
+            input.addEventListener('input', updateAndSendCommand); // Input number pakai update langsung
+            input.addEventListener('change', updateAndSendCommand); // Input number change juga langsung
         }
 
-        // --- (PERBAIKAN v2.7) Event Listener Kontrol FES ---
+        // --- (PERBAIKAN v2.8) Event Listener Kontrol FES ---
         ch1Enable.addEventListener('change', () => {
-            const isEnabled = ch1Enable.checked; 
+            const isEnabled = ch1Enable.checked;
             console.log(`C1 Toggle changed: ${isEnabled}`);
+            
+            // 1. Reset UI ke 0 SEKARANG
+            ch1AmplitudeSlider.value = 0;
+            ch1AmplitudeInput.value = 0;
+            
+            // 2. Kirim perintah Enable/Disable
             sendCommand(`C1:E:${isEnabled ? 1 : 0}`);
             
-            // Selalu kirim A:0 dan reset UI ke 0, baik saat ON atau OFF
-            sendCommand(`C1:A:0`); 
-            ch1AmplitudeSlider.value = 0; // Paksa UI ke 0
-            ch1AmplitudeInput.value = 0;  // Paksa UI ke 0
+            // 3. Kirim perintah Amplitudo 0
+            sendCommand(`C1:A:0`);
             
+            // 4. Update Waveform
             drawWaveform();
         });
         syncSliderInput(ch1AmplitudeSlider, ch1AmplitudeInput, 'C1:A', ch1Enable);
         
         ch2Enable.addEventListener('change', () => {
-            const isEnabled = ch2Enable.checked; 
+            const isEnabled = ch2Enable.checked;
             console.log(`C2 Toggle changed: ${isEnabled}`);
+
+            // 1. Reset UI ke 0 SEKARANG
+            ch2AmplitudeSlider.value = 0;
+            ch2AmplitudeInput.value = 0;
+
+            // 2. Kirim perintah Enable/Disable
             sendCommand(`C2:E:${isEnabled ? 1 : 0}`);
             
-            // Selalu kirim A:0 dan reset UI ke 0
+            // 3. Kirim perintah Amplitudo 0
             sendCommand(`C2:A:0`); 
-            ch2AmplitudeSlider.value = 0; // Paksa UI ke 0
-            ch2AmplitudeInput.value = 0;  // Paksa UI ke 0
 
             // Tidak perlu drawWaveform untuk C2
         });
@@ -259,7 +222,6 @@
          window.addEventListener('load', () => {
              showScreen('home'); 
              updateStatus("Disconnected", false); 
-             // Pastikan nilai awal input number cocok dengan slider
              pulseWidthInput.value = pulseWidthSlider.value;
              frequencyInput.value = frequencySlider.value;
              ch1AmplitudeInput.value = ch1AmplitudeSlider.value;
