@@ -1,290 +1,1047 @@
 <!DOCTYPE html>
+
 <html lang="id">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>RUBIFlex Integrated Remote</title>
+
+    <title>NMES Integrated Remote</title>
+
     <style>
-        :root { /* ... Palet Warna RUBIFlex ... */
-            --background-color: #963930; --card-background: #dac2b3; --text-color: #1c1e21;
-            --text-secondary: #a29390; --border-color: #a29390; --primary-color: #4c949f;
-            --primary-hover: #3a7f8a; --success-color: #42b72a; --danger-color: #fa383e;
-            --slider-track: #93b6b4; --angle-text-color: var(--primary-color);
-            --gauge-fill-color: var(--primary-color); --outline-color: rgba(76, 148, 159, 0.4);
-         }
-        body { font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color:var(--background-color); color:var(--text-color); margin:0; padding:1rem; display:flex; justify-content:center; min-height:100vh; box-sizing:border-box; }
-        .container { width:100%; max-width:500px; }
-        .card { background-color:var(--card-background); border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.15); padding:1.5rem; margin-bottom:1rem; }
-        #manualModeScreen, #autoModeScreen, #globalSettingsCard { display:none; }
-        h1, h2, h3 { margin-top:0; color:var(--text-color); text-align:center; }
-        h1 { font-size:1.8rem; margin-bottom:1.5rem; }
-        h2 { font-size:1.3rem; font-weight:600; margin-bottom:1.5rem; text-align:left; border-bottom:1px solid var(--border-color); padding-bottom:0.75rem; }
-        .control-group { margin-bottom:2rem; }
-        .control-group:last-child { margin-bottom:0.5rem; }
-        label { display:block; margin-bottom:0.5rem; font-weight:500; color:var(--text-secondary); }
-        input[type="range"] { -webkit-appearance:none; appearance:none; width:100%; height:8px; background:var(--slider-track); border-radius:5px; outline:none; transition:opacity .2s; cursor:pointer; }
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:24px; height:24px; background:var(--primary-color); cursor:pointer; border-radius:50%; border:4px solid var(--card-background); box-shadow:0 1px 4px rgba(0,0,0,0.2); transition:transform 0.1s ease, box-shadow 0.1s ease; }
-        input[type="range"]:focus::-webkit-slider-thumb { box-shadow:0 0 0 4px var(--outline-color); }
-        .input-value-container { display:flex; align-items:center; justify-content:flex-end; gap:0.5rem; }
-        input[type="number"] { width:70px; padding:0.3rem 0.5rem; border:1px solid var(--border-color); border-radius:6px; font-size:0.95rem; text-align:right; -moz-appearance:textfield; background-color:var(--card-background); color:var(--text-color); transition:border-color 0.2s ease, box-shadow 0.2s ease; }
-        input[type="number"]:focus { border-color:var(--primary-color); box-shadow:0 0 0 3px var(--outline-color); outline:none; }
-        input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
-        .unit-label { font-weight:normal; color:var(--text-secondary); font-size:0.95rem; }
-        button { width:100%; padding:0.9rem 1rem; font-size:1.1rem; font-weight:bold; border:none; border-radius:8px; cursor:pointer; transition:background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease; }
-        button:active { transform:scale(0.98); }
-        button:focus { box-shadow:0 0 0 3px var(--outline-color); outline:none; }
-        #connectButton { background-color:var(--primary-color); color:white; margin-bottom:1rem; }
-        #connectButton:hover { background-color:var(--primary-hover); }
-        #connectButton.connected { background-color:var(--danger-color); }
-        #status { text-align:center; padding:0.8rem; border-radius:8px; font-weight:500; margin-bottom:1rem; display:none; } /* Dihapus .active */
-        .switch { position:relative; display:inline-block; width:50px; height:28px; }
-        .switch input { opacity:0; width:0; height:0; }
-        .switch-slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:var(--text-secondary); transition:.4s; border-radius:28px; box-shadow:0 0 0 0px var(--outline-color); }
-        input:checked + .switch-slider { background-color:var(--success-color); }
-        .switch-slider:before { position:absolute; content:""; height:20px; width:20px; left:4px; bottom:4px; background-color:var(--card-background); transition:.4s; border-radius:50%; }
-        .switch input:focus + .switch-slider { box-shadow:0 0 0 3px var(--outline-color); }
-        input:checked + .switch-slider:before { transform:translateX(22px); }
-        #waveformCanvas { width:100%; height:120px; border:1px solid var(--border-color); border-radius:8px; margin-top:1rem; background-color:#f8f9fa; }
-        .sensor-display-card { margin-bottom:1.5rem; }
-        .angle-value { font-size:2.5rem; font-weight:600; color:var(--angle-text-color); text-align:center; margin-bottom:1rem; }
-        .gauge-container { width:100%; height:24px; background-color:var(--slider-track); border-radius:12px; overflow:hidden; border:1px solid var(--border-color); }
-        .angle-gauge { height:100%; width:0%; background-color:var(--gauge-fill-color); transition:width 0.1s linear; }
-        .mode-button-container { display:flex; gap:1rem; margin-top:1rem; }
-        .mode-button { background-color:var(--text-secondary); color:white; }
-        .mode-button:hover { background-color:#887a77; }
-        .back-button { background-color:var(--text-secondary); color:white; margin-top:1.5rem; }
-        .back-button:hover { background-color:#887a77; }
-        .auto-mode-setting { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
-        .auto-mode-setting label { margin-bottom:0; font-size:1rem; color:var(--text-color); }
-        .auto-mode-setting input { width:80px; }
-        .auto-mode-readout { text-align:center; font-size:1.2rem; margin-top:1rem; }
-        #autoC1AmplitudeReadout { font-weight:600; color:var(--primary-color); }
-        #autoStatusIndicator { color:var(--text-secondary); }
+
+        :root {
+
+            --primary-color: #1a7431; --primary-hover: #135523; --background-color: #f0f2f5;
+
+            --card-background: #ffffff; --text-color: #1c1e21; --text-secondary: #65676b;
+
+            --border-color: #ced0d4; --success-color: #42b72a; --danger-color: #fa383e;
+
+            --slider-track: #e4e6eb;
+
+        }
+
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: var(--background-color); color: var(--text-color); margin: 0; padding: 1rem; display: flex; justify-content: center; min-height: 100vh; box-sizing: border-box; }
+
+        .container { width: 100%; max-width: 500px; }
+
+        .card { background-color: var(--card-background); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 1.5rem; margin-bottom: 1rem; }
+
+        
+
+        #manualModeScreen, #autoModeScreen, #globalSettingsCard { 
+
+            display: none; 
+
+        }
+
+
+
+        h1, h2, h3 { margin-top: 0; color: var(--text-color); text-align: center; }
+
+        h1 { font-size: 1.8rem; margin-bottom: 1.5rem; }
+
+        h2 { font-size: 1.3rem; font-weight: 600; margin-bottom: 1.5rem; text-align: left; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; }
+
+        .control-group { margin-bottom: 2rem; }
+
+        .control-group:last-child { margin-bottom: 0.5rem; }
+
+        label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--text-secondary); }
+
+        input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; background: var(--slider-track); border-radius: 5px; outline: none; transition: opacity .2s; cursor: pointer;}
+
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; background: var(--primary-color); cursor: pointer; border-radius: 50%; border: 4px solid var(--card-background); box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+
+        .input-value-container { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; }
+
+        input[type="number"] { width: 70px; padding: 0.3rem 0.5rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.95rem; text-align: right; -moz-appearance: textfield; }
+
+        input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        .unit-label { font-weight: normal; color: var(--text-secondary); font-size: 0.95rem;}
+
+        button { width: 100%; padding: 0.9rem 1rem; font-size: 1.1rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.2s ease, transform 0.1s ease; }
+
+        button:active { transform: scale(0.98); }
+
+        
+
+        #connectButton { background-color: var(--primary-color); color: white; margin-bottom: 1rem;}
+
+        #connectButton.connected { background-color: var(--danger-color); }
+
+        #status { text-align: center; padding: 0.8rem; border-radius: 8px; font-weight: 500; margin-bottom: 1rem; display: none; }
+
+        
+
+        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .switch-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 28px; }
+
+        .switch-slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+
+        input:checked + .switch-slider { background-color: var(--success-color); }
+
+        input:checked + .switch-slider:before { transform: translateX(22px); }
+
+        #waveformCanvas { width: 100%; height: 120px; border: 1px solid var(--border-color); border-radius: 8px; margin-top: 1rem; background-color: #f8f9fa; }
+
+        
+
+        .sensor-display-card { margin-bottom: 1.5rem; }
+
+        .angle-value { font-size: 2.5rem; font-weight: 600; color: var(--primary-color); text-align: center; margin-bottom: 1rem; }
+
+        .gauge-container { width: 100%; height: 24px; background-color: var(--slider-track); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); }
+
+        .angle-gauge { height: 100%; width: 0%; background-color: var(--primary-color); transition: width 0.1s linear; }
+
+        .mode-button-container { display: flex; gap: 1rem; margin-top: 1rem; }
+
+        .mode-button { background-color: #555; color: white; }
+
+        .back-button { background-color: var(--text-secondary); color: white; margin-top: 1.5rem; }
+
+        .auto-mode-setting { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;}
+
+        .auto-mode-setting label { margin-bottom: 0; font-size: 1rem; }
+
+        .auto-mode-setting input { width: 80px; }
+
+        .auto-mode-readout { text-align: center; font-size: 1.2rem; margin-top: 1rem; }
+
+        #autoC1AmplitudeReadout { font-weight: 600; color: var(--primary-color); }
+
     </style>
+
 </head>
+
 <body>
+
+
+
     <div class="container">
+
+
+
         <div id="homeScreen">
+
             <div class="card">
-                <h1>RUBIFlex Controller</h1>
+
+                <h1>NMES Controller</h1>
+
                 <button id="connectButton">Connect to Device</button>
+
                 <div id="status">Disconnected</div>
+
                 <div id="modeSelection" style="display: none;">
+
                     <h2>Mode: <span id="currentModeDisplay">Manual</span></h2>
+
                     <div class="mode-button-container">
+
                         <button id="selectManualButton" class="mode-button">Masuk Mode Manual</button>
+
                         <button id="selectAutoButton" class="mode-button">Masuk Mode Otomatis</button>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
+
+
+
         <div id="manualModeScreen">
-            <div class="card"> <button id="backButtonManual" class="back-button">Keluar Mode Manual</button> </div>
-            <div class="card sensor-display-card"> <h2>Flex Sensor</h2> <div id="manualAngleValue" class="angle-value">0.00°</div> <div class="gauge-container"> <div id="manualAngleGauge" class="angle-gauge"></div> </div> </div>
-            <div class="card"> <h2>Channels</h2> <div class="control-group"> <div class="control-group-header"><h3>Channel 1</h3><label class="switch"><input type="checkbox" id="ch1Enable"><span class="switch-slider"></span></label></div> <label for="ch1AmplitudeSlider">Amplitude</label> <div class="slider-container"><input type="range" id="ch1AmplitudeSlider" min="0" max="255" value="0"></div> <div class="input-value-container"><input type="number" id="ch1AmplitudeInput" min="0" max="255" value="0"></div> </div> <div class="control-group"> <div class="control-group-header"><h3>Channel 2</h3><label class="switch"><input type="checkbox" id="ch2Enable"><span class="switch-slider"></span></label></div> <label for="ch2AmplitudeSlider">Amplitude</label> <div class="slider-container"><input type="range" id="ch2AmplitudeSlider" min="0" max="255" value="0"></div> <div class="input-value-container"><input type="number" id="ch2AmplitudeInput" min="0" max="255" value="0"></div> </div> </div>
-        </div>
+
+            <div class="card">
+
+                <button id="backButtonManual" class="back-button">Keluar Mode Manual</button>
+
+            </div>
+
+            
+
+            <div class="card sensor-display-card">
+
+                <h2>Flex Sensor</h2>
+
+                <div id="manualAngleValue" class="angle-value">0.00°</div>
+
+                <div class="gauge-container">
+
+                    <div id="manualAngleGauge" class="angle-gauge"></div>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="card">
+
+                <h2>Channels</h2>
+
+                <div class="control-group">
+
+                    <div class="control-group-header"><h3>Channel 1</h3><label class="switch"><input type="checkbox" id="ch1Enable"><span class="switch-slider"></span></label></div>
+
+                    <label for="ch1AmplitudeSlider">Amplitude</label>
+
+                    <div class="slider-container"><input type="range" id="ch1AmplitudeSlider" min="0" max="255" value="0"></div>
+
+                    <div class="input-value-container"><input type="number" id="ch1AmplitudeInput" min="0" max="255" value="0"></div>
+
+                </div>
+
+                <div class="control-group">
+
+                    <div class="control-group-header"><h3>Channel 2</h3><label class="switch"><input type="checkbox" id="ch2Enable"><span class="switch-slider"></span></label></div>
+
+                    <label for="ch2AmplitudeSlider">Amplitude</label>
+
+                    <div class="slider-container"><input type="range" id="ch2AmplitudeSlider" min="0" max="255" value="0"></div>
+
+                    <div class="input-value-container"><input type="number" id="ch2AmplitudeInput" min="0" max="255" value="0"></div>
+
+                </div>
+
+            </div>
+
+
+
+            </div>
+
+
+
         <div id="autoModeScreen">
-             <div class="card"> <button id="backButtonAuto" class="back-button">Keluar Mode Otomatis</button> </div>
-             <div class="card sensor-display-card"> <h2>Flex Sensor (Live)</h2> <div id="autoAngleValue" class="angle-value">0.00°</div> <div class="gauge-container"> <div id="autoAngleGauge" class="angle-gauge"></div> </div> </div>
-             <div class="card"> <h2>Pengaturan Auto-Mode</h2> <div class="auto-mode-setting"> <label for="targetAngleInput">Target Angle</label> <div class="input-value-container"> <input type="number" id="targetAngleInput" min="0" max="120" value="90"> <span class="unit-label">deg</span> </div> </div> <div class="auto-mode-readout"> Amplitudo C1 & C2 (Otomatis): <span id="autoC1AmplitudeReadout">0</span> </div> <h3 id="autoStatusIndicator" style="text-align:center; margin-top:1.5rem; font-weight:600;"> Menunggu Data... </h3> </div>
+
+            <div class="card">
+
+                <button id="backButtonAuto" class="back-button">Keluar Mode Otomatis</button>
+
+            </div>
+
+
+
+            <div class="card sensor-display-card">
+
+                <h2>Flex Sensor (Live)</h2>
+
+                <div id="autoAngleValue" class="angle-value">0.00°</div>
+
+                <div class="gauge-container">
+
+                    <div id="autoAngleGauge" class="angle-gauge"></div>
+
+                </div>
+
+            </div>
+
+            
+
+            <div class="card">
+
+                <h2>Pengaturan Auto-Mode</h2>
+
+                <div class="auto-mode-setting">
+
+                    <label for="targetAngleInput">Target Angle</label>
+
+                    <div class="input-value-container">
+
+                        <input type="number" id="targetAngleInput" min="0" max="120" value="90">
+
+                        <span class="unit-label">deg</span>
+
+                    </div>
+
+                </div>
+
+                <div class="auto-mode-readout">
+
+                    Amplitudo C1 (Otomatis):
+
+                    <span id="autoC1AmplitudeReadout">0</span>
+
+                </div>
+
+                <h3 id="autoStatusIndicator" style="text-align:center; margin-top:1.5rem; font-weight:600;">
+
+                    Menunggu Data...
+
+                </h3>
+
+            </div>
+
         </div>
+
+
+
         <div class="card" id="globalSettingsCard">
-            <h2>Global Settings</h2> <div class="control-group"> <label for="pulseWidthSlider">Pulse Width</label> <div class="slider-container"><input type="range" id="pulseWidthSlider" min="50" max="3000" value="200" step="10"></div> <div class="input-value-container"><input type="number" id="pulseWidthInput" min="50" max="3000" value="200" step="10"><span class="unit-label">µs</span></div> </div> <div class="control-group"> <label for="frequencySlider">Frequency</label> <div class="slider-container"><input type="range" id="frequencySlider" min="1" max="150" value="30"></div> <div class="input-value-container"><input type="number" id="frequencyInput" min="1" max="150" value="30"><span class="unit-label">Hz</span></div> </div> <canvas id="waveformCanvas"></canvas>
+
+            <h2>Global Settings</h2>
+
+            <div class="control-group">
+
+                <label for="pulseWidthSlider">Pulse Width</label>
+
+                <div class="slider-container"><input type="range" id="pulseWidthSlider" min="50" max="3000" value="200" step="10"></div>
+
+                <div class="input-value-container"><input type="number" id="pulseWidthInput" min="50" max="3000" value="200" step="10"><span class="unit-label">µs</span></div>
+
+            </div>
+
+            <div class="control-group">
+
+                <label for="frequencySlider">Frequency</label>
+
+                <div class="slider-container"><input type="range" id="frequencySlider" min="1" max="150" value="30"></div>
+
+                <div class="input-value-container"><input type="number" id="frequencyInput" min="1" max="150" value="30"><span class="unit-label">Hz</span></div>
+
+            </div>
+
+            <canvas id="waveformCanvas"></canvas>
+
         </div>
-    </div> 
-    <script>
-        // --- Referensi Elemen ---
-        const homeScreen = document.getElementById('homeScreen'); const manualModeScreen = document.getElementById('manualModeScreen'); const autoModeScreen = document.getElementById('autoModeScreen'); const globalSettingsCard = document.getElementById('globalSettingsCard'); const connectButton = document.getElementById('connectButton'); const statusDisplay = document.getElementById('status'); const modeSelection = document.getElementById('modeSelection'); const currentModeDisplay = document.getElementById('currentModeDisplay'); const selectManualButton = document.getElementById('selectManualButton'); const selectAutoButton = document.getElementById('selectAutoButton'); const backButtonManual = document.getElementById('backButtonManual'); const backButtonAuto = document.getElementById('backButtonAuto'); const manualAngleValue = document.getElementById('manualAngleValue'); const manualAngleGauge = document.getElementById('manualAngleGauge'); const autoAngleValue = document.getElementById('autoAngleValue'); const autoAngleGauge = document.getElementById('autoAngleGauge'); const autoStatusIndicator = document.getElementById('autoStatusIndicator'); const ch1Enable = document.getElementById('ch1Enable'); const ch1AmplitudeSlider = document.getElementById('ch1AmplitudeSlider'); const ch1AmplitudeInput = document.getElementById('ch1AmplitudeInput'); const ch2Enable = document.getElementById('ch2Enable'); const ch2AmplitudeSlider = document.getElementById('ch2AmplitudeSlider'); const ch2AmplitudeInput = document.getElementById('ch2AmplitudeInput'); const pulseWidthSlider = document.getElementById('pulseWidthSlider'); const pulseWidthInput = document.getElementById('pulseWidthInput'); const frequencySlider = document.getElementById('frequencySlider'); const frequencyInput = document.getElementById('frequencyInput'); const waveformCanvas = document.getElementById('waveformCanvas'); const ctx = waveformCanvas.getContext('2d'); const targetAngleInput = document.getElementById('targetAngleInput'); const autoC1AmplitudeReadout = document.getElementById('autoC1AmplitudeReadout');
-        // --- Konfigurasi & Variabel Global ---
-        const FES_SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b"; const FES_CONTROL_CHAR_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"; const SENSOR_SERVICE_UUID = "0000180f-0000-1000-8000-00805f9b34fb"; const FLEX_SENSOR_CHAR_UUID = "00002a19-0000-1000-8000-00805f9b34fb"; let bleDevice, controlCharacteristic, flexSensorCharacteristic; let isConnected = false; const encoder = new TextEncoder('utf-8'); const decoder = new TextDecoder('utf-8'); let currentParams = { pulseWidth: 200, frequency: 30, interPhaseGap: 50 };
+
+
+
+
+
+    </div> <script>
 
         // ===============================================
-        // == FUNGSI KONEKSI (PERBAIKAN v2.9) ==
+
+        // == REFERENSI ELEMEN HTML ==
+
         // ===============================================
+
+        
+
+        // --- Layar ---
+
+        const homeScreen = document.getElementById('homeScreen');
+
+        const manualModeScreen = document.getElementById('manualModeScreen');
+
+        const autoModeScreen = document.getElementById('autoModeScreen');
+
+        const globalSettingsCard = document.getElementById('globalSettingsCard'); // (BARU)
+
+
+
+        // --- Home ---
+
+        const connectButton = document.getElementById('connectButton');
+
+        const statusDisplay = document.getElementById('status');
+
+        const modeSelection = document.getElementById('modeSelection');
+
+        const currentModeDisplay = document.getElementById('currentModeDisplay');
+
+        const selectManualButton = document.getElementById('selectManualButton');
+
+        const selectAutoButton = document.getElementById('selectAutoButton');
+
+
+
+        // --- Tombol Kembali ---
+
+        const backButtonManual = document.getElementById('backButtonManual');
+
+        const backButtonAuto = document.getElementById('backButtonAuto');
+
+
+
+        // --- Sensor (Manual) ---
+
+        const manualAngleValue = document.getElementById('manualAngleValue');
+
+        const manualAngleGauge = document.getElementById('manualAngleGauge');
+
+
+
+        // --- Sensor (Auto) ---
+
+        const autoAngleValue = document.getElementById('autoAngleValue');
+
+        const autoAngleGauge = document.getElementById('autoAngleGauge');
+
+        const autoStatusIndicator = document.getElementById('autoStatusIndicator'); // (BARU)
+
+        
+
+        // --- Kontrol FES Manual ---
+
+        const ch1Enable = document.getElementById('ch1Enable');
+
+        const ch1AmplitudeSlider = document.getElementById('ch1AmplitudeSlider');
+
+        const ch1AmplitudeInput = document.getElementById('ch1AmplitudeInput');
+
+        const ch2Enable = document.getElementById('ch2Enable');
+
+        const ch2AmplitudeSlider = document.getElementById('ch2AmplitudeSlider');
+
+        const ch2AmplitudeInput = document.getElementById('ch2AmplitudeInput');
+
+        
+
+        // --- Kontrol FES Global ---
+
+        const pulseWidthSlider = document.getElementById('pulseWidthSlider');
+
+        const pulseWidthInput = document.getElementById('pulseWidthInput');
+
+        const frequencySlider = document.getElementById('frequencySlider');
+
+        const frequencyInput = document.getElementById('frequencyInput');
+
+        const waveformCanvas = document.getElementById('waveformCanvas');
+
+        const ctx = waveformCanvas.getContext('2d');
+
+        
+
+        // --- Kontrol Auto-Mode ---
+
+        const targetAngleInput = document.getElementById('targetAngleInput');
+
+        const autoC1AmplitudeReadout = document.getElementById('autoC1AmplitudeReadout');
+
+
+
+        // ===============================================
+
+        // == KONFIGURASI & VARIABEL GLOBAL ==
+
+        // ===============================================
+
+        const FES_SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
+
+        const FES_CONTROL_CHAR_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
+
+        const SENSOR_SERVICE_UUID = "0000180f-0000-1000-8000-00805f9b34fb";
+
+        const FLEX_SENSOR_CHAR_UUID = "00002a19-0000-1000-8000-00805f9b34fb";
+
+        let bleDevice, controlCharacteristic, flexSensorCharacteristic;
+
+        let isConnected = false;
+
+        const encoder = new TextEncoder('utf-8');
+
+        const decoder = new TextDecoder('utf-8'); 
+
+        let currentParams = { pulseWidth: 200, frequency: 30, interPhaseGap: 50 };
+
+
+
+        // ===============================================
+
+        // == FUNGSI KONEKSI (Sudah Diperbaiki v2.2) ==
+
+        // ===============================================
+
         connectButton.addEventListener('click', () => isConnected ? disconnect() : connect());
 
-        async function connect() {
-            console.log("Connect function called.");
-            updateStatus("Mencari perangkat...", false); // Update status SEBELUM try
 
-            // (PERBAIKAN v2.9) Cek support Web Bluetooth dulu
-            if (!navigator.bluetooth) {
-                console.error("Web Bluetooth tidak didukung.");
-                updateStatus("Error: Web Bluetooth tidak didukung browser ini.", false);
-                return;
-            }
+
+        async function connect() {
+
+            console.log("Connect function called.");
 
             try {
-                console.log("Meminta perangkat Bluetooth...");
+
                 bleDevice = await navigator.bluetooth.requestDevice({
-                    filters: [{ services: [FES_SERVICE_UUID] }],
-                    optionalServices: [FES_SERVICE_UUID, SENSOR_SERVICE_UUID]
+
+                    filters: [{ services: [FES_SERVICE_UUID] }], 
+
+                    optionalServices: [FES_SERVICE_UUID, SENSOR_SERVICE_UUID] 
+
                 });
-                console.log("Perangkat dipilih:", bleDevice.name);
-                updateStatus("Perangkat dipilih. Menghubungkan...", false); 
+
+                
+
+                updateStatus("Device selected. Connecting...", false);
 
                 bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
-                
-                console.log("Menghubungkan ke GATT Server...");
+
                 const server = await bleDevice.gatt.connect();
-                console.log("GATT Server terhubung.");
-                updateStatus("Terhubung ke GATT. Mencari Service...", false);
 
-                console.log("Mendapatkan FES Service...");
+                
+
+                updateStatus("Getting FES Service...", false);
+
                 const fesService = await server.getPrimaryService(FES_SERVICE_UUID);
-                console.log("Mendapatkan FES Characteristic...");
+
                 controlCharacteristic = await fesService.getCharacteristic(FES_CONTROL_CHAR_UUID);
-                console.log("FES Siap.");
-                updateStatus("FES Service siap.", false);
 
-                console.log("Mendapatkan Sensor Service...");
+                
+
+                updateStatus("Getting Sensor Service...", false);
+
                 const sensorService = await server.getPrimaryService(SENSOR_SERVICE_UUID);
-                console.log("Mendapatkan Sensor Characteristic...");
-                flexSensorCharacteristic = await sensorService.getCharacteristic(FLEX_SENSOR_CHAR_UUID);
-                console.log("Sensor Siap.");
-                updateStatus("Sensor Service siap.", false);
 
-                console.log("Memulai notifikasi sensor...");
+                flexSensorCharacteristic = await sensorService.getCharacteristic(FLEX_SENSOR_CHAR_UUID);
+
+                
+
+                updateStatus("Subscribing to Sensor...", false);
+
                 await flexSensorCharacteristic.startNotifications();
+
                 flexSensorCharacteristic.addEventListener('characteristicvaluechanged', handleSensorNotification);
-                console.log("Berlangganan notifikasi sensor.");
-                updateStatus("Berlangganan notifikasi...", false);
+
+
 
                 isConnected = true;
-                console.log("Koneksi berhasil!");
-                updateStatus("Terhubung!", true);
+
+                updateStatus("Connected!", true);
+
                 connectButton.textContent = "Disconnect";
+
                 connectButton.classList.add("connected");
-                modeSelection.style.display = 'block';
+
+                modeSelection.style.display = 'block'; 
+
+
 
             } catch (error) {
-                console.error("Kesalahan Koneksi:", error);
-                // (PERBAIKAN v2.9) Tangani error spesifik jika user cancel
-                if (error.name === 'NotFoundError') {
-                    updateStatus("Pemilihan perangkat dibatalkan.", false);
-                } else {
-                    updateStatus(`Error: ${error.message}`, false);
-                }
-                // Pastikan disconnect dipanggil untuk reset state
-                if (bleDevice && bleDevice.gatt && bleDevice.gatt.connected) {
-                    bleDevice.gatt.disconnect();
-                } else {
-                    onDisconnected(); // Panggil manual jika belum sempat connect
-                }
+
+                console.error("Connection Error:", error);
+
+                updateStatus(`Error: ${error.message}`, false);
+
+                onDisconnected();
+
             }
+
         }
 
-        async function disconnect() { /* ... (Kode v2.2, tidak berubah) ... */ if (flexSensorCharacteristic) { try { await flexSensorCharacteristic.stopNotifications(); } catch(e) {console.error("Error stopping sensor notifications:", e);} } if (bleDevice && bleDevice.gatt.connected) { bleDevice.gatt.disconnect(); } else { onDisconnected(); } }
-        function onDisconnected() { /* ... (Kode v2.2, tidak berubah) ... */ console.log("onDisconnected event triggered."); isConnected = false; controlCharacteristic = null; flexSensorCharacteristic = null; updateStatus("Device Disconnected", false); connectButton.textContent = "Connect to Device"; connectButton.classList.remove("connected"); modeSelection.style.display = 'none'; showScreen('home'); }
+
+
+        async function disconnect() {
+
+            if (flexSensorCharacteristic) { try { await flexSensorCharacteristic.stopNotifications(); } catch(e) {} }
+
+            if (bleDevice && bleDevice.gatt.connected) { bleDevice.gatt.disconnect(); } 
+
+            else { onDisconnected(); }
+
+        }
+
+
+
+        function onDisconnected() {
+
+            console.log("onDisconnected event triggered.");
+
+            isConnected = false;
+
+            controlCharacteristic = null;
+
+            flexSensorCharacteristic = null; 
+
+            
+
+            updateStatus("Device Disconnected", false);
+
+            connectButton.textContent = "Connect to Device";
+
+            connectButton.classList.remove("connected");
+
+            modeSelection.style.display = 'none'; 
+
+            showScreen('home'); 
+
+        }
+
+
 
         // ===============================================
+
         // == MANAJEMEN LAYAR & UI HELPER ==
+
         // ===============================================
 
-        // (PERBAIKAN v2.9) Fungsi updateStatus disederhanakan
+        
+
         function updateStatus(message, isSuccess = false) {
+
             console.log("Updating status:", message);
-            if (!statusDisplay) return; // Exit jika elemen tidak ada
-            
-            statusDisplay.textContent = message;
-            statusDisplay.style.display = 'block'; // Selalu tampilkan
-            
-            // Set warna berdasarkan status
-            if (message.toLowerCase().includes('error')) {
-                statusDisplay.style.backgroundColor = 'var(--danger-color)';
-                statusDisplay.style.color = '#fff';
-            } else if (isSuccess) {
-                 statusDisplay.style.backgroundColor = 'var(--success-color)';
-                 statusDisplay.style.color = '#fff';
-            } else {
-                 statusDisplay.style.backgroundColor = 'var(--border-color)';
-                 statusDisplay.style.color = 'var(--text-color)';
+
+            if (statusDisplay) {
+
+                statusDisplay.textContent = message; 
+
+                statusDisplay.style.display = 'block'; 
+
+                statusDisplay.style.backgroundColor = isSuccess ? 'var(--success-color)' : 'var(--border-color)';
+
+                statusDisplay.style.color = isSuccess ? '#fff' : 'var(--text-color)';
+
             }
+
         }
 
-        function showScreen(screenName) { /* ... (Kode v2.3, tidak berubah) ... */ homeScreen.style.display = 'none'; manualModeScreen.style.display = 'none'; autoModeScreen.style.display = 'none'; globalSettingsCard.style.display = 'none'; if (screenName === 'home') { homeScreen.style.display = 'block'; } else if (screenName === 'manual') { manualModeScreen.style.display = 'block'; globalSettingsCard.style.display = 'block'; currentModeDisplay.textContent = "Manual"; drawWaveform(); } else if (screenName === 'auto') { autoModeScreen.style.display = 'block'; globalSettingsCard.style.display = 'block'; currentModeDisplay.textContent = "Otomatis"; drawWaveform(); } }
-        selectManualButton.addEventListener('click', () => { showScreen('manual'); sendCommand('AM:E:0'); });
-        selectAutoButton.addEventListener('click', () => { showScreen('auto'); targetAngleInput.dispatchEvent(new Event('change')); sendCommand('AM:E:1'); });
-        backButtonManual.addEventListener('click', () => showScreen('home'));
-        backButtonAuto.addEventListener('click', () => { showScreen('home'); sendCommand('AM:E:0'); });
 
-        // --- Menangani Data Sensor ---
-        function handleSensorNotification(event) { /* ... (Kode v2.3, tidak berubah) ... */ const payloadString = decoder.decode(event.target.value); const parts = payloadString.split(':'); if (parts.length < 2) return; const angle = parseFloat(parts[0]); const currentAmplitude = parseInt(parts[1]); if (isNaN(angle) || isNaN(currentAmplitude)) return; const maxAngle = 120.0; const gaugePercentage = (angle / maxAngle) * 100; const clampedPercentage = `${Math.min(100, Math.max(0, gaugePercentage))}%`; const angleText = `${angle.toFixed(2)}°`; manualAngleValue.textContent = angleText; manualAngleGauge.style.width = clampedPercentage; autoAngleValue.textContent = angleText; autoAngleGauge.style.width = clampedPercentage; const targetAngle = parseInt(targetAngleInput.value) || 90; if (autoStatusIndicator) { if (angle >= targetAngle) { autoStatusIndicator.textContent = "Target Tercapai 👍"; autoStatusIndicator.style.color = 'var(--success-color)'; } else { autoStatusIndicator.textContent = "Mencoba Mencapai Target..."; autoStatusIndicator.style.color = 'var(--text-secondary)'; } } autoC1AmplitudeReadout.textContent = currentAmplitude; if (document.activeElement !== ch1AmplitudeSlider && document.activeElement !== ch1AmplitudeInput) { ch1AmplitudeSlider.value = currentAmplitude; ch1AmplitudeInput.value = currentAmplitude; } if (document.activeElement !== ch2AmplitudeSlider && document.activeElement !== ch2AmplitudeInput) { ch2AmplitudeSlider.value = currentAmplitude; ch2AmplitudeInput.value = currentAmplitude; } if (globalSettingsCard.style.display === 'block') { drawWaveform(); } }
 
-        // ===============================================
-        // == FUNGSI & EVENT LISTENER FES (Perbaikan v2.8) ==
-        // ===============================================
+        function showScreen(screenName) {
+
+            // Sembunyikan semua layar/kartu
+
+            homeScreen.style.display = 'none';
+
+            manualModeScreen.style.display = 'none';
+
+            autoModeScreen.style.display = 'none';
+
+            globalSettingsCard.style.display = 'none'; // (BARU)
+
+
+
+            if (screenName === 'home') {
+
+                homeScreen.style.display = 'block';
+
+            } else if (screenName === 'manual') {
+
+                manualModeScreen.style.display = 'block';
+
+                globalSettingsCard.style.display = 'block'; // (BARU) Tampilkan Global
+
+                currentModeDisplay.textContent = "Manual";
+
+                drawWaveform(); 
+
+            } else if (screenName === 'auto') {
+
+                autoModeScreen.style.display = 'block';
+
+                globalSettingsCard.style.display = 'block'; // (BARU) Tampilkan Global
+
+                currentModeDisplay.textContent = "Otomatis";
+
+                drawWaveform(); // (BARU) Gambar juga di mode auto
+
+            }
+
+        }
+
+
+
+        selectManualButton.addEventListener('click', () => {
+
+            showScreen('manual');
+
+            sendCommand('AM:E:0');
+
+        });
+
         
-        function drawWaveform() { /* ... */ } 
-        async function sendCommand(command) { /* ... */ } 
-        const debounce = (func, wait) => { /* ... */ }; 
-        const debouncedSendCommand = debounce(sendCommand, 50);
 
-        function drawWaveform() { try { waveformCanvas.width = waveformCanvas.offsetWidth; waveformCanvas.height = 120; ctx.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height); ctx.strokeStyle = 'var(--primary-color)'; ctx.lineWidth = 2; const canvasWidth = waveformCanvas.width; const canvasHeight = waveformCanvas.height; const midY = canvasHeight / 2; const maxAmplitudeHeight = (canvasHeight / 2) * 0.8; const amplitude = parseInt(ch1AmplitudeInput.value) || 0; const pulseWidth = parseInt(pulseWidthInput.value) || 200; const frequency = parseInt(frequencyInput.value) || 30; const interPhaseGap = 50; const period_us = (frequency > 0) ? (1000000 / frequency) : canvasWidth; const scaleX = canvasWidth / period_us; const scaleY = maxAmplitudeHeight / 255; const scaledAmplitude = amplitude * scaleY; const pulseWidthPx = pulseWidth * scaleX; const gapPx = interPhaseGap * scaleX; ctx.beginPath(); ctx.moveTo(0, midY); ctx.lineTo(0, midY - scaledAmplitude); ctx.lineTo(pulseWidthPx, midY - scaledAmplitude); ctx.lineTo(pulseWidthPx, midY); const endGap1 = pulseWidthPx + gapPx; ctx.lineTo(endGap1, midY); const startPhase2 = endGap1; const endPhase2 = startPhase2 + pulseWidthPx; ctx.lineTo(startPhase2, midY + scaledAmplitude); ctx.lineTo(endPhase2, midY + scaledAmplitude); ctx.lineTo(endPhase2, midY); ctx.lineTo(canvasWidth, midY); ctx.stroke(); ctx.strokeStyle = 'var(--border-color)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, midY); ctx.lineTo(canvasWidth, midY); ctx.stroke(); } catch (drawError) { console.error("Error drawing waveform:", drawError); } }
-        async function sendCommand(command) { if (!isConnected || !controlCharacteristic) { return; } try { await controlCharacteristic.writeValue(encoder.encode(command)); } catch (error) { console.error("Send Error:", error); } }
+        selectAutoButton.addEventListener('click', () => {
+
+            showScreen('auto');
+
+            targetAngleInput.dispatchEvent(new Event('change'));
+
+            sendCommand('AM:E:1');
+
+        });
+
+
+
+        backButtonManual.addEventListener('click', () => showScreen('home'));
+
+        backButtonAuto.addEventListener('click', () => {
+
+            showScreen('home');
+
+            sendCommand('AM:E:0');
+
+        });
+
+
+
+        // ===============================================
+
+        // == MENANGANI DATA SENSOR (MODIFIKASI) ==
+
+        // ===============================================
+
+        function handleSensorNotification(event) {
+
+            const payloadString = decoder.decode(event.target.value); // "85.20:30"
+
+            const parts = payloadString.split(':'); // ["85.20", "30"]
+
+            
+
+            if (parts.length < 2) return; 
+
+            const angle = parseFloat(parts[0]);
+
+            const c1Amplitude = parseInt(parts[1]);
+
+            if (isNaN(angle) || isNaN(c1Amplitude)) return;
+
+
+
+            // --- Update Nilai Sudut (di kedua layar) ---
+
+            const maxAngle = 120.0; 
+
+            const gaugePercentage = (angle / maxAngle) * 100;
+
+            const clampedPercentage = `${Math.min(100, Math.max(0, gaugePercentage))}%`;
+
+            const angleText = `${angle.toFixed(2)}°`;
+
+            manualAngleValue.textContent = angleText;
+
+            manualAngleGauge.style.width = clampedPercentage;
+
+            autoAngleValue.textContent = angleText;
+
+            autoAngleGauge.style.width = clampedPercentage;
+
+
+
+            // --- (BARU) Update Indikator Status Auto-Mode ---
+
+            const targetAngle = parseInt(targetAngleInput.value) || 90;
+
+            if (autoStatusIndicator) {
+
+                if (angle >= targetAngle) {
+
+                    autoStatusIndicator.textContent = "Target Tercapai 👍";
+
+                    autoStatusIndicator.style.color = 'var(--success-color)';
+
+                } else {
+
+                    autoStatusIndicator.textContent = "Mencoba Mencapai Target...";
+
+                    autoStatusIndicator.style.color = 'var(--text-secondary)';
+
+                }
+
+            }
+
+
+
+            // --- Update Nilai Amplitudo (di kedua layar) ---
+
+            autoC1AmplitudeReadout.textContent = c1Amplitude;
+
+            if (document.activeElement !== ch1AmplitudeSlider && document.activeElement !== ch1AmplitudeInput) {
+
+                ch1AmplitudeSlider.value = c1Amplitude;
+
+                ch1AmplitudeInput.value = c1Amplitude;
+
+            }
+
+            
+
+            // (DIMODIFIKASI) Gambar ulang waveform jika sedang TAMPIL
+
+            if (globalSettingsCard.style.display === 'block') {
+
+                drawWaveform();
+
+            }
+
+        }
+
+
+
+        // ===============================================
+
+        // == FUNGSI & EVENT LISTENER FES ==
+
+        // ===============================================
+
+        
+
+        function drawWaveform() { 
+
+            try { 
+
+                waveformCanvas.width = waveformCanvas.offsetWidth;
+
+                waveformCanvas.height = 120; 
+
+                ctx.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height);
+
+                ctx.strokeStyle = '#1a7431'; 
+
+                ctx.lineWidth = 2;
+
+                const canvasWidth = waveformCanvas.width;
+
+                const canvasHeight = waveformCanvas.height;
+
+                const midY = canvasHeight / 2;
+
+                const maxAmplitudeHeight = (canvasHeight / 2) * 0.8;
+
+                
+
+                // (DIMODIFIKASI) Baca amplitudo dari slider C1 (selalu update)
+
+                const amplitude = parseInt(ch1AmplitudeInput.value) || 0;
+
+                const pulseWidth = parseInt(pulseWidthInput.value) || 200;
+
+                const frequency = parseInt(frequencyInput.value) || 30;
+
+
+
+                const interPhaseGap = 50; 
+
+                const period_us = (frequency > 0) ? (1000000 / frequency) : canvasWidth;
+
+                const scaleX = canvasWidth / period_us;
+
+                const scaleY = maxAmplitudeHeight / 255;
+
+                const scaledAmplitude = amplitude * scaleY;
+
+                const pulseWidthPx = pulseWidth * scaleX;
+
+                const gapPx = interPhaseGap * scaleX;
+
+
+
+                ctx.beginPath();
+
+                ctx.moveTo(0, midY);
+
+                ctx.lineTo(0, midY - scaledAmplitude);
+
+                ctx.lineTo(pulseWidthPx, midY - scaledAmplitude);
+
+                ctx.lineTo(pulseWidthPx, midY);
+
+                const endGap1 = pulseWidthPx + gapPx;
+
+                ctx.lineTo(endGap1, midY);
+
+                const startPhase2 = endGap1;
+
+                const endPhase2 = startPhase2 + pulseWidthPx;
+
+                ctx.lineTo(startPhase2, midY + scaledAmplitude);
+
+                ctx.lineTo(endPhase2, midY + scaledAmplitude);
+
+                ctx.lineTo(endPhase2, midY);
+
+                ctx.lineTo(canvasWidth, midY);
+
+                ctx.stroke();
+
+
+
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+
+                ctx.lineWidth = 1;
+
+                ctx.beginPath();
+
+                ctx.moveTo(0, midY);
+
+                ctx.lineTo(canvasWidth, midY);
+
+                ctx.stroke();
+
+            } catch (drawError) {
+
+                 console.error("Error drawing waveform:", drawError); 
+
+            }
+
+        }
+
+
+
+        async function sendCommand(command) {
+
+            if (!isConnected || !controlCharacteristic) { return; }
+
+            try { await controlCharacteristic.writeValue(encoder.encode(command)); } 
+
+            catch (error) { console.error("Send Error:", error); }
+
+        }
+
+        
+
         const debounce = (func, wait) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), wait); }; };
 
+        const debouncedSendCommand = debounce(sendCommand, 50);
+
+
+
         function syncSliderInput(slider, input, commandPrefix, channelEnable = null, paramName = null) {
+
             function updateAndSendCommand() {
+
                 let value = parseInt(input.value);
-                const min = parseInt(input.min); const max = parseInt(input.max); const step = parseInt(input.step) || 1;
+
+                const min = parseInt(input.min);
+
+                const max = parseInt(input.max);
+
+                const step = parseInt(input.step) || 1;
+
                 if (isNaN(value)) value = min;
+
                 else { value = Math.max(min, Math.min(max, value)); value = Math.round((value - min) / step) * step + min; }
-                slider.value = value; input.value = value;
-                
-                if ((channelEnable && channelEnable.checked) || !channelEnable) {
-                    sendCommand(`${commandPrefix}:${value}`); // Kirim langsung
+
+                slider.value = value;
+
+                input.value = value;
+
+                if (!channelEnable || channelEnable.checked) {
+
+                    debouncedSendCommand(`${commandPrefix}:${value}`);
+
                 }
-                
-                if (paramName) { currentParams[paramName] = value; drawWaveform(); } 
-                else if (commandPrefix.includes(':A')) { drawWaveform(); }
+
+                if (paramName) {
+
+                    currentParams[paramName] = value;
+
+                    drawWaveform();
+
+                } else if (commandPrefix.includes(':A') && slider === ch1AmplitudeSlider) { 
+
+                    drawWaveform();
+
+                }
+
             }
 
+
+
             slider.addEventListener('input', () => {
+
                 input.value = slider.value;
-                 if ((channelEnable && channelEnable.checked) || !channelEnable) {
-                      debouncedSendCommand(`${commandPrefix}:${slider.value}`); // Debounce OK
+
+                 if (!channelEnable || channelEnable.checked) {
+
+                      debouncedSendCommand(`${commandPrefix}:${slider.value}`);
+
                  }
-                if (paramName) { currentParams[paramName] = parseInt(slider.value); drawWaveform(); } 
-                else if (commandPrefix.includes(':A')) { drawWaveform(); }
+
+                if (paramName) {
+
+                    currentParams[paramName] = parseInt(slider.value);
+
+                    drawWaveform();
+
+                } else if (commandPrefix.includes(':A') && slider === ch1AmplitudeSlider) {
+
+                     drawWaveform();
+
+                }
+
             });
-            input.addEventListener('input', updateAndSendCommand); // Kirim langsung
-            input.addEventListener('change', updateAndSendCommand); // Kirim langsung
+
+            input.addEventListener('input', updateAndSendCommand);
+
+            input.addEventListener('change', updateAndSendCommand);
+
+            input.value = slider.value;
+
         }
 
-        // --- Event Listener FES (Logika Reset v2.8) ---
+
+
+        // --- Setup Event Listener Kontrol FES ---
+
         ch1Enable.addEventListener('change', () => {
-            const isEnabled = ch1Enable.checked; 
-            console.log(`C1 Toggle changed: ${isEnabled}`);
-            ch1AmplitudeSlider.value = 0; ch1AmplitudeInput.value = 0; // Reset UI
-            sendCommand(`C1:E:${isEnabled ? 1 : 0}`);
-            sendCommand(`C1:A:0`); // Selalu kirim A:0
+
+            const isEnabled = ch1Enable.checked; sendCommand(`C1:E:${isEnabled ? 1 : 0}`);
+
+            if (isEnabled) { sendCommand(`C1:A:${ch1AmplitudeSlider.value}`); } else { sendCommand(`C1:A:0`); }
+
             drawWaveform();
+
         });
+
         syncSliderInput(ch1AmplitudeSlider, ch1AmplitudeInput, 'C1:A', ch1Enable);
+
         
+
         ch2Enable.addEventListener('change', () => {
-            const isEnabled = ch2Enable.checked; 
-            console.log(`C2 Toggle changed: ${isEnabled}`);
-            ch2AmplitudeSlider.value = 0; ch2AmplitudeInput.value = 0; // Reset UI
-            sendCommand(`C2:E:${isEnabled ? 1 : 0}`);
-            sendCommand(`C2:A:0`); // Selalu kirim A:0
+
+            const isEnabled = ch2Enable.checked; sendCommand(`C2:E:${isEnabled ? 1 : 0}`);
+
+            if (isEnabled) { sendCommand(`C2:A:${ch2AmplitudeSlider.value}`); } else { sendCommand(`C2:A:0`); }
+
         });
+
         syncSliderInput(ch2AmplitudeSlider, ch2AmplitudeInput, 'C2:A', ch2Enable);
+
         
-        // --- Event Listener Global & Auto --- (Tidak Berubah)
+
+        // --- Setup Event Listener Kontrol Global ---
+
         syncSliderInput(pulseWidthSlider, pulseWidthInput, 'C1:W', null, 'pulseWidth');
+
         syncSliderInput(frequencySlider, frequencyInput, 'C1:F', null, 'frequency');
-        targetAngleInput.addEventListener('change', () => { let target = parseInt(targetAngleInput.value); if (isNaN(target)) target = 90; target = Math.max(0, Math.min(120, target)); targetAngleInput.value = target; debouncedSendCommand(`AM:T:${target}`); });
+
+
+
+        // --- Setup Event Listener Kontrol Auto ---
+
+        targetAngleInput.addEventListener('change', () => {
+
+            let target = parseInt(targetAngleInput.value);
+
+            if (isNaN(target)) target = 90;
+
+            target = Math.max(0, Math.min(120, target));
+
+            targetAngleInput.value = target;
+
+            debouncedSendCommand(`AM:T:${target}`);
+
+        });
+
+
 
          window.addEventListener('load', () => {
+
              showScreen('home'); 
+
              updateStatus("Disconnected", false); 
-             pulseWidthInput.value = pulseWidthSlider.value; frequencyInput.value = frequencySlider.value;
-             ch1AmplitudeInput.value = ch1AmplitudeSlider.value; ch2AmplitudeInput.value = ch2AmplitudeSlider.value;
+
          });
+
          window.addEventListener('resize', debounce(drawWaveform, 200));
 
+
+
     </script>
+
 </body>
+
 </html>
