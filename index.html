@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>RUBIFlex Integrated Remote (v2.15)</title>
+    <title>RUBIFlex Integrated Remote (v2.16)</title>
     <style>
         /* (TEMA WARNA RUBIFLEX & OUTLINE v2.10) */
         :root {
@@ -59,7 +59,8 @@
         .angle-gauge { height:100%; width:0%; background-color:var(--gauge-fill-color); transition:width 0.1s linear; }
         /* Style untuk display Grip Value */
         .grip-value { font-size: 2.5rem; font-weight: 600; color: var(--primary-color); text-align: center; margin-bottom: 1rem; }
-        .grip-status { text-align: center; font-size: 1rem; font-weight: 600; margin-top: 0.75rem; }
+        /* CSS .grip-status tidak lagi digunakan, boleh dihapus */
+        /* .grip-status { text-align: center; font-size: 1rem; font-weight: 600; margin-top: 0.75rem; } */
         .mode-button-container { display:flex; gap:1rem; margin-top:1rem; }
         .mode-button { background-color:var(--text-secondary); color:white; }
         .mode-button:hover { background-color:#887a77; }
@@ -102,11 +103,10 @@
             </div>
             
             <div class="card sensor-display-card">
-                <h2>Sensor Genggaman (Validasi)</h2>
+                <h2>Sensor Genggaman (Forearm)</h2>
                 <div id="manualGripValue" class="grip-value">0.00%</div>
                 <div class="gauge-container"> <div id="manualGripGauge" class="angle-gauge"></div> </div>
-                <div id="manualGripStatus" class="grip-status" style="color: var(--danger-color);">Genggaman Lepas</div>
-            </div>
+                </div>
 
             <div class="card"> <h2>Channels</h2> <div class="control-group"> <div class="control-group-header"><h3>Channel 1</h3><label class="switch"><input type="checkbox" id="ch1Enable"><span class="switch-slider"></span></label></div> <label for="ch1AmplitudeSlider">Amplitude</label> <div class="slider-container"><input type="range" id="ch1AmplitudeSlider" min="0" max="255" value="0"></div> <div class="input-value-container"><input type="number" id="ch1AmplitudeInput" min="0" max="255" value="0"></div> </div> <div class="control-group"> <div class="control-group-header"><h3>Channel 2</h3><label class="switch"><input type="checkbox" id="ch2Enable"><span class="switch-slider"></span></label></div> <label for="ch2AmplitudeSlider">Amplitude</label> <div class="slider-container"><input type="range" id="ch2AmplitudeSlider" min="0" max="255" value="0"></div> <div class="input-value-container"><input type="number" id="ch2AmplitudeInput" min="0" max="255" value="0"></div> </div> </div>
         </div>
@@ -124,10 +124,9 @@
                 <h2>Sensor Genggaman (Live)</h2>
                 <div id="autoGripValue" class="grip-value">0.00%</div>
                 <div class="gauge-container"> <div id="autoGripGauge" class="angle-gauge"></div> </div>
-                <div id="autoGripStatus" class="grip-status" style="color: var(--danger-color);">Genggaman Lepas</div>
-            </div>
+                </div>
 
-             <div class="card"> <h2>Pengaturan Auto-Mode</h2> <div class="auto-mode-setting"> <label for="targetAngleInput">Target Angle</label> <div class="input-value-container"> <input type="number" id="targetAngleInput" min="0" max="120" value="90"> <span class="unit-label">deg</span> </div> </div> <div class="auto-mode-readout"> Amplitudo C1 & C2 (Otomatis): <span id="autoC1AmplitudeReadout">0</span> </div> <h3 id="autoStatusIndicator" style="text-align:center; margin-top:1.5rem; font-weight:600;"> Menunggu Data... </h3> </div>
+             <div class="card"> <h2>Pengaturan Auto-Mode</h2> <div class="auto-mode-setting"> <label for="targetAngleInput">Target Angle (Bicep)</label> <div class="input-value-container"> <input type="number" id="targetAngleInput" min="0" max="120" value="90"> <span class="unit-label">deg</span> </div> </div> <div class="auto-mode-readout"> Amplitudo C1 & C2 (Otomatis): <span id="autoC1AmplitudeReadout">0</span> </div> <h3 id="autoStatusIndicator" style="text-align:center; margin-top:1.5rem; font-weight:600;"> Menunggu Data... </h3> </div>
         </div>
 
         <div class="card" id="globalSettingsCard">
@@ -142,16 +141,17 @@
         // Referensi Sensor Bicep
         const manualAngleValue = document.getElementById('manualAngleValue'); const manualAngleGauge = document.getElementById('manualAngleGauge'); const autoAngleValue = document.getElementById('autoAngleValue'); const autoAngleGauge = document.getElementById('autoAngleGauge');
         
-        // Referensi Sensor Grip (BARU)
-        const manualGripValue = document.getElementById('manualGripValue'); const manualGripGauge = document.getElementById('manualGripGauge'); const manualGripStatus = document.getElementById('manualGripStatus'); const autoGripValue = document.getElementById('autoGripValue'); const autoGripGauge = document.getElementById('autoGripGauge'); const autoGripStatus = document.getElementById('autoGripStatus');
+        // Referensi Sensor Grip (Update v2.16: Status Dihapus)
+        const manualGripValue = document.getElementById('manualGripValue'); const manualGripGauge = document.getElementById('manualGripGauge');
+        const autoGripValue = document.getElementById('autoGripValue'); const autoGripGauge = document.getElementById('autoGripGauge');
 
         // --- Konfigurasi & Variabel Global ---
         const FES_SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b"; const FES_CONTROL_CHAR_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"; const SENSOR_SERVICE_UUID = "0000180f-0000-1000-8000-00805f9b34fb"; const FLEX_SENSOR_CHAR_UUID = "00002a19-0000-1000-8000-00805f9b34fb"; let bleDevice, controlCharacteristic, flexSensorCharacteristic; let isConnected = false; const encoder = new TextEncoder('utf-8'); const decoder = new TextDecoder('utf-8');
-        const GRIP_THRESHOLD = 50; // Threshold (persen) untuk status "Engaged" (samakan dengan firmware)
+        // const GRIP_THRESHOLD = 50; // Dihapus di v2.16
 
         // --- Fungsi Koneksi (Struktur v2.11) ---
         connectButton.addEventListener('click', () => isConnected ? disconnect() : connect());
-        async function connect() { console.log("Connect function called (v2.15)."); try { if (!navigator.bluetooth) { throw new Error("Web Bluetooth not supported."); } updateStatus("Requesting Device...", false); bleDevice = await navigator.bluetooth.requestDevice({ filters: [{ services: [FES_SERVICE_UUID] }], optionalServices: [FES_SERVICE_UUID, SENSOR_SERVICE_UUID] }); updateStatus("Connecting...", false); bleDevice.addEventListener('gattserverdisconnected', onDisconnected); const server = await bleDevice.gatt.connect(); updateStatus("Getting FES Service...", false); const fesService = await server.getPrimaryService(FES_SERVICE_UUID); controlCharacteristic = await fesService.getCharacteristic(FES_CONTROL_CHAR_UUID); updateStatus("Getting Sensor Service...", false); const sensorService = await server.getPrimaryService(SENSOR_SERVICE_UUID); flexSensorCharacteristic = await sensorService.getCharacteristic(FLEX_SENSOR_CHAR_UUID); updateStatus("Subscribing to Sensor...", false); await flexSensorCharacteristic.startNotifications(); flexSensorCharacteristic.addEventListener('characteristicvaluechanged', handleSensorNotification); console.log("Subscribed to sensor notifications."); isConnected = true; updateStatus("Connected!", true); updateConnectButton(); modeSelection.style.display = 'block'; } catch (error) { console.error("Connection Error:", error); updateStatus(`Error: ${error.message}`, false); if (bleDevice && bleDevice.gatt && bleDevice.gatt.connected) { bleDevice.gatt.disconnect(); } else { onDisconnected(); } } }
+        async function connect() { console.log("Connect function called (v2.16)."); try { if (!navigator.bluetooth) { throw new Error("Web Bluetooth not supported."); } updateStatus("Requesting Device...", false); bleDevice = await navigator.bluetooth.requestDevice({ filters: [{ services: [FES_SERVICE_UUID] }], optionalServices: [FES_SERVICE_UUID, SENSOR_SERVICE_UUID] }); updateStatus("Connecting...", false); bleDevice.addEventListener('gattserverdisconnected', onDisconnected); const server = await bleDevice.gatt.connect(); updateStatus("Getting FES Service...", false); const fesService = await server.getPrimaryService(FES_SERVICE_UUID); controlCharacteristic = await fesService.getCharacteristic(FES_CONTROL_CHAR_UUID); updateStatus("Getting Sensor Service...", false); const sensorService = await server.getPrimaryService(SENSOR_SERVICE_UUID); flexSensorCharacteristic = await sensorService.getCharacteristic(FLEX_SENSOR_CHAR_UUID); updateStatus("Subscribing to Sensor...", false); await flexSensorCharacteristic.startNotifications(); flexSensorCharacteristic.addEventListener('characteristicvaluechanged', handleSensorNotification); console.log("Subscribed to sensor notifications."); isConnected = true; updateStatus("Connected!", true); updateConnectButton(); modeSelection.style.display = 'block'; } catch (error) { console.error("Connection Error:", error); updateStatus(`Error: ${error.message}`, false); if (bleDevice && bleDevice.gatt && bleDevice.gatt.connected) { bleDevice.gatt.disconnect(); } else { onDisconnected(); } } }
         function disconnect() { if (flexSensorCharacteristic) { try { flexSensorCharacteristic.stopNotifications(); flexSensorCharacteristic.removeEventListener('characteristicvaluechanged', handleSensorNotification); } catch(error) { console.error("Error stopping/removing listener:", error); } } if (bleDevice && bleDevice.gatt.connected) { bleDevice.gatt.disconnect(); } else { onDisconnected(); } }
         function onDisconnected() { console.log("onDisconnected event triggered."); isConnected = false; controlCharacteristic = null; flexSensorCharacteristic = null; bleDevice = null; updateStatus("Device Disconnected", false); updateConnectButton(); modeSelection.style.display = 'none'; showScreen('home'); }
 
@@ -164,7 +164,7 @@
         backButtonManual.addEventListener('click', () => showScreen('home'));
         backButtonAuto.addEventListener('click', () => { showScreen('home'); sendCommand('AM:E:0'); sendCommand('C1:A:0'); sendCommand('C2:A:0'); ch1AmplitudeSlider.value = 0; ch1AmplitudeInput.value = 0; ch2AmplitudeSlider.value = 0; ch2AmplitudeInput.value = 0; });
 
-        // --- (PERUBAHAN v2.15) Menangani Data Sensor ---
+        // --- (PERUBAHAN v2.16) Menangani Data Sensor ---
         function handleSensorNotification(event) {
             const payloadString = decoder.decode(event.target.value);
             // Format: "BicepAngle:GripValue:Amplitude"
@@ -202,18 +202,7 @@
             autoGripValue.textContent = gripValueText;
             autoGripGauge.style.width = gripGaugePercentage;
 
-            // Update Grip Status Text
-            if (gripValue >= GRIP_THRESHOLD) {
-                manualGripStatus.textContent = "Genggaman Terdeteksi 👍";
-                manualGripStatus.style.color = 'var(--success-color)';
-                autoGripStatus.textContent = "Genggaman Terdeteksi 👍";
-                autoGripStatus.style.color = 'var(--success-color)';
-            } else {
-                manualGripStatus.textContent = "Genggaman Lepas";
-                manualGripStatus.style.color = 'var(--danger-color)';
-                autoGripStatus.textContent = "Genggaman Lepas";
-                autoGripStatus.style.color = 'var(--danger-color)';
-            }
+            // Update Grip Status Text (DIHAPUS di v2.16)
 
             // 3. Update Auto-Mode Status (Berdasarkan Bicep Angle)
             const targetAngle = parseInt(targetAngleInput.value) || 90;
@@ -300,7 +289,7 @@
               showScreen('home'); 
               updateStatus("Disconnected", false); 
               pulseWidthInput.value = pulseWidthSlider.value; frequencyInput.value = frequencySlider.value;
-              ch1AmplitudeInput.value = ch1AmplitudeSlider.value; ch2AmplitudeInput.value = ch2AmplitudeInput.value;
+              ch1AmplitudeInput.value = ch1AmplitudeSlider.value; ch2AmplitudeInput.value = ch2AmplitudeSlider.value;
          });
          
     </script>
