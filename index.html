@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>RUBIFlex Integrated Remote (v2.14)</title>
+    <title>RUBIFlex Integrated Remote (v2.15)</title>
     <style>
         /* (TEMA WARNA RUBIFLEX & OUTLINE v2.10) */
         :root {
@@ -57,6 +57,9 @@
         .angle-value { font-size:2.5rem; font-weight:600; color:var(--angle-text-color); text-align:center; margin-bottom:1rem; }
         .gauge-container { width:100%; height:24px; background-color:var(--slider-track); border-radius:12px; overflow:hidden; border:1px solid var(--border-color); }
         .angle-gauge { height:100%; width:0%; background-color:var(--gauge-fill-color); transition:width 0.1s linear; }
+        /* Style untuk display Grip Value */
+        .grip-value { font-size: 2.5rem; font-weight: 600; color: var(--primary-color); text-align: center; margin-bottom: 1rem; }
+        .grip-status { text-align: center; font-size: 1rem; font-weight: 600; margin-top: 0.75rem; }
         .mode-button-container { display:flex; gap:1rem; margin-top:1rem; }
         .mode-button { background-color:var(--text-secondary); color:white; }
         .mode-button:hover { background-color:#887a77; }
@@ -68,11 +71,8 @@
         .auto-mode-readout { text-align:center; font-size:1.2rem; margin-top:1rem; }
         #autoC1AmplitudeReadout { font-weight:600; color:var(--primary-color); }
         #autoStatusIndicator { color:var(--text-secondary); }
-        
-        /* CSS untuk header grup kontrol (v2.13) */
         .control-group-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
         .control-group-header h3 { margin-bottom: 0; text-align: left; border-bottom: none; padding-bottom: 0; font-size: 1.1rem; }
-
     </style>
 </head>
 <body>
@@ -91,64 +91,165 @@
                 </div>
             </div>
         </div>
+
         <div id="manualModeScreen">
             <div class="card"> <button id="backButtonManual" class="back-button">Keluar Mode Manual</button> </div>
-            <div class="card sensor-display-card"> <h2>Flex Sensor</h2> <div id="manualAngleValue" class="angle-value">0.00°</div> <div class="gauge-container"> <div id="manualAngleGauge" class="angle-gauge"></div> </div> </div>
+            
+            <div class="card sensor-display-card"> 
+                <h2>Sensor Bicep (Sudut)</h2> 
+                <div id="manualAngleValue" class="angle-value">0.00°</div> 
+                <div class="gauge-container"> <div id="manualAngleGauge" class="angle-gauge"></div> </div> 
+            </div>
+            
+            <div class="card sensor-display-card">
+                <h2>Sensor Genggaman (Validasi)</h2>
+                <div id="manualGripValue" class="grip-value">0.00%</div>
+                <div class="gauge-container"> <div id="manualGripGauge" class="angle-gauge"></div> </div>
+                <div id="manualGripStatus" class="grip-status" style="color: var(--danger-color);">Genggaman Lepas</div>
+            </div>
+
             <div class="card"> <h2>Channels</h2> <div class="control-group"> <div class="control-group-header"><h3>Channel 1</h3><label class="switch"><input type="checkbox" id="ch1Enable"><span class="switch-slider"></span></label></div> <label for="ch1AmplitudeSlider">Amplitude</label> <div class="slider-container"><input type="range" id="ch1AmplitudeSlider" min="0" max="255" value="0"></div> <div class="input-value-container"><input type="number" id="ch1AmplitudeInput" min="0" max="255" value="0"></div> </div> <div class="control-group"> <div class="control-group-header"><h3>Channel 2</h3><label class="switch"><input type="checkbox" id="ch2Enable"><span class="switch-slider"></span></label></div> <label for="ch2AmplitudeSlider">Amplitude</label> <div class="slider-container"><input type="range" id="ch2AmplitudeSlider" min="0" max="255" value="0"></div> <div class="input-value-container"><input type="number" id="ch2AmplitudeInput" min="0" max="255" value="0"></div> </div> </div>
         </div>
+
         <div id="autoModeScreen">
              <div class="card"> <button id="backButtonAuto" class="back-button">Keluar Mode Otomatis</button> </div>
-             <div class="card sensor-display-card"> <h2>Flex Sensor (Live)</h2> <div id="autoAngleValue" class="angle-value">0.00°</div> <div class="gauge-container"> <div id="autoAngleGauge" class="angle-gauge"></div> </div> </div>
+             
+             <div class="card sensor-display-card"> 
+                <h2>Sensor Bicep (Live)</h2> 
+                <div id="autoAngleValue" class="angle-value">0.00°</div> 
+                <div class="gauge-container"> <div id="autoAngleGauge" class="angle-gauge"></div> </div> 
+             </div>
+
+             <div class="card sensor-display-card">
+                <h2>Sensor Genggaman (Live)</h2>
+                <div id="autoGripValue" class="grip-value">0.00%</div>
+                <div class="gauge-container"> <div id="autoGripGauge" class="angle-gauge"></div> </div>
+                <div id="autoGripStatus" class="grip-status" style="color: var(--danger-color);">Genggaman Lepas</div>
+            </div>
+
              <div class="card"> <h2>Pengaturan Auto-Mode</h2> <div class="auto-mode-setting"> <label for="targetAngleInput">Target Angle</label> <div class="input-value-container"> <input type="number" id="targetAngleInput" min="0" max="120" value="90"> <span class="unit-label">deg</span> </div> </div> <div class="auto-mode-readout"> Amplitudo C1 & C2 (Otomatis): <span id="autoC1AmplitudeReadout">0</span> </div> <h3 id="autoStatusIndicator" style="text-align:center; margin-top:1.5rem; font-weight:600;"> Menunggu Data... </h3> </div>
         </div>
+
         <div class="card" id="globalSettingsCard">
             <h2>Global Settings</h2> <div class="control-group"> <label for="pulseWidthSlider">Pulse Width</label> <div class="slider-container"><input type="range" id="pulseWidthSlider" min="50" max="3000" value="200" step="10"></div> <div class="input-value-container"><input type="number" id="pulseWidthInput" min="50" max="3000" value="200" step="10"><span class="unit-label">µs</span></div> </div> <div class="control-group"> <label for="frequencySlider">Frequency</label> <div class="slider-container"><input type="range" id="frequencySlider" min="1" max="150" value="30"></div> <div class="input-value-container"><input type="number" id="frequencyInput" min="1" max="150" value="30"><span class="unit-label">Hz</span></div> </div>
-            </div>
+        </div>
     </div> 
+
     <script>
         // --- Referensi Elemen ---
-        const homeScreen = document.getElementById('homeScreen'); const manualModeScreen = document.getElementById('manualModeScreen'); const autoModeScreen = document.getElementById('autoModeScreen'); const globalSettingsCard = document.getElementById('globalSettingsCard'); const connectButton = document.getElementById('connectButton'); const statusDisplay = document.getElementById('status'); const modeSelection = document.getElementById('modeSelection'); const currentModeDisplay = document.getElementById('currentModeDisplay'); const selectManualButton = document.getElementById('selectManualButton'); const selectAutoButton = document.getElementById('selectAutoButton'); const backButtonManual = document.getElementById('backButtonManual'); const backButtonAuto = document.getElementById('backButtonAuto'); const manualAngleValue = document.getElementById('manualAngleValue'); const manualAngleGauge = document.getElementById('manualAngleGauge'); const autoAngleValue = document.getElementById('autoAngleValue'); const autoAngleGauge = document.getElementById('autoAngleGauge'); const autoStatusIndicator = document.getElementById('autoStatusIndicator'); const ch1Enable = document.getElementById('ch1Enable'); const ch1AmplitudeSlider = document.getElementById('ch1AmplitudeSlider'); const ch1AmplitudeInput = document.getElementById('ch1AmplitudeInput'); const ch2Enable = document.getElementById('ch2Enable'); const ch2AmplitudeSlider = document.getElementById('ch2AmplitudeSlider'); const ch2AmplitudeInput = document.getElementById('ch2AmplitudeInput'); const pulseWidthSlider = document.getElementById('pulseWidthSlider'); const pulseWidthInput = document.getElementById('pulseWidthInput'); const frequencySlider = document.getElementById('frequencySlider'); const frequencyInput = document.getElementById('frequencyInput'); const targetAngleInput = document.getElementById('targetAngleInput'); const autoC1AmplitudeReadout = document.getElementById('autoC1AmplitudeReadout');
+        const homeScreen = document.getElementById('homeScreen'); const manualModeScreen = document.getElementById('manualModeScreen'); const autoModeScreen = document.getElementById('autoModeScreen'); const globalSettingsCard = document.getElementById('globalSettingsCard'); const connectButton = document.getElementById('connectButton'); const statusDisplay = document.getElementById('status'); const modeSelection = document.getElementById('modeSelection'); const currentModeDisplay = document.getElementById('currentModeDisplay'); const selectManualButton = document.getElementById('selectManualButton'); const selectAutoButton = document.getElementById('selectAutoButton'); const backButtonManual = document.getElementById('backButtonManual'); const backButtonAuto = document.getElementById('backButtonAuto'); const autoStatusIndicator = document.getElementById('autoStatusIndicator'); const ch1Enable = document.getElementById('ch1Enable'); const ch1AmplitudeSlider = document.getElementById('ch1AmplitudeSlider'); const ch1AmplitudeInput = document.getElementById('ch1AmplitudeInput'); const ch2Enable = document.getElementById('ch2Enable'); const ch2AmplitudeSlider = document.getElementById('ch2AmplitudeSlider'); const ch2AmplitudeInput = document.getElementById('ch2AmplitudeInput'); const pulseWidthSlider = document.getElementById('pulseWidthSlider'); const pulseWidthInput = document.getElementById('pulseWidthInput'); const frequencySlider = document.getElementById('frequencySlider'); const frequencyInput = document.getElementById('frequencyInput'); const targetAngleInput = document.getElementById('targetAngleInput'); const autoC1AmplitudeReadout = document.getElementById('autoC1AmplitudeReadout');
+
+        // Referensi Sensor Bicep
+        const manualAngleValue = document.getElementById('manualAngleValue'); const manualAngleGauge = document.getElementById('manualAngleGauge'); const autoAngleValue = document.getElementById('autoAngleValue'); const autoAngleGauge = document.getElementById('autoAngleGauge');
         
-        // --- Referensi Canvas Dihapus ---
-        // const waveformCanvas = null;
-        // const ctx = null;
+        // Referensi Sensor Grip (BARU)
+        const manualGripValue = document.getElementById('manualGripValue'); const manualGripGauge = document.getElementById('manualGripGauge'); const manualGripStatus = document.getElementById('manualGripStatus'); const autoGripValue = document.getElementById('autoGripValue'); const autoGripGauge = document.getElementById('autoGripGauge'); const autoGripStatus = document.getElementById('autoGripStatus');
 
         // --- Konfigurasi & Variabel Global ---
         const FES_SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b"; const FES_CONTROL_CHAR_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"; const SENSOR_SERVICE_UUID = "0000180f-0000-1000-8000-00805f9b34fb"; const FLEX_SENSOR_CHAR_UUID = "00002a19-0000-1000-8000-00805f9b34fb"; let bleDevice, controlCharacteristic, flexSensorCharacteristic; let isConnected = false; const encoder = new TextEncoder('utf-8'); const decoder = new TextDecoder('utf-8');
-        // Hapus 'currentParams' jika hanya untuk canvas
-        // let currentParams = { pulseWidth: 200, frequency: 30, interPhaseGap: 50 }; // Hapus jika hanya untuk drawWaveform
+        const GRIP_THRESHOLD = 50; // Threshold (persen) untuk status "Engaged" (samakan dengan firmware)
 
-        // --- Fungsi Koneksi (Struktur v2.5 / v2.11) ---
+        // --- Fungsi Koneksi (Struktur v2.11) ---
         connectButton.addEventListener('click', () => isConnected ? disconnect() : connect());
-        async function connect() { console.log("Connect function called (v2.14)."); try { if (!navigator.bluetooth) { throw new Error("Web Bluetooth not supported."); } updateStatus("Requesting Device...", false); console.log("Requesting Bluetooth device..."); bleDevice = await navigator.bluetooth.requestDevice({ filters: [{ services: [FES_SERVICE_UUID] }], optionalServices: [FES_SERVICE_UUID, SENSOR_SERVICE_UUID] }); console.log("Device selected:", bleDevice.name); updateStatus("Connecting...", false); console.log("Connecting to GATT server..."); bleDevice.addEventListener('gattserverdisconnected', onDisconnected); const server = await bleDevice.gatt.connect(); console.log("GATT server connected."); updateStatus("Getting FES Service...", false); console.log("Getting FES primary service..."); const fesService = await server.getPrimaryService(FES_SERVICE_UUID); console.log("Getting FES Control Characteristic..."); controlCharacteristic = await fesService.getCharacteristic(FES_CONTROL_CHAR_UUID); console.log("FES Service Ready."); updateStatus("Getting Sensor Service...", false); console.log("Getting Sensor primary service..."); const sensorService = await server.getPrimaryService(SENSOR_SERVICE_UUID); console.log("Getting Sensor Characteristic..."); flexSensorCharacteristic = await sensorService.getCharacteristic(FLEX_SENSOR_CHAR_UUID); console.log("Sensor Service Ready."); updateStatus("Subscribing to Sensor...", false); console.log("Starting sensor notifications..."); await flexSensorCharacteristic.startNotifications(); flexSensorCharacteristic.addEventListener('characteristicvaluechanged', handleSensorNotification); console.log("Subscribed to sensor notifications."); isConnected = true; updateStatus("Connected!", true); updateConnectButton(); modeSelection.style.display = 'block'; } catch (error) { console.error("Connection Error:", error); if (error.name === 'NotFoundError') { updateStatus("Device selection cancelled.", false); } else { updateStatus(`Error: ${error.message}`, false); } if (bleDevice && bleDevice.gatt && bleDevice.gatt.connected) { bleDevice.gatt.disconnect(); } else { onDisconnected(); } } }
-        function disconnect() { console.log("Disconnect function called."); if (flexSensorCharacteristic) { try { flexSensorCharacteristic.stopNotifications() .then(() => console.log("Stopped sensor notifications.")) .catch(error => console.error("Error stopping notifications:", error)); flexSensorCharacteristic.removeEventListener('characteristicvaluechanged', handleSensorNotification); } catch(error) { console.error("Error removing listener:", error); } } if (bleDevice && bleDevice.gatt.connected) { console.log("Disconnecting from GATT server..."); bleDevice.gatt.disconnect(); } else { console.log("Device not connected or already disconnected."); onDisconnected(); } }
+        async function connect() { console.log("Connect function called (v2.15)."); try { if (!navigator.bluetooth) { throw new Error("Web Bluetooth not supported."); } updateStatus("Requesting Device...", false); bleDevice = await navigator.bluetooth.requestDevice({ filters: [{ services: [FES_SERVICE_UUID] }], optionalServices: [FES_SERVICE_UUID, SENSOR_SERVICE_UUID] }); updateStatus("Connecting...", false); bleDevice.addEventListener('gattserverdisconnected', onDisconnected); const server = await bleDevice.gatt.connect(); updateStatus("Getting FES Service...", false); const fesService = await server.getPrimaryService(FES_SERVICE_UUID); controlCharacteristic = await fesService.getCharacteristic(FES_CONTROL_CHAR_UUID); updateStatus("Getting Sensor Service...", false); const sensorService = await server.getPrimaryService(SENSOR_SERVICE_UUID); flexSensorCharacteristic = await sensorService.getCharacteristic(FLEX_SENSOR_CHAR_UUID); updateStatus("Subscribing to Sensor...", false); await flexSensorCharacteristic.startNotifications(); flexSensorCharacteristic.addEventListener('characteristicvaluechanged', handleSensorNotification); console.log("Subscribed to sensor notifications."); isConnected = true; updateStatus("Connected!", true); updateConnectButton(); modeSelection.style.display = 'block'; } catch (error) { console.error("Connection Error:", error); updateStatus(`Error: ${error.message}`, false); if (bleDevice && bleDevice.gatt && bleDevice.gatt.connected) { bleDevice.gatt.disconnect(); } else { onDisconnected(); } } }
+        function disconnect() { if (flexSensorCharacteristic) { try { flexSensorCharacteristic.stopNotifications(); flexSensorCharacteristic.removeEventListener('characteristicvaluechanged', handleSensorNotification); } catch(error) { console.error("Error stopping/removing listener:", error); } } if (bleDevice && bleDevice.gatt.connected) { bleDevice.gatt.disconnect(); } else { onDisconnected(); } }
         function onDisconnected() { console.log("onDisconnected event triggered."); isConnected = false; controlCharacteristic = null; flexSensorCharacteristic = null; bleDevice = null; updateStatus("Device Disconnected", false); updateConnectButton(); modeSelection.style.display = 'none'; showScreen('home'); }
 
         // --- Manajemen Layar & UI Helper ---
-        function updateStatus(message, isSuccess = false) { console.log("Updating status:", message); if (!statusDisplay) return; statusDisplay.textContent = message; statusDisplay.style.display = 'block'; if (message.toLowerCase().includes('error')) { statusDisplay.style.backgroundColor = 'var(--danger-color)'; statusDisplay.style.color = '#fff'; } else if (isSuccess) { statusDisplay.style.backgroundColor = 'var(--success-color)'; statusDisplay.style.color = '#fff'; } else { statusDisplay.style.backgroundColor = 'var(--border-color)'; statusDisplay.style.color = 'var(--text-color)'; } }
+        function updateStatus(message, isSuccess = false) { if (!statusDisplay) return; statusDisplay.textContent = message; statusDisplay.style.display = 'block'; if (message.toLowerCase().includes('error')) { statusDisplay.style.backgroundColor = 'var(--danger-color)'; statusDisplay.style.color = '#fff'; } else if (isSuccess) { statusDisplay.style.backgroundColor = 'var(--success-color)'; statusDisplay.style.color = '#fff'; } else { statusDisplay.style.backgroundColor = 'var(--border-color)'; statusDisplay.style.color = 'var(--text-color)'; } }
         function updateConnectButton() { if (isConnected) { connectButton.textContent = "Disconnect"; connectButton.classList.add("connected"); } else { connectButton.textContent = "Connect to Device"; connectButton.classList.remove("connected"); } }
-        function showScreen(screenName) { homeScreen.style.display = 'none'; manualModeScreen.style.display = 'none'; autoModeScreen.style.display = 'none'; globalSettingsCard.style.display = 'none'; if (screenName === 'home') { homeScreen.style.display = 'block'; } else if (screenName === 'manual') { manualModeScreen.style.display = 'block'; globalSettingsCard.style.display = 'block'; currentModeDisplay.textContent = "Manual"; /* drawWaveform(); Dihapus */ } else if (screenName === 'auto') { autoModeScreen.style.display = 'block'; globalSettingsCard.style.display = 'block'; currentModeDisplay.textContent = "Otomatis"; /* drawWaveform(); Dihapus */ } }
+        function showScreen(screenName) { homeScreen.style.display = 'none'; manualModeScreen.style.display = 'none'; autoModeScreen.style.display = 'none'; globalSettingsCard.style.display = 'none'; if (screenName === 'home') { homeScreen.style.display = 'block'; } else if (screenName === 'manual') { manualModeScreen.style.display = 'block'; globalSettingsCard.style.display = 'block'; currentModeDisplay.textContent = "Manual"; } else if (screenName === 'auto') { autoModeScreen.style.display = 'block'; globalSettingsCard.style.display = 'block'; currentModeDisplay.textContent = "Otomatis"; } }
         selectManualButton.addEventListener('click', () => { showScreen('manual'); sendCommand('AM:E:0'); });
         selectAutoButton.addEventListener('click', () => { showScreen('auto'); targetAngleInput.dispatchEvent(new Event('change')); sendCommand('AM:E:1'); });
         backButtonManual.addEventListener('click', () => showScreen('home'));
-        backButtonAuto.addEventListener('click', () => { showScreen('home'); sendCommand('AM:E:0'); sendCommand('C1:A:0'); sendCommand('C2:A:0'); ch1AmplitudeSlider.value = 0; ch1AmplitudeInput.value = 0; ch2AmplitudeSlider.value = 0; ch2AmplitudeInput.value = 0; /* drawWaveform(); Dihapus */ });
+        backButtonAuto.addEventListener('click', () => { showScreen('home'); sendCommand('AM:E:0'); sendCommand('C1:A:0'); sendCommand('C2:A:0'); ch1AmplitudeSlider.value = 0; ch1AmplitudeInput.value = 0; ch2AmplitudeSlider.value = 0; ch2AmplitudeInput.value = 0; });
 
-        // --- Menangani Data Sensor ---
-        function handleSensorNotification(event) { const payloadString = decoder.decode(event.target.value); const parts = payloadString.split(':'); if (parts.length < 2) return; const angle = parseFloat(parts[0]); const currentAmplitude = parseInt(parts[1]); if (isNaN(angle) || isNaN(currentAmplitude)) return; const maxAngle = 120.0; const gaugePercentage = (angle / maxAngle) * 100; const clampedPercentage = `${Math.min(100, Math.max(0, gaugePercentage))}%`; const angleText = `${angle.toFixed(2)}°`; manualAngleValue.textContent = angleText; manualAngleGauge.style.width = clampedPercentage; autoAngleValue.textContent = angleText; autoAngleGauge.style.width = clampedPercentage; const targetAngle = parseInt(targetAngleInput.value) || 90; if (autoStatusIndicator) { if (angle >= targetAngle) { autoStatusIndicator.textContent = "Target Tercapai 👍"; autoStatusIndicator.style.color = 'var(--success-color)'; } else { autoStatusIndicator.textContent = "Mencoba Mencapai Target..."; autoStatusIndicator.style.color = 'var(--text-secondary)'; } } autoC1AmplitudeReadout.textContent = currentAmplitude; if (document.activeElement !== ch1AmplitudeSlider && document.activeElement !== ch1AmplitudeInput) { ch1AmplitudeSlider.value = currentAmplitude; ch1AmplitudeInput.value = currentAmplitude; } if (autoModeScreen.style.display === 'block') { if (document.activeElement !== ch2AmplitudeSlider && document.activeElement !== ch2AmplitudeInput) { ch2AmplitudeSlider.value = currentAmplitude; ch2AmplitudeInput.value = currentAmplitude; } }
-            // Panggilan drawWaveform() dihapus dari sini
+        // --- (PERUBAHAN v2.15) Menangani Data Sensor ---
+        function handleSensorNotification(event) {
+            const payloadString = decoder.decode(event.target.value);
+            // Format: "BicepAngle:GripValue:Amplitude"
+            const parts = payloadString.split(':');
+            if (parts.length < 3) {
+                console.warn("Invalid sensor payload:", payloadString);
+                return;
+            }
+
+            const bicepAngle = parseFloat(parts[0]);
+            const gripValue = parseFloat(parts[1]);
+            const currentAmplitude = parseInt(parts[2]);
+
+            if (isNaN(bicepAngle) || isNaN(gripValue) || isNaN(currentAmplitude)) {
+                console.warn("NaN value parsed:", payloadString);
+                return;
+            }
+
+            // 1. Update Bicep Sensor (Angle)
+            const maxAngle = 120.0;
+            const bicepGaugePercentage = `${Math.min(100, Math.max(0, (bicepAngle / maxAngle) * 100))}%`;
+            const bicepAngleText = `${bicepAngle.toFixed(2)}°`;
+            
+            manualAngleValue.textContent = bicepAngleText;
+            manualAngleGauge.style.width = bicepGaugePercentage;
+            autoAngleValue.textContent = bicepAngleText;
+            autoAngleGauge.style.width = bicepGaugePercentage;
+
+            // 2. Update Grip Sensor (Validation)
+            const gripGaugePercentage = `${Math.min(100, Math.max(0, gripValue))}%`;
+            const gripValueText = `${gripValue.toFixed(2)}%`;
+            
+            manualGripValue.textContent = gripValueText;
+            manualGripGauge.style.width = gripGaugePercentage;
+            autoGripValue.textContent = gripValueText;
+            autoGripGauge.style.width = gripGaugePercentage;
+
+            // Update Grip Status Text
+            if (gripValue >= GRIP_THRESHOLD) {
+                manualGripStatus.textContent = "Genggaman Terdeteksi 👍";
+                manualGripStatus.style.color = 'var(--success-color)';
+                autoGripStatus.textContent = "Genggaman Terdeteksi 👍";
+                autoGripStatus.style.color = 'var(--success-color)';
+            } else {
+                manualGripStatus.textContent = "Genggaman Lepas";
+                manualGripStatus.style.color = 'var(--danger-color)';
+                autoGripStatus.textContent = "Genggaman Lepas";
+                autoGripStatus.style.color = 'var(--danger-color)';
+            }
+
+            // 3. Update Auto-Mode Status (Berdasarkan Bicep Angle)
+            const targetAngle = parseInt(targetAngleInput.value) || 90;
+            if (autoStatusIndicator) {
+                if (bicepAngle >= targetAngle) {
+                    autoStatusIndicator.textContent = "Target Tercapai 👍";
+                    autoStatusIndicator.style.color = 'var(--success-color)';
+                } else {
+                    autoStatusIndicator.textContent = "Mencoba Mencapai Target...";
+                    autoStatusIndicator.style.color = 'var(--text-secondary)';
+                }
+            }
+            
+            // 4. Update Amplitude Readout
+            autoC1AmplitudeReadout.textContent = currentAmplitude;
+            if (document.activeElement !== ch1AmplitudeSlider && document.activeElement !== ch1AmplitudeInput) {
+                ch1AmplitudeSlider.value = currentAmplitude;
+                ch1AmplitudeInput.value = currentAmplitude;
+            }
+            if (autoModeScreen.style.display === 'block') {
+                if (document.activeElement !== ch2AmplitudeSlider && document.activeElement !== ch2AmplitudeInput) {
+                    ch2AmplitudeSlider.value = currentAmplitude;
+                    ch2AmplitudeInput.value = currentAmplitude;
+                }
+            }
         }
 
         // ===============================================
-        // == FUNGSI & EVENT LISTENER FES (PERBAIKAN v2.13) ==
+        // == FUNGSI & EVENT LISTENER FES (dari v2.13) ==
         // ===============================================
         
-        // --- Fungsi drawWaveform() Dihapus ---
-
         async function sendCommand(command) { if (!isConnected || !controlCharacteristic) { return; } try { await controlCharacteristic.writeValue(encoder.encode(command)); } catch (error) { console.error("Send Error:", error); } }
         const debounce = (func, wait) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), wait); }; };
         const debouncedSendCommand = debounce(sendCommand, 50);
 
-        function syncSliderInput(slider, input, commandPrefix, channelEnable = null, paramName = null) {
+        function syncSliderInput(slider, input, commandPrefix, channelEnable = null) {
             function updateAndSendCommand() {
                 let value = parseInt(input.value);
                 const min = parseInt(input.min); const max = parseInt(input.max); const step = parseInt(input.step) || 1;
@@ -156,78 +257,52 @@
                 else { value = Math.max(min, Math.min(max, value)); value = Math.round((value - min) / step) * step + min; }
                 slider.value = value; input.value = value;
                 
-                // Kirim HANYA jika toggle menyala ATAU BUKAN slider amplitudo
                 if ((channelEnable && channelEnable.checked) || !channelEnable) {
-                    sendCommand(`${commandPrefix}:${value}`); // Kirim langsung
+                    sendCommand(`${commandPrefix}:${value}`);
                 }
-                
-                // Panggilan drawWaveform() dihapus dari sini
             }
 
             slider.addEventListener('input', () => {
                 input.value = slider.value;
                  if ((channelEnable && channelEnable.checked) || !channelEnable) {
-                     debouncedSendCommand(`${commandPrefix}:${slider.value}`); // Debounce OK
+                     debouncedSendCommand(`${commandPrefix}:${slider.value}`); 
                  }
-                // Panggilan drawWaveform() dihapus dari sini
             });
-            input.addEventListener('input', updateAndSendCommand); // Kirim langsung
-            input.addEventListener('change', updateAndSendCommand); // Kirim langsung
+            input.addEventListener('input', updateAndSendCommand);
+            input.addEventListener('change', updateAndSendCommand);
         }
 
         // --- (PERBAIKAN v2.13) Event Listener Kontrol FES ---
-        // Logika ini (dari v2.13) sudah benar untuk UI-side fix.
         ch1Enable.addEventListener('change', () => {
             const isEnabled = ch1Enable.checked; 
-            console.log(`C1 Toggle changed: ${isEnabled}`);
-            
-            // 1. Reset UI ke 0 SEKARANG
             ch1AmplitudeSlider.value = 0; 
             ch1AmplitudeInput.value = 0;   
-            
-            // 2. Kirim perintah Enable/Disable
             sendCommand(`C1:E:${isEnabled ? 1 : 0}`);
-            
-            // 3. SELALU Kirim perintah Amplitudo 0 (Safety backup)
             sendCommand(`C1:A:0`); 
-            
-            // 4. Update Waveform (Dihapus)
-            // drawWaveform();
         });
         syncSliderInput(ch1AmplitudeSlider, ch1AmplitudeInput, 'C1:A', ch1Enable);
         
-        // --- (PERBAIKAN v2.13) Event Listener C2 disamakan ---
         ch2Enable.addEventListener('change', () => {
             const isEnabled = ch2Enable.checked; 
-            console.log(`C2 Toggle changed: ${isEnabled}`);
-
-            // 1. Reset UI ke 0 SEKARANG
             ch2AmplitudeSlider.value = 0; 
             ch2AmplitudeInput.value = 0;   
-
-            // 2. Kirim perintah Enable/Disable
             sendCommand(`C2:E:${isEnabled ? 1 : 0}`);
-            
-            // 3. SELALU Kirim perintah Amplitudo 0 (Safety backup)
             sendCommand(`C2:A:0`); 
-
-            // 4. Update Waveform (Dihapus)
         });
         syncSliderInput(ch2AmplitudeSlider, ch2AmplitudeInput, 'C2:A', ch2Enable);
         
         // --- Event Listener Global & Auto ---
-        syncSliderInput(pulseWidthSlider, pulseWidthInput, 'C1:W', null, 'pulseWidth');
-        syncSliderInput(frequencySlider, frequencyInput, 'C1:F', null, 'frequency');
+        syncSliderInput(pulseWidthSlider, pulseWidthInput, 'C1:W', null);
+        syncSliderInput(frequencySlider, frequencyInput, 'C1:F', null);
         targetAngleInput.addEventListener('change', () => { let target = parseInt(targetAngleInput.value); if (isNaN(target)) target = 90; target = Math.max(0, Math.min(120, target)); targetAngleInput.value = target; debouncedSendCommand(`AM:T:${target}`); });
 
          window.addEventListener('load', () => {
               showScreen('home'); 
               updateStatus("Disconnected", false); 
               pulseWidthInput.value = pulseWidthSlider.value; frequencyInput.value = frequencySlider.value;
-              ch1AmplitudeInput.value = ch1AmplitudeSlider.value; ch2AmplitudeInput.value = ch2AmplitudeSlider.value;
+              ch1AmplitudeInput.value = ch1AmplitudeSlider.value; ch2AmplitudeInput.value = ch2AmplitudeInput.value;
          });
          
-         // Event listener 'resize' untuk canvas dihapus
     </script>
 </body>
 </html>
