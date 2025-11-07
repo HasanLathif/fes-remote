@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>RUBIFlex Integrated Remote (v2.17)</title>
+    <title>RUBIFlex Integrated Remote (v2.18)</title>
     <style>
         /* (TEMA WARNA RUBIFLEX & OUTLINE v2.10) */
         :root {
@@ -24,7 +24,8 @@
         body { font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color:var(--background-color); color:var(--text-color); margin:0; padding:1rem; display:flex; justify-content:center; min-height:100vh; box-sizing:border-box; }
         .container { width:100%; max-width:500px; }
         .card { background-color:var(--card-background); border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.15); padding:1.5rem; margin-bottom:1rem; }
-        #manualModeScreen, #autoModeScreen, #globalSettingsCard { display:none; }
+        /* Layar yang bisa disembunyikan */
+        #homeScreen, #manualModeScreen, #autoModeScreen, #globalSettingsCard { display:none; }
         h1, h2, h3 { margin-top:0; color:var(--text-color); text-align:center; }
         h1 { font-size:1.8rem; margin-bottom:1.5rem; }
         h2 { font-size:1.3rem; font-weight:600; margin-bottom:1.5rem; text-align:left; border-bottom:1px solid var(--border-color); padding-bottom:0.75rem; }
@@ -46,7 +47,7 @@
         #connectButton:hover { background-color:var(--primary-hover); }
         #connectButton.connected { background-color:var(--danger-color); }
         #status { text-align:center; padding:0.8rem; border-radius:8px; font-weight:500; margin-bottom:1rem; display:none; }
-        /* Style untuk Baterai (BARU) */
+        /* Style untuk Baterai (v2.18) */
         #batteryStatus { text-align: center; font-weight: 600; font-size: 1.1rem; margin-top: 1rem; color: var(--text-color); display: none; }
         .switch { position:relative; display:inline-block; width:50px; height:28px; }
         .switch input { opacity:0; width:0; height:0; }
@@ -77,14 +78,16 @@
 </head>
 <body>
     <div class="container">
+        
+        <div class="card" id="globalStatusCard">
+            <h1>RUBIFlex Controller</h1>
+            <button id="connectButton">Connect to Device</button>
+            <div id="status">Disconnected</div>
+            <div id="batteryStatus">BAT: --% (-- V)</div>
+        </div>
+
         <div id="homeScreen">
             <div class="card">
-                <h1>RUBIFlex Controller</h1>
-                <button id="connectButton">Connect to Device</button>
-                <div id="status">Disconnected</div>
-                
-                <div id="batteryStatus">BAT: --%</div>
-                
                 <div id="modeSelection" style="display: none;">
                     <h2>Mode: <span id="currentModeDisplay">Manual</span></h2>
                     <div class="mode-button-container">
@@ -96,7 +99,7 @@
         </div>
 
         <div id="manualModeScreen">
-            <div class="card"> <button id="backButtonManual" class="back-button">Keluar Mode Manual</button> D</div>
+            <div class="card"> <button id="backButtonManual" class="back-button">Kembali ke Home</button> </div>
             <div class="card sensor-display-card"> 
                 <h2>Sensor Bicep (Sudut)</h2> 
                 <div id="manualAngleValue" class="angle-value">0.00°</div> 
@@ -111,7 +114,7 @@
         </div>
 
         <div id="autoModeScreen">
-             <div class="card"> <button id="backButtonAuto" class="back-button">Keluar Mode Otomatis</button> </div>
+             <div class="card"> <button id="backButtonAuto" class="back-button">Kembali ke Home</button> </div>
              <div class="card sensor-display-card"> 
                 <h2>Sensor Bicep (Live)</h2> 
                 <div id="autoAngleValue" class="angle-value">0.00°</div> 
@@ -132,40 +135,108 @@
 
     <script>
         // --- Referensi Elemen ---
-        const homeScreen = document.getElementById('homeScreen'); const manualModeScreen = document.getElementById('manualModeScreen'); const autoModeScreen = document.getElementById('autoModeScreen'); const globalSettingsCard = document.getElementById('globalSettingsCard'); const connectButton = document.getElementById('connectButton'); const statusDisplay = document.getElementById('status'); const modeSelection = document.getElementById('modeSelection'); const currentModeDisplay = document.getElementById('currentModeDisplay'); const selectManualButton = document.getElementById('selectManualButton'); const selectAutoButton = document.getElementById('selectAutoButton'); const backButtonManual = document.getElementById('backButtonManual'); const backButtonAuto = document.getElementById('backButtonAuto'); const autoStatusIndicator = document.getElementById('autoStatusIndicator'); const ch1Enable = document.getElementById('ch1Enable'); const ch1AmplitudeSlider = document.getElementById('ch1AmplitudeSlider'); const ch1AmplitudeInput = document.getElementById('ch1AmplitudeInput'); const ch2Enable = document.getElementById('ch2Enable'); const ch2AmplitudeSlider = document.getElementById('ch2AmplitudeSlider'); const ch2AmplitudeInput = document.getElementById('ch2AmplitudeInput'); const pulseWidthSlider = document.getElementById('pulseWidthSlider'); const pulseWidthInput = document.getElementById('pulseWidthInput'); const frequencySlider = document.getElementById('frequencySlider'); const frequencyInput = document.getElementById('frequencyInput'); const targetAngleInput = document.getElementById('targetAngleInput'); const autoC1AmplitudeReadout = document.getElementById('autoC1AmplitudeReadout');
-        const manualAngleValue = document.getElementById('manualAngleValue'); const manualAngleGauge = document.getElementById('manualAngleGauge'); const autoAngleValue = document.getElementById('autoAngleValue'); const autoAngleGauge = document.getElementById('autoAngleGauge');
-        const manualGripValue = document.getElementById('manualGripValue'); const manualGripGauge = document.getElementById('manualGripGauge');
-        const autoGripValue = document.getElementById('autoGripValue'); const autoGripGauge = document.getElementById('autoGripGauge');
+        const globalStatusCard = document.getElementById('globalStatusCard'); // Kartu Global
+        const homeScreen = document.getElementById('homeScreen'); // Kartu Home (Pilih Mode)
+        const manualModeScreen = document.getElementById('manualModeScreen'); 
+        const autoModeScreen = document.getElementById('autoModeScreen'); 
+        const globalSettingsCard = document.getElementById('globalSettingsCard'); 
+        const connectButton = document.getElementById('connectButton'); 
+        const statusDisplay = document.getElementById('status'); 
+        const modeSelection = document.getElementById('modeSelection'); 
+        const currentModeDisplay = document.getElementById('currentModeDisplay'); 
+        const selectManualButton = document.getElementById('selectManualButton'); 
+        const selectAutoButton = document.getElementById('selectAutoButton'); 
+        const backButtonManual = document.getElementById('backButtonManual'); 
+        const backButtonAuto = document.getElementById('backButtonAuto'); 
+        const autoStatusIndicator = document.getElementById('autoStatusIndicator'); 
+        const ch1Enable = document.getElementById('ch1Enable'); 
+        const ch1AmplitudeSlider = document.getElementById('ch1AmplitudeSlider'); 
+        const ch1AmplitudeInput = document.getElementById('ch1AmplitudeInput'); 
+        const ch2Enable = document.getElementById('ch2Enable'); 
+        const ch2AmplitudeSlider = document.getElementById('ch2AmplitudeSlider'); 
+        const ch2AmplitudeInput = document.getElementById('ch2AmplitudeInput'); 
+        const pulseWidthSlider = document.getElementById('pulseWidthSlider'); 
+        const pulseWidthInput = document.getElementById('pulseWidthInput'); 
+        const frequencySlider = document.getElementById('frequencySlider'); 
+        const frequencyInput = document.getElementById('frequencyInput'); 
+        const targetAngleInput = document.getElementById('targetAngleInput'); 
+        const autoC1AmplitudeReadout = document.getElementById('autoC1AmplitudeReadout');
+        const manualAngleValue = document.getElementById('manualAngleValue'); 
+        const manualAngleGauge = document.getElementById('manualAngleGauge'); 
+        const autoAngleValue = document.getElementById('autoAngleValue'); 
+        const autoAngleGauge = document.getElementById('autoAngleGauge');
+        const manualGripValue = document.getElementById('manualGripValue'); 
+        const manualGripGauge = document.getElementById('manualGripGauge');
+        const autoGripValue = document.getElementById('autoGripValue'); 
+        const autoGripGauge = document.getElementById('autoGripGauge');
         
-        // Referensi Baterai (BARU v2.17)
+        // Referensi Baterai (v2.18)
         const batteryStatus = document.getElementById('batteryStatus');
 
         // --- Konfigurasi & Variabel Global ---
         const FES_SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b"; const FES_CONTROL_CHAR_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"; const SENSOR_SERVICE_UUID = "0000180f-0000-1000-8000-00805f9b34fb"; const FLEX_SENSOR_CHAR_UUID = "00002a19-0000-1000-8000-00805f9b34fb"; let bleDevice, controlCharacteristic, flexSensorCharacteristic; let isConnected = false; const encoder = new TextEncoder('utf-8'); const decoder = new TextDecoder('utf-8');
 
-        // --- Fungsi Koneksi (Struktur v2.11) ---
+        // --- Fungsi Koneksi (Update v2.18) ---
         connectButton.addEventListener('click', () => isConnected ? disconnect() : connect());
-        async function connect() { console.log("Connect function called (v2.17)."); try { if (!navigator.bluetooth) { throw new Error("Web Bluetooth not supported."); } updateStatus("Requesting Device...", false); bleDevice = await navigator.bluetooth.requestDevice({ filters: [{ services: [FES_SERVICE_UUID] }], optionalServices: [FES_SERVICE_UUID, SENSOR_SERVICE_UUID] }); updateStatus("Connecting...", false); bleDevice.addEventListener('gattserverdisconnected', onDisconnected); const server = await bleDevice.gatt.connect(); updateStatus("Getting FES Service...", false); const fesService = await server.getPrimaryService(FES_SERVICE_UUID); controlCharacteristic = await fesService.getCharacteristic(FES_CONTROL_CHAR_UUID); updateStatus("Getting Sensor Service...", false); const sensorService = await server.getPrimaryService(SENSOR_SERVICE_UUID); flexSensorCharacteristic = await sensorService.getCharacteristic(FLEX_SENSOR_CHAR_UUID); updateStatus("Subscribing to Sensor...", false); await flexSensorCharacteristic.startNotifications(); flexSensorCharacteristic.addEventListener('characteristicvaluechanged', handleSensorNotification); console.log("Subscribed to sensor notifications."); isConnected = true; updateStatus("Connected!", true); updateConnectButton(); modeSelection.style.display = 'block'; batteryStatus.style.display = 'block'; } catch (error) { console.error("Connection Error:", error); updateStatus(`Error: ${error.message}`, false); if (bleDevice && bleDevice.gatt && bleDevice.gatt.connected) { bleDevice.gatt.disconnect(); } else { onDisconnected(); } } }
+        async function connect() { console.log("Connect function called (v2.18)."); try { if (!navigator.bluetooth) { throw new Error("Web Bluetooth not supported."); } updateStatus("Requesting Device...", false); bleDevice = await navigator.bluetooth.requestDevice({ filters: [{ services: [FES_SERVICE_UUID] }], optionalServices: [FES_SERVICE_UUID, SENSOR_SERVICE_UUID] }); updateStatus("Connecting...", false); bleDevice.addEventListener('gattserverdisconnected', onDisconnected); const server = await bleDevice.gatt.connect(); updateStatus("Getting FES Service...", false); const fesService = await server.getPrimaryService(FES_SERVICE_UUID); controlCharacteristic = await fesService.getCharacteristic(FES_CONTROL_CHAR_UUID); updateStatus("Getting Sensor Service...", false); const sensorService = await server.getPrimaryService(SENSOR_SERVICE_UUID); flexSensorCharacteristic = await sensorService.getCharacteristic(FLEX_SENSOR_CHAR_UUID); updateStatus("Subscribing to Sensor...", false); await flexSensorCharacteristic.startNotifications(); flexSensorCharacteristic.addEventListener('characteristicvaluechanged', handleSensorNotification); console.log("Subscribed to sensor notifications."); isConnected = true; updateStatus("Connected!", true); updateConnectButton(); 
+            
+            // Tampilkan elemen UI setelah konek
+            modeSelection.style.display = 'block'; 
+            batteryStatus.style.display = 'block';
+            showScreen('home'); // Tampilkan card pilih mode
+
+         } catch (error) { console.error("Connection Error:", error); updateStatus(`Error: ${error.message}`, false); if (bleDevice && bleDevice.gatt && bleDevice.gatt.connected) { bleDevice.gatt.disconnect(); } else { onDisconnected(); } } }
+        
         function disconnect() { if (flexSensorCharacteristic) { try { flexSensorCharacteristic.stopNotifications(); flexSensorCharacteristic.removeEventListener('characteristicvaluechanged', handleSensorNotification); } catch(error) { console.error("Error stopping/removing listener:", error); } } if (bleDevice && bleDevice.gatt.connected) { bleDevice.gatt.disconnect(); } else { onDisconnected(); } }
-        function onDisconnected() { console.log("onDisconnected event triggered."); isConnected = false; controlCharacteristic = null; flexSensorCharacteristic = null; bleDevice = null; updateStatus("Device Disconnected", false); updateConnectButton(); modeSelection.style.display = 'none'; batteryStatus.style.display = 'none'; showScreen('home'); }
+        
+        function onDisconnected() { 
+            console.log("onDisconnected event triggered."); isConnected = false; controlCharacteristic = null; flexSensorCharacteristic = null; bleDevice = null; 
+            updateStatus("Device Disconnected", false); 
+            updateConnectButton(); 
+            
+            // Sembunyikan elemen UI
+            modeSelection.style.display = 'none'; 
+            batteryStatus.style.display = 'none';
+            batteryStatus.textContent = 'BAT: --% (-- V)'; // Reset teks
+            showScreen('home'); // Tampilkan card home (yang kini kosong)
+        }
 
         // --- Manajemen Layar & UI Helper ---
         function updateStatus(message, isSuccess = false) { if (!statusDisplay) return; statusDisplay.textContent = message; statusDisplay.style.display = 'block'; if (message.toLowerCase().includes('error')) { statusDisplay.style.backgroundColor = 'var(--danger-color)'; statusDisplay.style.color = '#fff'; } else if (isSuccess) { statusDisplay.style.backgroundColor = 'var(--success-color)'; statusDisplay.style.color = '#fff'; } else { statusDisplay.style.backgroundColor = 'var(--border-color)'; statusDisplay.style.color = 'var(--text-color)'; } }
         function updateConnectButton() { if (isConnected) { connectButton.textContent = "Disconnect"; connectButton.classList.add("connected"); } else { connectButton.textContent = "Connect to Device"; connectButton.classList.remove("connected"); } }
-        function showScreen(screenName) { homeScreen.style.display = 'none'; manualModeScreen.style.display = 'none'; autoModeScreen.style.display = 'none'; globalSettingsCard.style.display = 'none'; if (screenName === 'home') { homeScreen.style.display = 'block'; } else if (screenName === 'manual') { manualModeScreen.style.display = 'block'; globalSettingsCard.style.display = 'block'; currentModeDisplay.textContent = "Manual"; } else if (screenName === 'auto') { autoModeScreen.style.display = 'block'; globalSettingsCard.style.display = 'block'; currentModeDisplay.textContent = "Otomatis"; } }
+        
+        // Fungsi showScreen (v2.18) - Tidak perlu diubah, sudah benar
+        function showScreen(screenName) { 
+            homeScreen.style.display = 'none'; 
+            manualModeScreen.style.display = 'none'; 
+            autoModeScreen.style.display = 'none'; 
+            globalSettingsCard.style.display = 'none'; 
+            if (screenName === 'home') { 
+                homeScreen.style.display = 'block'; // Tampilkan card pilih mode
+            } else if (screenName === 'manual') { 
+                manualModeScreen.style.display = 'block'; 
+                globalSettingsCard.style.display = 'block'; 
+                currentModeDisplay.textContent = "Manual"; 
+            } else if (screenName === 'auto') { 
+                autoModeScreen.style.display = 'block'; 
+                globalSettingsCard.style.display = 'block'; 
+                currentModeDisplay.textContent = "Otomatis"; 
+            } 
+        }
+
         selectManualButton.addEventListener('click', () => { showScreen('manual'); sendCommand('AM:E:0'); });
         selectAutoButton.addEventListener('click', () => { showScreen('auto'); targetAngleInput.dispatchEvent(new Event('change')); sendCommand('AM:E:1'); });
         backButtonManual.addEventListener('click', () => showScreen('home'));
         backButtonAuto.addEventListener('click', () => { showScreen('home'); sendCommand('AM:E:0'); sendCommand('C1:A:0'); sendCommand('C2:A:0'); ch1AmplitudeSlider.value = 0; ch1AmplitudeInput.value = 0; ch2AmplitudeSlider.value = 0; ch2AmplitudeInput.value = 0; });
 
-        // --- (PERUBAHAN v2.17) Menangani Data Sensor ---
+        // --- (PERUBAHAN v2.18) Menangani Data Sensor ---
         function handleSensorNotification(event) {
             const payloadString = decoder.decode(event.target.value);
-            // Format: "BicepAngle:GripValue:Amplitude:BatteryPercent"
+            // Format: "BicepAngle:GripValue:Amplitude:BatteryPercent:BatteryVoltage"
             const parts = payloadString.split(':');
             
-            // Cek harus 4 bagian
-            if (parts.length < 4) {
+            // Cek harus 5 bagian
+            if (parts.length < 5) {
                 console.warn("Invalid sensor payload:", payloadString);
                 return;
             }
@@ -174,8 +245,9 @@
             const gripValue = parseFloat(parts[1]);
             const currentAmplitude = parseInt(parts[2]);
             const battPercent = parseInt(parts[3]); // NILAI BARU
+            const battVoltage = parseFloat(parts[4]); // NILAI BARU
 
-            if (isNaN(bicepAngle) || isNaN(gripValue) || isNaN(currentAmplitude) || isNaN(battPercent)) {
+            if (isNaN(bicepAngle) || isNaN(gripValue) || isNaN(currentAmplitude) || isNaN(battPercent) || isNaN(battVoltage)) {
                 console.warn("NaN value parsed:", payloadString);
                 return;
             }
@@ -222,10 +294,9 @@
                 }
             }
             
-            // 5. Update Status Baterai (BARU v2.17)
+            // 5. Update Status Baterai (BARU v2.18)
             if (batteryStatus) {
-                batteryStatus.textContent = `BAT: ${battPercent}%`;
-                // Ganti warna jika baterai lemah (opsional)
+                batteryStatus.textContent = `BAT: ${battPercent}% (${battVoltage.toFixed(2)} V)`;
                 if (battPercent <= 20) {
                     batteryStatus.style.color = 'var(--danger-color)';
                 } else {
@@ -234,9 +305,7 @@
             }
         }
 
-        // ===============================================
-        // == FUNGSI & EVENT LISTENER FES (dari v2.13) ==
-        // ===============================================
+        // --- Fungsi FES (Tidak Berubah) ---
         
         async function sendCommand(command) { if (!isConnected || !controlCharacteristic) { return; } try { await controlCharacteristic.writeValue(encoder.encode(command)); } catch (error) { console.error("Send Error:", error); } }
         const debounce = (func, wait) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), wait); }; };
@@ -254,7 +323,6 @@
                     sendCommand(`${commandPrefix}:${value}`);
                 }
             }
-
             slider.addEventListener('input', () => {
                 input.value = slider.value;
                  if ((channelEnable && channelEnable.checked) || !channelEnable) {
@@ -288,7 +356,7 @@
         targetAngleInput.addEventListener('change', () => { let target = parseInt(targetAngleInput.value); if (isNaN(target)) target = 90; target = Math.max(0, Math.min(120, target)); targetAngleInput.value = target; debouncedSendCommand(`AM:T:${target}`); });
 
          window.addEventListener('load', () => {
-              showScreen('home'); 
+              showScreen('home'); // Tampilkan card home (kosong) saat load
               updateStatus("Disconnected", false); 
               pulseWidthInput.value = pulseWidthSlider.value; frequencyInput.value = frequencySlider.value;
               ch1AmplitudeInput.value = ch1AmplitudeSlider.value; ch2AmplitudeInput.value = ch2AmplitudeSlider.value;
