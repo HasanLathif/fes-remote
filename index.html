@@ -42,13 +42,14 @@
              animation: fadeIn 0.4s ease-out; /* Terapkan juga di kartu global */
         }
 
-        /* (STYLE SPLASH SCREEN v2.20) */
+        /* (STYLE SPLASH SCREEN v2.20 - Disesuaikan untuk Logo) */
         #splashScreen {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
             background-color: var(--background-color);
             display: flex;
+            flex-direction: column; /* Mengatur item secara vertikal */
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -62,8 +63,17 @@
             pointer-events: none;
         }
 
+        /* (STYLE LOGO BARU v2.20) */
+        #splashScreen img {
+            max-width: 80%; /* Ukuran maksimum logo */
+            height: auto;
+            margin-bottom: 20px; /* Jarak antara logo dan teks */
+        }
+
+
         h1, h2, h3 { margin-top:0; color:var(--text-color); text-align:center; }
-        h1 { font-size:1.8rem; margin-bottom:1.5rem; }
+        /* H1 di splash screen akan di-override oleh h1 di #splashScreen, jadi ini untuk h1 di kartu utama */
+        .card h1 { font-size:1.8rem; margin-bottom:1.5rem; } 
         h2 { font-size:1.3rem; font-weight:600; margin-bottom:1.5rem; text-align:left; border-bottom:1px solid var(--border-color); padding-bottom:0.75rem; }
         .control-group { margin-bottom:2rem; }
         .control-group:last-child { margin-bottom:0.5rem; }
@@ -123,8 +133,9 @@
 </head>
 <body>
     <div id="splashScreen">
+        <img src="rubiflex_logo.png" alt="RUBIFlex Logo"> 
         <h1>RUBIFlex</h1>
-    </div>
+        </div>
 
     <div class="container">
         
@@ -242,7 +253,7 @@
         const frequencySlider = document.getElementById('frequencySlider');
         const frequencyInput = document.getElementById('frequencyInput');
         
-        // Baterai (BARU v2.20)
+        // Baterai
         const batteryStatus = document.getElementById('batteryStatus');
         const batteryFill = document.getElementById('batteryFill');
         const batteryText = document.getElementById('batteryText');
@@ -270,7 +281,7 @@
         const FES_SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b"; const FES_CONTROL_CHAR_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"; const SENSOR_SERVICE_UUID = "0000180f-0000-1000-8000-00805f9b34fb"; const FLEX_SENSOR_CHAR_UUID = "00002a19-0000-1000-8000-00805f9b34fb"; let bleDevice, controlCharacteristic, flexSensorCharacteristic; let isConnected = false; const encoder = new TextEncoder('utf-8'); const decoder = new TextDecoder('utf-8');
         const DEFAULT_PULSE_WIDTH = 200;
         const DEFAULT_FREQUENCY = 30;
-        const BATTERY_FILL_WIDTH = 26; // Lebar maks (px/unit) dari rect #batteryFill
+        const BATTERY_FILL_WIDTH = 26; 
 
         // --- Fungsi Koneksi ---
         connectButton.addEventListener('click', () => isConnected ? disconnect() : connect());
@@ -298,7 +309,7 @@
                 updateStatus("Connected!", true); 
                 updateConnectButton(); 
                 modeSelection.style.display = 'block'; 
-                batteryStatus.style.display = 'flex'; // Tampilkan container baterai
+                batteryStatus.style.display = 'flex'; 
                 showScreen('home');
             } catch (error) { 
                 console.error("Connection Error:", error); 
@@ -392,7 +403,7 @@
             ch2AmplitudeSlider.value = 0; ch2AmplitudeInput.value = 0; ch2Enable.checked = false;
         });
 
-        // --- (PERUBAHAN v2.20) Menangani Data Sensor & Baterai SVG ---
+        // --- Menangani Data Sensor & Baterai SVG ---
         function handleSensorNotification(event) {
             const payloadString = decoder.decode(event.target.value);
             // Format: "BicepAngle:GripAngle:C1_Amp:C2_Amp:Batt%:BattV"
@@ -462,7 +473,7 @@
                 ch2AmplitudeInput.value = c2Amplitude;
             }
             
-            // 5. Update Status Baterai (BARU v2.20)
+            // 5. Update Status Baterai
             if (batteryFill) {
                 let fillW = (battPercent / 100) * BATTERY_FILL_WIDTH;
                 batteryFill.setAttribute('width', fillW);
@@ -544,10 +555,10 @@
             debouncedSendCommand(`AM:G:${target}`);
         });
 
-         // (PERUBAHAN v2.20) Logika Splash Screen
+         // Logika Splash Screen
          window.addEventListener('load', () => {
-              globalStatusCard.style.display = 'block'; // Tampilkan kartu global
-              showScreen(null); // Sembunyikan semua kartu mode
+              globalStatusCard.style.display = 'block'; 
+              showScreen(null); 
               updateStatus("Disconnected", false); 
               
               // Set nilai default di UI
@@ -567,7 +578,7 @@
                     // Hapus dari layout setelah fade out
                     setTimeout(() => { splashScreen.style.display = 'none'; }, 500); 
                   }
-              }, 2000); // Tampilkan splash screen selama 2 detik
+              }, 2000); 
          });
          
     </script>
