@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>RUBIFlex Pro Remote (v3.1)</title>
+    <title>RUBIFlex Pro Remote (v3.2)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -36,11 +36,24 @@
         h1 { font-size:1.8rem; margin-bottom:0.5rem; text-align: center; color: var(--background-color); }
         h2 { font-size:1.2rem; font-weight:700; margin-bottom:1rem; border-bottom:2px solid var(--border-color); padding-bottom:0.5rem; color: var(--text-color); }
         
-        /* INPUTS & CONTROLS */
-        .login-form input { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
+        /* INPUTS (FIXED WIDTH) */
+        .login-form label { display: block; margin-bottom: 5px; font-weight: 600; color: var(--text-secondary); }
+        /* Memastikan input memenuhi lebar container */
+        .login-form input { 
+            width: 100%; 
+            padding: 14px; /* Padding lebih besar */
+            margin-bottom: 20px; 
+            border: 2px solid #ccc; /* Border lebih jelas */
+            border-radius: 8px; 
+            font-size: 1.1rem; /* Font lebih besar */
+            box-sizing: border-box; /* Kunci agar padding tidak menambah lebar */
+            background-color: white;
+        }
+        .login-form input:focus { border-color: var(--primary-color); outline: none; }
+
         .control-group { margin-bottom:1.5rem; }
         label { display:block; margin-bottom:0.3rem; font-weight:600; color:var(--text-secondary); }
-        .param-desc { font-size: 0.8rem; color: #888; margin-bottom: 8px; font-style: italic; display: block; } /* Deskripsi Parameter */
+        .param-desc { font-size: 0.8rem; color: #888; margin-bottom: 8px; font-style: italic; display: block; }
         
         input[type="range"] { -webkit-appearance:none; width:100%; height:10px; background:var(--slider-track); border-radius:5px; outline:none; cursor:pointer; }
         input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:24px; height:24px; background:var(--primary-color); cursor:pointer; border-radius:50%; border:3px solid #fff; box-shadow:0 2px 5px rgba(0,0,0,0.2); }
@@ -55,6 +68,9 @@
         .btn-danger { background: var(--danger-color); }
         .btn-secondary { background-color: #b2bec3; color: var(--text-color); }
         .btn-outline { background: transparent; border: 2px solid var(--text-secondary); color: var(--text-secondary); }
+        
+        /* Tombol kecil untuk history */
+        .btn-sm { width: auto; padding: 6px 12px; font-size: 0.85rem; margin: 0; display: inline-block; }
 
         /* BATTERY SVG */
         #batteryStatus { display: none; justify-content: center; align-items: center; gap: 10px; margin-top: 10px; }
@@ -79,7 +95,10 @@
         .history-tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
         .tag-session { background: #e3f2fd; color: #0984e3; }
         .tag-preset { background: #fff3cd; color: #f39c12; }
-        .history-detail { font-size: 0.85rem; color: #555; line-height: 1.4; }
+        .history-detail { font-size: 0.85rem; color: #555; line-height: 1.4; margin-bottom: 8px; }
+        .history-actions { display: flex; gap: 8px; justify-content: flex-end; }
+        
+        #storageInfo { text-align: center; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem; background: #f1f2f6; padding: 5px; border-radius: 5px; }
 
         /* TOGGLE SWITCH */
         .switch { position:relative; display:inline-block; width:46px; height:24px; }
@@ -106,8 +125,10 @@
                 <div class="login-form">
                     <label>Nama Pasien</label>
                     <input type="text" id="inputName" placeholder="Contoh: Budi Santoso">
+                    
                     <label>Nomor Telepon (ID)</label>
-                    <input type="number" id="inputPhone" placeholder="Contoh: 08123456789">
+                    <input type="tel" id="inputPhone" placeholder="08xxxxxxxxxx">
+                    
                     <button class="btn-primary" onclick="handleLogin()">Masuk & Mulai Sesi</button>
                     <button class="btn-outline" onclick="handleGuest()">Lanjut sebagai Tamu</button>
                 </div>
@@ -235,6 +256,9 @@
             <div class="card">
                 <button class="btn-secondary" onclick="goHome()">Kembali</button>
                 <h2>Riwayat Terapi</h2>
+                
+                <div id="storageInfo">Memuat Info Penyimpanan...</div>
+
                 <div id="historyList">
                     <p style="text-align:center; color:#888;">Belum ada data rekaman.</p>
                 </div>
@@ -288,10 +312,8 @@
             document.getElementById(id).style.display = 'block';
         }
 
-        // --- FEATURE: SAVE MANUAL PRESET ---
         function saveManualPreset() {
             if(!currentUser) { alert("Mode Tamu tidak bisa menyimpan preset."); return; }
-            
             const preset = {
                 type: 'preset',
                 date: new Date().toLocaleString(),
@@ -302,11 +324,33 @@
                     freq: document.getElementById('freqInput').value
                 }
             };
-            
             let history = JSON.parse(localStorage.getItem(currentUser.key)) || [];
             history.push(preset);
             localStorage.setItem(currentUser.key, JSON.stringify(history));
-            alert("Preset Berhasil Disimpan di Riwayat!");
+            alert("Preset Berhasil Disimpan!");
+        }
+
+        // --- STORAGE MANAGEMENT (NEW v3.2) ---
+        function getStorageUsage() {
+            // Hitung estimasi penggunaan storage dalam KB
+            let total = 0;
+            if(currentUser && localStorage.getItem(currentUser.key)){
+                const data = localStorage.getItem(currentUser.key);
+                total = data.length * 2; // UTF-16 uses 2 bytes per char
+            }
+            return (total / 1024).toFixed(2);
+        }
+
+        function deleteHistoryItem(reverseIndex) {
+            if(!confirm("Yakin ingin menghapus data ini? Data tidak bisa dikembalikan.")) return;
+            
+            const history = JSON.parse(localStorage.getItem(currentUser.key));
+            const realIndex = (history.length - 1) - reverseIndex; // Convert back from reversed view
+            
+            history.splice(realIndex, 1); // Remove item
+            localStorage.setItem(currentUser.key, JSON.stringify(history)); // Save back
+            
+            renderHistory(); // Refresh view
         }
 
         // --- NAVIGATION ---
@@ -318,16 +362,13 @@
         async function goToAuto() { 
             showScreen('autoModeScreen');
             startRecording();
-            
             const tg = document.getElementById('targetGrip').value;
             const tb = document.getElementById('targetBicep').value;
-            
-            // FIXED: Tambahkan delay agar tidak overlapping
             sendCommand(`AM:G:${tg}`);
-            await new Promise(r => setTimeout(r, 100)); // Delay 100ms
+            await new Promise(r => setTimeout(r, 100));
             sendCommand(`AM:B:${tb}`);
             await new Promise(r => setTimeout(r, 100));
-            sendCommand('AM:E:1'); // Enable Auto
+            sendCommand('AM:E:1'); 
         }
 
         function goHome() {
@@ -373,14 +414,12 @@
         function stopRecording() {
             isRecording = false;
             if(!currentUser || currentSessionData.length === 0) return;
-            
             const session = {
                 type: 'session',
                 date: new Date().toLocaleString(),
                 duration: ((Date.now() - recordingStartTime)/1000).toFixed(1) + "s",
                 data: currentSessionData
             };
-            
             let history = JSON.parse(localStorage.getItem(currentUser.key)) || [];
             history.push(session);
             localStorage.setItem(currentUser.key, JSON.stringify(history));
@@ -429,7 +468,7 @@
         // --- DATA HANDLER ---
         function handleNotifications(event) {
             const str = decoder.decode(event.target.value);
-            const p = str.split(':'); // Bicep:Grip:C1:C2:Bat%:BatV
+            const p = str.split(':'); 
             if(p.length < 6) return;
 
             const bicep = parseFloat(p[0]);
@@ -439,24 +478,18 @@
             const batP = parseInt(p[4]);
             const batV = parseFloat(p[5]);
 
-            // Update Manual Gauges
             updateGauge('manGrip', grip, 270);
             updateGauge('manBicep', bicep, 120);
-            
-            // Update Auto Gauges (ADDED in v3.1)
             updateGauge('autoGrip', grip, 270);
             updateGauge('autoBicep', bicep, 120);
 
-            // Update Battery
             document.getElementById('batteryText').textContent = batP + "%";
             document.getElementById('batteryVoltageText').textContent = batV.toFixed(2) + "V";
             document.getElementById('batteryFill').setAttribute('width', (batP/100)*26);
             
-            // Update Readouts
             document.getElementById('autoC1Readout').textContent = c1;
             document.getElementById('autoC2Readout').textContent = c2;
 
-            // Charting
             if(isRecording && currentUser) {
                 const t = ((Date.now() - recordingStartTime)/1000).toFixed(1);
                 currentSessionData.push({t, g:grip, b:bicep, c1, c2});
@@ -474,19 +507,27 @@
         }
 
         function updateGauge(prefix, val, max) {
-            // Helper to update text and bar width
             const elVal = document.getElementById(prefix + 'Val') || document.getElementById(prefix + 'ValDisplay');
             const elBar = document.getElementById(prefix + 'Gauge');
             if(elVal) elVal.textContent = val.toFixed(0) + "°";
             if(elBar) elBar.style.width = Math.min((val/max)*100, 100) + "%";
         }
 
-        // --- HISTORY RENDERER ---
+        // --- HISTORY RENDERER (Updated v3.2) ---
         function renderHistory() {
             const list = document.getElementById('historyList');
+            const info = document.getElementById('storageInfo');
             list.innerHTML = "";
-            if(!currentUser) { list.innerHTML = "<p>Mode Tamu.</p>"; return; }
             
+            if(!currentUser) { 
+                list.innerHTML = "<p>Mode Tamu.</p>"; 
+                info.style.display = 'none';
+                return; 
+            }
+            
+            info.style.display = 'block';
+            info.textContent = `Penyimpanan Pasien Ini: ${getStorageUsage()} KB (Aman)`;
+
             const history = JSON.parse(localStorage.getItem(currentUser.key)) || [];
             if(history.length === 0) { list.innerHTML = "<p style='text-align:center'>Kosong.</p>"; return; }
 
@@ -494,20 +535,27 @@
                 const div = document.createElement('div');
                 div.className = 'history-item';
                 
+                let content = "";
+                let actions = "";
+
                 if(item.type === 'preset') {
-                    div.innerHTML = `
+                    content = `
                         <div class="history-header"><span class="history-tag tag-preset">PRESET</span> <span style="font-size:0.8rem">${item.date}</span></div>
                         <div class="history-detail">
                             <strong>Disimpan:</strong> Grip Amp: ${item.data.c1}, Bicep Amp: ${item.data.c2}<br>
                             PW: ${item.data.pw}µs, Freq: ${item.data.freq}Hz
                         </div>`;
                 } else {
-                    div.innerHTML = `
+                    content = `
                         <div class="history-header"><span class="history-tag tag-session">SESI</span> <span style="font-size:0.8rem">${item.date}</span></div>
-                        <div class="history-detail">Durasi: ${item.duration}</div>
-                        <button class="btn-success" style="padding:5px; font-size:0.8rem; margin-top:5px; width:auto;" onclick="downloadCSV(${idx})">Download CSV</button>
-                    `;
+                        <div class="history-detail">Durasi: ${item.duration}</div>`;
+                    actions = `<button class="btn-success btn-sm" onclick="downloadCSV(${idx})">Download</button>`;
                 }
+
+                // Delete button for all types
+                actions += `<button class="btn-danger btn-sm" onclick="deleteHistoryItem(${idx})">Hapus</button>`;
+
+                div.innerHTML = content + `<div class="history-actions">${actions}</div>`;
                 list.appendChild(div);
             });
         }
@@ -516,10 +564,8 @@
             const history = JSON.parse(localStorage.getItem(currentUser.key));
             const realIdx = (history.length - 1) - revIdx;
             const data = history[realIdx].data;
-            
             let csv = "Time(s),Grip(deg),Bicep(deg),AmpC1,AmpC2\n";
             data.forEach(r => csv += `${r.t},${r.g},${r.b},${r.c1},${r.c2}\n`);
-            
             const link = document.createElement("a");
             link.href = encodeURI("data:text/csv;charset=utf-8," + csv);
             link.download = `Sesi_${currentUser.name}.csv`;
@@ -569,7 +615,6 @@
             document.getElementById('ch1Enable').checked=false; document.getElementById('ch2Enable').checked=false;
         }
         
-        // Init
         document.getElementById('pwInput').value = 200;
         document.getElementById('freqInput').value = 30;
     </script>
