@@ -3,96 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>RUBIFlex Pro Remote (v3.0)</title>
+    <title>RUBIFlex Pro Remote (v3.1)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* (TEMA WARNA RUBIFLEX PRO) */
+        /* TEMA WARNA */
         :root {
-            --background-color: #963930;    /* Red Brand */
-            --card-background: #fdf6f2;     /* Lebih terang biar bersih */
-            --text-color: #2d3436;          /* Dark Grey */
-            --text-secondary: #636e72;      /* Grey */
+            --background-color: #963930;
+            --card-background: #fdf6f2;
+            --text-color: #2d3436;
+            --text-secondary: #636e72;
             --border-color: #dfe6e9;        
-            --primary-color: #0984e3;       /* Azure Blue yang lebih vivid */
-            --primary-hover: #74b9ff;       
-            --success-color: #00b894;       /* Green */
-            --warning-color: #fdcb6e;       /* Orange */
-            --danger-color: #d63031;        /* Red Alert */
+            --primary-color: #0984e3;
+            --success-color: #00b894;
+            --danger-color: #d63031;
             --slider-track: #b2bec3;
             --gauge-fill: #0984e3;
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color:var(--background-color); color:var(--text-color); margin:0; padding:1rem; display:flex; justify-content:center; min-height:100vh; box-sizing:border-box; }
-        .container { width:100%; max-width:550px; padding-top: 40px; /* Space untuk logo */ }
+        .container { width:100%; max-width:550px; padding-top: 50px; padding-bottom: 50px; }
         
-        /* LOGO DI POJOK KANAN ATAS (PERSISTENT) */
-        #fixedLogo {
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            width: 60px; /* Sesuaikan ukuran */
-            height: auto;
-            z-index: 2000;
-            filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3));
-        }
+        /* LOGO */
+        #fixedLogo { position: fixed; top: 15px; right: 15px; width: 60px; height: auto; z-index: 2000; filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3)); }
 
-        .card { 
-            background-color:var(--card-background); 
-            border-radius:16px; 
-            box-shadow:0 8px 20px rgba(0,0,0,0.2); 
-            padding:1.5rem; 
-            margin-bottom:1rem; 
-            animation: fadeIn 0.4s ease-out;
-        }
-        
-        /* Layar */
+        .card { background-color:var(--card-background); border-radius:16px; box-shadow:0 8px 20px rgba(0,0,0,0.2); padding:1.5rem; margin-bottom:1rem; animation: fadeIn 0.4s ease-out; }
         #loginScreen, #homeScreen, #manualModeScreen, #autoModeScreen, #historyScreen { display:none; }
 
         h1 { font-size:1.8rem; margin-bottom:0.5rem; text-align: center; color: var(--background-color); }
         h2 { font-size:1.2rem; font-weight:700; margin-bottom:1rem; border-bottom:2px solid var(--border-color); padding-bottom:0.5rem; color: var(--text-color); }
         
-        /* Form Login */
+        /* INPUTS & CONTROLS */
         .login-form input { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
-        .login-form label { display: block; margin-bottom: 5px; font-weight: 600; color: var(--text-secondary); }
-
-        /* Controls */
         .control-group { margin-bottom:1.5rem; }
-        label { display:block; margin-bottom:0.5rem; font-weight:600; color:var(--text-secondary); }
-        input[type="range"] { -webkit-appearance:none; appearance:none; width:100%; height:10px; background:var(--slider-track); border-radius:5px; outline:none; cursor:pointer; }
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:24px; height:24px; background:var(--primary-color); cursor:pointer; border-radius:50%; border:3px solid #fff; box-shadow:0 2px 5px rgba(0,0,0,0.2); }
+        label { display:block; margin-bottom:0.3rem; font-weight:600; color:var(--text-secondary); }
+        .param-desc { font-size: 0.8rem; color: #888; margin-bottom: 8px; font-style: italic; display: block; } /* Deskripsi Parameter */
         
-        .input-value-container { display:flex; align-items:center; justify-content:flex-end; gap:0.5rem; }
+        input[type="range"] { -webkit-appearance:none; width:100%; height:10px; background:var(--slider-track); border-radius:5px; outline:none; cursor:pointer; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:24px; height:24px; background:var(--primary-color); cursor:pointer; border-radius:50%; border:3px solid #fff; box-shadow:0 2px 5px rgba(0,0,0,0.2); }
+        .input-value-container { display:flex; align-items:center; justify-content:flex-end; gap:0.5rem; margin-top: 5px; }
         input[type="number"] { width:70px; padding:5px; border:1px solid var(--border-color); border-radius:6px; font-size:1rem; text-align:right; }
 
-        /* Buttons */
-        button { width:100%; padding:12px; font-size:1rem; font-weight:bold; border:none; border-radius:10px; cursor:pointer; transition:transform 0.1s, opacity 0.2s; color: white; margin-bottom: 10px; }
+        /* BUTTONS */
+        button { width:100%; padding:12px; font-size:1rem; font-weight:bold; border:none; border-radius:10px; cursor:pointer; color: white; margin-bottom: 10px; transition: 0.2s; }
         button:active { transform:scale(0.98); }
-        .btn-primary { background: linear-gradient(135deg, var(--primary-color), var(--primary-hover)); }
-        .btn-success { background: linear-gradient(135deg, var(--success-color), #55efc4); }
-        .btn-danger { background: linear-gradient(135deg, var(--danger-color), #fab1a0); }
+        .btn-primary { background: var(--primary-color); }
+        .btn-success { background: var(--success-color); }
+        .btn-danger { background: var(--danger-color); }
         .btn-secondary { background-color: #b2bec3; color: var(--text-color); }
         .btn-outline { background: transparent; border: 2px solid var(--text-secondary); color: var(--text-secondary); }
 
-        /* Status & Battery */
-        #status { text-align:center; padding:8px; border-radius:8px; font-weight:600; margin-bottom:1rem; background: #eee; font-size: 0.9rem; }
-        #currentUserDisplay { text-align: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-secondary); font-style: italic; }
-        
-        /* Battery SVG */
+        /* BATTERY SVG */
         #batteryStatus { display: none; justify-content: center; align-items: center; gap: 10px; margin-top: 10px; }
         svg.battery-svg { width: 50px; height: 24px; }
         .battery-frame { fill: none; stroke: var(--text-color); stroke-width: 2; }
         .battery-cap { fill: var(--text-color); }
-        #batteryFill { fill: var(--success-color); transition: width 0.3s ease, fill 0.3s ease; }
+        #batteryFill { fill: var(--success-color); transition: width 0.3s; }
         #batteryText { font-size: 10px; font-weight: bold; fill: #000; }
 
-        /* Sensors & Gauges */
+        /* SENSORS & GAUGES */
         .sensor-row { display: flex; gap: 10px; margin-bottom: 1rem; }
         .sensor-box { flex: 1; background: #fff; padding: 10px; border-radius: 10px; border: 1px solid var(--border-color); text-align: center; }
         .sensor-title { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px; }
@@ -100,15 +72,16 @@
         .gauge-bar { height: 8px; background: var(--slider-track); border-radius: 4px; overflow: hidden; margin-top: 5px; }
         .gauge-fill { height: 100%; width: 0%; background: var(--gauge-fill); transition: width 0.2s; }
 
-        /* Chart Canvas */
+        /* CHART & HISTORY */
         .chart-container { position: relative; height: 200px; width: 100%; margin-top: 1rem; }
+        .history-item { background: white; border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; margin-bottom: 8px; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .history-tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
+        .tag-session { background: #e3f2fd; color: #0984e3; }
+        .tag-preset { background: #fff3cd; color: #f39c12; }
+        .history-detail { font-size: 0.85rem; color: #555; line-height: 1.4; }
 
-        /* History Table */
-        .history-item { background: white; border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .history-info { font-size: 0.9rem; }
-        .history-date { font-size: 0.75rem; color: var(--text-secondary); }
-
-        /* Toggle Switch */
+        /* TOGGLE SWITCH */
         .switch { position:relative; display:inline-block; width:46px; height:24px; }
         .switch input { opacity:0; width:0; height:0; }
         .switch-slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.4s; border-radius:24px; }
@@ -133,10 +106,8 @@
                 <div class="login-form">
                     <label>Nama Pasien</label>
                     <input type="text" id="inputName" placeholder="Contoh: Budi Santoso">
-                    
                     <label>Nomor Telepon (ID)</label>
                     <input type="number" id="inputPhone" placeholder="Contoh: 08123456789">
-                    
                     <button class="btn-primary" onclick="handleLogin()">Masuk & Mulai Sesi</button>
                     <button class="btn-outline" onclick="handleGuest()">Lanjut sebagai Tamu</button>
                 </div>
@@ -145,9 +116,9 @@
 
         <div id="homeScreen">
             <div class="card">
-                <div id="currentUserDisplay">Halo, Tamu</div>
-                <button id="connectButton" class="btn-primary">Connect Device (Bluetooth)</button>
-                <div id="status">Disconnected</div>
+                <div id="currentUserDisplay" style="text-align:center; margin-bottom:10px; color:var(--text-secondary);">Halo, Tamu</div>
+                <button id="connectButton" class="btn-primary">Connect Device</button>
+                <div id="status" style="text-align:center; padding:8px; background:#eee; border-radius:8px; font-weight:600; font-size:0.9rem;">Disconnected</div>
                 
                 <div id="batteryStatus">
                     <div class="battery-container" style="display:flex; align-items:center; gap:5px;">
@@ -156,7 +127,7 @@
                             <rect class="battery-cap" x="31" y="4" width="2" height="8" rx="1"></rect>
                             <rect id="batteryFill" x="3" y="3" width="0" height="10" rx="1"></rect>
                         </svg>
-                        <span id="batteryText" style="font-size:0.9rem; font-weight:bold;">--%</span>
+                        <span id="batteryText">--%</span>
                     </div>
                     <div id="batteryVoltageText" style="font-size:0.8rem; color:var(--text-secondary);">-- V</div>
                 </div>
@@ -164,15 +135,16 @@
                 <hr style="margin: 1.5rem 0; border-top:1px solid #ddd;">
 
                 <button class="btn-success" onclick="goToManual()">Mode Manual</button>
-                <button class="btn-success" onclick="goToAuto()">Mode Otomatis (Rekam)</button>
+                <button class="btn-success" onclick="goToAuto()">Mode Otomatis</button>
                 <button class="btn-secondary" onclick="goToHistory()">Riwayat Pasien</button>
-                <button class="btn-danger" onclick="logout()">Keluar / Ganti Pasien</button>
+                <button class="btn-danger" onclick="logout()">Keluar</button>
             </div>
         </div>
 
         <div id="manualModeScreen">
             <div class="card">
                 <button class="btn-secondary" onclick="goHome()">Kembali</button>
+                <button class="btn-primary" onclick="saveManualPreset()" style="margin-bottom:15px;">💾 Simpan Preset Ini</button>
                 <h2>Mode Manual</h2>
                 
                 <div class="sensor-row">
@@ -190,23 +162,28 @@
 
                 <div class="control-group">
                     <div class="control-header"><span>Channel 1 (Grip)</span> <label class="switch"><input type="checkbox" id="ch1Enable"><span class="switch-slider"></span></label></div>
+                    <span class="param-desc">Kekuatan stimulasi otot lengan bawah (Genggam).</span>
                     <input type="range" id="ch1AmpSlider" min="0" max="255" value="0">
                     <div class="input-value-container"><input type="number" id="ch1AmpInput" value="0"></div>
                 </div>
 
                 <div class="control-group">
                     <div class="control-header"><span>Channel 2 (Bicep)</span> <label class="switch"><input type="checkbox" id="ch2Enable"><span class="switch-slider"></span></label></div>
+                    <span class="param-desc">Kekuatan stimulasi otot lengan atas (Tekuk).</span>
                     <input type="range" id="ch2AmpSlider" min="0" max="255" value="0">
                     <div class="input-value-container"><input type="number" id="ch2AmpInput" value="0"></div>
                 </div>
 
                 <div class="card" style="background:#f1f2f6; margin-top:1rem;">
                     <h3>Global Settings</h3>
+                    
                     <label>Pulse Width (µs)</label>
+                    <span class="param-desc">Lebar denyut. Semakin tinggi, penetrasi otot semakin dalam & kuat.</span>
                     <input type="range" id="pwSlider" min="50" max="3000" value="200" step="10">
                     <div class="input-value-container"><input type="number" id="pwInput" value="200"></div>
                     
-                    <label style="margin-top:10px;">Frequency (Hz)</label>
+                    <label style="margin-top:15px;">Frequency (Hz)</label>
+                    <span class="param-desc">Kecepatan denyut per detik. Mengatur kehalusan kontraksi otot.</span>
                     <input type="range" id="freqSlider" min="1" max="150" value="30">
                     <div class="input-value-container"><input type="number" id="freqInput" value="30"></div>
                 </div>
@@ -216,8 +193,21 @@
         <div id="autoModeScreen">
             <div class="card">
                 <button class="btn-secondary" onclick="goHome()">Stop & Simpan</button>
-                <h2>Mode Otomatis (Live)</h2>
-                <div style="text-align:center; color:var(--danger-color); font-weight:bold; font-size:0.9rem; margin-bottom:10px;" id="recordingStatus">🔴 Merekam Data...</div>
+                <h2>Mode Otomatis</h2>
+                <div style="text-align:center; color:var(--danger-color); font-weight:bold; margin-bottom:10px;" id="recordingStatus">🔴 Merekam Data...</div>
+
+                <div class="sensor-row">
+                    <div class="sensor-box">
+                        <div class="sensor-title">Grip (C1)</div>
+                        <div id="autoGripValDisplay" class="sensor-val">0°</div>
+                        <div class="gauge-bar"><div id="autoGripGauge" class="gauge-fill"></div></div>
+                    </div>
+                    <div class="sensor-box">
+                        <div class="sensor-title">Bicep (C2)</div>
+                        <div id="autoBicepValDisplay" class="sensor-val">0°</div>
+                        <div class="gauge-bar"><div id="autoBicepGauge" class="gauge-fill"></div></div>
+                    </div>
+                </div>
 
                 <div class="chart-container">
                     <canvas id="sessionChart"></canvas>
@@ -254,8 +244,6 @@
     </div>
 
     <script>
-        // --- 1. GLOBAL VARIABLES ---
-        // BLE UUIDs
         const FES_SERVICE = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
         const FES_CHAR = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
         const SENSOR_SERVICE = "0000180f-0000-1000-8000-00805f9b34fb";
@@ -266,72 +254,86 @@
         const encoder = new TextEncoder();
         const decoder = new TextDecoder();
 
-        // User & Data State
-        let currentUser = null; // Object {name, phone, key}
-        let currentSessionData = []; // Array to store [time, grip, bicep, c1, c2]
+        let currentUser = null;
+        let currentSessionData = [];
         let isRecording = false;
         let recordingStartTime = 0;
         let chartInstance = null;
 
-        // --- 2. USER MANAGEMENT (LOGIN/LOGOUT) ---
+        // --- USER & DATA ---
         function handleLogin() {
             const name = document.getElementById('inputName').value.trim();
             const phone = document.getElementById('inputPhone').value.trim();
-            
-            if(!name || !phone) { alert("Mohon isi Nama dan Nomor Telepon."); return; }
-            
-            // Buat ID unik: 'pasien_nomor' (misal: budi_08123)
+            if(!name || !phone) { alert("Isi nama dan nomor."); return; }
             const userKey = `rubiflex_${name.toLowerCase().replace(/\s/g,'')}_${phone}`;
-            
             currentUser = { name: name, phone: phone, key: userKey };
-            
-            document.getElementById('currentUserDisplay').textContent = `Pasien: ${name} (${phone})`;
+            document.getElementById('currentUserDisplay').textContent = `Pasien: ${name}`;
             showScreen('homeScreen');
         }
 
         function handleGuest() {
             currentUser = null;
-            document.getElementById('currentUserDisplay').textContent = "Mode Tamu (Data tidak disimpan)";
+            document.getElementById('currentUserDisplay').textContent = "Mode Tamu";
             showScreen('homeScreen');
         }
 
         function logout() {
             currentUser = null;
             if(isConnected) disconnect();
-            document.getElementById('inputName').value = "";
-            document.getElementById('inputPhone').value = "";
             showScreen('loginScreen');
         }
 
-        // --- 3. NAVIGATION ---
         function showScreen(id) {
-            const screens = ['loginScreen', 'homeScreen', 'manualModeScreen', 'autoModeScreen', 'historyScreen'];
-            screens.forEach(s => document.getElementById(s).style.display = 'none');
+            ['loginScreen', 'homeScreen', 'manualModeScreen', 'autoModeScreen', 'historyScreen'].forEach(s => document.getElementById(s).style.display = 'none');
             document.getElementById(id).style.display = 'block';
         }
 
+        // --- FEATURE: SAVE MANUAL PRESET ---
+        function saveManualPreset() {
+            if(!currentUser) { alert("Mode Tamu tidak bisa menyimpan preset."); return; }
+            
+            const preset = {
+                type: 'preset',
+                date: new Date().toLocaleString(),
+                data: {
+                    c1: document.getElementById('ch1AmpInput').value,
+                    c2: document.getElementById('ch2AmpInput').value,
+                    pw: document.getElementById('pwInput').value,
+                    freq: document.getElementById('freqInput').value
+                }
+            };
+            
+            let history = JSON.parse(localStorage.getItem(currentUser.key)) || [];
+            history.push(preset);
+            localStorage.setItem(currentUser.key, JSON.stringify(history));
+            alert("Preset Berhasil Disimpan di Riwayat!");
+        }
+
+        // --- NAVIGATION ---
         function goToManual() { 
             showScreen('manualModeScreen'); 
-            sendCommand('AM:E:0'); // Pastikan Auto mati
+            sendCommand('AM:E:0'); 
         }
         
-        function goToAuto() { 
+        async function goToAuto() { 
             showScreen('autoModeScreen');
-            startRecording(); // Mulai rekam & grafik
-            // Kirim target awal
+            startRecording();
+            
             const tg = document.getElementById('targetGrip').value;
             const tb = document.getElementById('targetBicep').value;
+            
+            // FIXED: Tambahkan delay agar tidak overlapping
             sendCommand(`AM:G:${tg}`);
+            await new Promise(r => setTimeout(r, 100)); // Delay 100ms
             sendCommand(`AM:B:${tb}`);
-            sendCommand('AM:E:1'); // Nyalakan Auto Mode di alat
+            await new Promise(r => setTimeout(r, 100));
+            sendCommand('AM:E:1'); // Enable Auto
         }
 
         function goHome() {
-            // Jika pulang dari Auto Mode, stop rekaman
             if(isRecording) stopRecording();
-            
-            sendCommand('AM:E:0'); // Matikan Auto
-            sendCommand('C1:A:0'); // Reset Amp
+            sendCommand('AM:E:0');
+            sendCommand('C1:A:0');
             sendCommand('C2:A:0');
             resetSliders();
             showScreen('homeScreen');
@@ -342,300 +344,234 @@
             showScreen('historyScreen');
         }
 
-        // --- 4. RECORDING & CHART LOGIC ---
+        // --- CHART & RECORDING ---
         function initChart() {
             const ctx = document.getElementById('sessionChart').getContext('2d');
-            if(chartInstance) chartInstance.destroy(); // Hapus chart lama jika ada
-
+            if(chartInstance) chartInstance.destroy();
             chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: [], // Time (detik)
+                    labels: [],
                     datasets: [
-                        { label: 'Grip (°)', data: [], borderColor: '#e17055', tension: 0.1 }, // Merah bata
-                        { label: 'Bicep (°)', data: [], borderColor: '#0984e3', tension: 0.1 } // Biru
+                        { label: 'Grip (°)', data: [], borderColor: '#e17055', tension: 0.1 },
+                        { label: 'Bicep (°)', data: [], borderColor: '#0984e3', tension: 0.1 }
                     ]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: false, // Matikan animasi biar ringan saat update real-time
+                    responsive: true, maintainAspectRatio: false, animation: false,
                     scales: { y: { beginAtZero: true, max: 270 } }
                 }
             });
         }
 
         function startRecording() {
-            currentSessionData = []; // Kosongkan data
-            isRecording = true;
-            recordingStartTime = Date.now();
-            
-            if(currentUser) {
-                document.getElementById('recordingStatus').style.display = 'block';
-            } else {
-                document.getElementById('recordingStatus').style.display = 'none'; // Tamu ga direkam
-            }
+            currentSessionData = []; isRecording = true; recordingStartTime = Date.now();
+            document.getElementById('recordingStatus').style.display = currentUser ? 'block' : 'none';
             initChart();
         }
 
         function stopRecording() {
             isRecording = false;
-            if(!currentUser) return; // Tamu tidak simpan data
-
-            // Simpan ke LocalStorage
-            if(currentSessionData.length > 0) {
-                const sessionRecord = {
-                    date: new Date().toLocaleString(),
-                    duration: ((Date.now() - recordingStartTime)/1000).toFixed(1) + "s",
-                    data: currentSessionData
-                };
-
-                // Ambil history lama
-                let history = JSON.parse(localStorage.getItem(currentUser.key)) || [];
-                history.push(sessionRecord); // Tambah sesi baru
-                localStorage.setItem(currentUser.key, JSON.stringify(history)); // Simpan balik
-                alert("Data sesi berhasil disimpan!");
-            }
+            if(!currentUser || currentSessionData.length === 0) return;
+            
+            const session = {
+                type: 'session',
+                date: new Date().toLocaleString(),
+                duration: ((Date.now() - recordingStartTime)/1000).toFixed(1) + "s",
+                data: currentSessionData
+            };
+            
+            let history = JSON.parse(localStorage.getItem(currentUser.key)) || [];
+            history.push(session);
+            localStorage.setItem(currentUser.key, JSON.stringify(history));
+            alert("Sesi Terapi Disimpan!");
         }
 
-        // --- 5. BLE CONNECTION ---
+        // --- BLE LOGIC ---
         document.getElementById('connectButton').addEventListener('click', () => isConnected ? disconnect() : connect());
 
         async function connect() {
             try {
-                updateStatus("Mencari Perangkat...", false);
+                updateStatus("Searching...", false);
                 bleDevice = await navigator.bluetooth.requestDevice({
                     filters: [{ services: [FES_SERVICE] }],
                     optionalServices: [FES_SERVICE, SENSOR_SERVICE]
                 });
-                
                 bleDevice.addEventListener('gattserverdisconnected', onDisconnect);
                 const server = await bleDevice.gatt.connect();
                 
-                // Get Services
-                const fesSvc = await server.getPrimaryService(FES_SERVICE);
-                controlChar = await fesSvc.getCharacteristic(FES_CHAR);
+                const fes = await server.getPrimaryService(FES_SERVICE);
+                controlChar = await fes.getCharacteristic(FES_CHAR);
                 
-                const sensSvc = await server.getPrimaryService(SENSOR_SERVICE);
-                sensorChar = await sensSvc.getCharacteristic(SENSOR_CHAR);
-                
+                const sens = await server.getPrimaryService(SENSOR_SERVICE);
+                sensorChar = await sens.getCharacteristic(SENSOR_CHAR);
                 await sensorChar.startNotifications();
                 sensorChar.addEventListener('characteristicvaluechanged', handleNotifications);
                 
                 isConnected = true;
-                updateStatus("Terhubung ✅", true);
+                updateStatus("Connected ✅", true);
                 document.getElementById('connectButton').textContent = "Disconnect";
                 document.getElementById('batteryStatus').style.display = 'flex';
-
-            } catch (error) {
-                console.error(error);
-                updateStatus("Gagal Konek: " + error.message, false);
-            }
+            } catch (e) { console.error(e); updateStatus("Error: " + e.message, false); }
         }
 
-        function disconnect() {
-            if(bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect();
-        }
-
+        function disconnect() { if(bleDevice) bleDevice.gatt.disconnect(); }
         function onDisconnect() {
             isConnected = false;
-            updateStatus("Terputus ❌", false);
+            updateStatus("Disconnected ❌", false);
             document.getElementById('connectButton').textContent = "Connect Device";
             document.getElementById('batteryStatus').style.display = 'none';
             resetSliders();
-            if(isRecording) stopRecording(); // Auto save if disconnect mid-session
-            showScreen('homeScreen'); // Kick to home
+            if(isRecording) stopRecording();
+            showScreen('homeScreen');
         }
 
-        // --- 6. DATA HANDLING (THE BRAIN) ---
+        // --- DATA HANDLER ---
         function handleNotifications(event) {
             const str = decoder.decode(event.target.value);
-            // Format v6.9: "Bicep:Grip:C1:C2:Bat%:BatV"
-            const parts = str.split(':');
-            if(parts.length < 6) return;
+            const p = str.split(':'); // Bicep:Grip:C1:C2:Bat%:BatV
+            if(p.length < 6) return;
 
-            const bicep = parseFloat(parts[0]);
-            const grip = parseFloat(parts[1]);
-            const c1 = parseInt(parts[2]);
-            const c2 = parseInt(parts[3]);
-            const batP = parseInt(parts[4]);
-            const batV = parseFloat(parts[5]);
+            const bicep = parseFloat(p[0]);
+            const grip = parseFloat(p[1]);
+            const c1 = parseInt(p[2]);
+            const c2 = parseInt(p[3]);
+            const batP = parseInt(p[4]);
+            const batV = parseFloat(p[5]);
 
-            // Update UI Elements
-            updateSensorUI(grip, bicep);
-            updateBatteryUI(batP, batV);
+            // Update Manual Gauges
+            updateGauge('manGrip', grip, 270);
+            updateGauge('manBicep', bicep, 120);
             
-            // Jika di Manual Mode, update slider jika perlu (sync)
-            // (Kode disederhanakan: user yang gerakin slider, jadi ga perlu update slider dari nilai balik kecuali auto)
+            // Update Auto Gauges (ADDED in v3.1)
+            updateGauge('autoGrip', grip, 270);
+            updateGauge('autoBicep', bicep, 120);
 
-            // Jika di Auto Mode, update text readout
+            // Update Battery
+            document.getElementById('batteryText').textContent = batP + "%";
+            document.getElementById('batteryVoltageText').textContent = batV.toFixed(2) + "V";
+            document.getElementById('batteryFill').setAttribute('width', (batP/100)*26);
+            
+            // Update Readouts
             document.getElementById('autoC1Readout').textContent = c1;
             document.getElementById('autoC2Readout').textContent = c2;
 
-            // RECORDING & CHARTING
+            // Charting
             if(isRecording && currentUser) {
-                const timeSec = ((Date.now() - recordingStartTime) / 1000).toFixed(1);
-                
-                // Masukkan ke data sesi
-                currentSessionData.push({ t: timeSec, b: bicep, g: grip, c1: c1, c2: c2 });
-
-                // Update Chart (Maks 50 poin biar gak berat)
+                const t = ((Date.now() - recordingStartTime)/1000).toFixed(1);
+                currentSessionData.push({t, g:grip, b:bicep, c1, c2});
                 if(chartInstance) {
-                    chartInstance.data.labels.push(timeSec);
-                    chartInstance.data.datasets[0].data.push(grip);
-                    chartInstance.data.datasets[1].data.push(bicep);
-                    
                     if(chartInstance.data.labels.length > 50) {
                         chartInstance.data.labels.shift();
-                        chartInstance.data.datasets[0].data.shift();
-                        chartInstance.data.datasets[1].data.shift();
+                        chartInstance.data.datasets.forEach(d => d.data.shift());
                     }
+                    chartInstance.data.labels.push(t);
+                    chartInstance.data.datasets[0].data.push(grip);
+                    chartInstance.data.datasets[1].data.push(bicep);
                     chartInstance.update();
                 }
             }
         }
 
-        function updateSensorUI(grip, bicep) {
-            // Manual Mode UI
-            document.getElementById('manGripVal').textContent = grip.toFixed(0) + "°";
-            document.getElementById('manGripGauge').style.width = Math.min((grip/270)*100, 100) + "%";
-            
-            document.getElementById('manBicepVal').textContent = bicep.toFixed(0) + "°";
-            document.getElementById('manBicepGauge').style.width = Math.min((bicep/120)*100, 100) + "%";
+        function updateGauge(prefix, val, max) {
+            // Helper to update text and bar width
+            const elVal = document.getElementById(prefix + 'Val') || document.getElementById(prefix + 'ValDisplay');
+            const elBar = document.getElementById(prefix + 'Gauge');
+            if(elVal) elVal.textContent = val.toFixed(0) + "°";
+            if(elBar) elBar.style.width = Math.min((val/max)*100, 100) + "%";
         }
 
-        function updateBatteryUI(pct, volt) {
-            document.getElementById('batteryText').textContent = pct + "%";
-            document.getElementById('batteryVoltageText').textContent = volt.toFixed(2) + " V";
-            const fill = document.getElementById('batteryFill');
-            const width = (pct / 100) * 26; // 26 is max width inside SVG
-            fill.setAttribute('width', width);
-            
-            if(pct < 20) fill.style.fill = "#d63031"; // Red
-            else if(pct < 50) fill.style.fill = "#fdcb6e"; // Orange
-            else fill.style.fill = "#00b894"; // Green
-        }
-
-        // --- 7. HISTORY & EXPORT ---
+        // --- HISTORY RENDERER ---
         function renderHistory() {
             const list = document.getElementById('historyList');
             list.innerHTML = "";
+            if(!currentUser) { list.innerHTML = "<p>Mode Tamu.</p>"; return; }
             
-            if(!currentUser) {
-                list.innerHTML = "<p>Mode Tamu tidak memiliki riwayat.</p>";
-                return;
-            }
-
             const history = JSON.parse(localStorage.getItem(currentUser.key)) || [];
-            
-            if(history.length === 0) {
-                list.innerHTML = "<p style='text-align:center'>Belum ada data rekaman.</p>";
-                return;
-            }
+            if(history.length === 0) { list.innerHTML = "<p style='text-align:center'>Kosong.</p>"; return; }
 
-            // Urutkan dari yang terbaru
-            history.reverse().forEach((sess, index) => {
-                const item = document.createElement('div');
-                item.className = 'history-item';
-                item.innerHTML = `
-                    <div class="history-info">
-                        <strong>Sesi #${history.length - index}</strong><br>
-                        <span class="history-date">${sess.date} • Durasi: ${sess.duration}</span>
-                    </div>
-                    <button class="btn-success" style="width:auto; padding:5px 10px; font-size:0.8rem; margin:0;" onclick='downloadCSV(${index})'>Download CSV</button>
-                `;
-                list.appendChild(item);
+            history.reverse().forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                
+                if(item.type === 'preset') {
+                    div.innerHTML = `
+                        <div class="history-header"><span class="history-tag tag-preset">PRESET</span> <span style="font-size:0.8rem">${item.date}</span></div>
+                        <div class="history-detail">
+                            <strong>Disimpan:</strong> Grip Amp: ${item.data.c1}, Bicep Amp: ${item.data.c2}<br>
+                            PW: ${item.data.pw}µs, Freq: ${item.data.freq}Hz
+                        </div>`;
+                } else {
+                    div.innerHTML = `
+                        <div class="history-header"><span class="history-tag tag-session">SESI</span> <span style="font-size:0.8rem">${item.date}</span></div>
+                        <div class="history-detail">Durasi: ${item.duration}</div>
+                        <button class="btn-success" style="padding:5px; font-size:0.8rem; margin-top:5px; width:auto;" onclick="downloadCSV(${idx})">Download CSV</button>
+                    `;
+                }
+                list.appendChild(div);
             });
         }
 
-        function downloadCSV(reverseIndex) {
-            // Ambil data asli (karena tadi di-reverse untuk tampilan)
+        function downloadCSV(revIdx) {
             const history = JSON.parse(localStorage.getItem(currentUser.key));
-            // Hitung index asli array
-            const realIndex = (history.length - 1) - reverseIndex;
-            const session = history[realIndex];
-
-            // Buat CSV Content
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Waktu(s),SudutGrip(deg),SudutBicep(deg),AmpC1,AmpC2\n"; // Header
-
-            session.data.forEach(row => {
-                csvContent += `${row.t},${row.g},${row.b},${row.c1},${row.c2}\n`;
-            });
-
-            // Trigger Download
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `RUBIFlex_${currentUser.name}_${session.date.replace(/[/,: ]/g, '_')}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // --- 8. UTILS & SENDERS ---
-        async function sendCommand(cmd) {
-            if(isConnected && controlChar) {
-                try { await controlChar.writeValue(encoder.encode(cmd)); }
-                catch(e) { console.log(e); }
-            }
-        }
-
-        // Slider Listeners with Debounce
-        const debounce = (func, delay) => {
-            let timeout;
-            return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func(...args), delay); };
-        };
-        const sendDebounced = debounce((cmd) => sendCommand(cmd), 50);
-
-        function setupSlider(id, cmdPrefix) {
-            const slider = document.getElementById(id + 'Slider');
-            const input = document.getElementById(id + 'Input');
+            const realIdx = (history.length - 1) - revIdx;
+            const data = history[realIdx].data;
             
-            slider.addEventListener('input', (e) => {
-                input.value = e.target.value;
-                sendDebounced(`${cmdPrefix}:${e.target.value}`);
+            let csv = "Time(s),Grip(deg),Bicep(deg),AmpC1,AmpC2\n";
+            data.forEach(r => csv += `${r.t},${r.g},${r.b},${r.c1},${r.c2}\n`);
+            
+            const link = document.createElement("a");
+            link.href = encodeURI("data:text/csv;charset=utf-8," + csv);
+            link.download = `Sesi_${currentUser.name}.csv`;
+            link.click();
+        }
+
+        // --- UTILS ---
+        async function sendCommand(cmd) {
+            if(isConnected && controlChar) controlChar.writeValue(encoder.encode(cmd));
+        }
+        
+        const debounce = (fn, d) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(()=>fn(...a), d); } };
+        const sendDebounced = debounce((c) => sendCommand(c), 50);
+
+        function setupSlider(id, prefix) {
+            document.getElementById(id+'Slider').addEventListener('input', (e) => {
+                document.getElementById(id+'Input').value = e.target.value;
+                sendDebounced(`${prefix}:${e.target.value}`);
             });
         }
 
-        // Init Controls
         setupSlider('ch1Amp', 'C1:A');
         setupSlider('ch2Amp', 'C2:A');
-        setupSlider('pw', 'C1:W'); // Global pulse width
-        setupSlider('freq', 'C1:F'); // Global freq
+        setupSlider('pw', 'C1:W');
+        setupSlider('freq', 'C1:F');
 
         document.getElementById('ch1Enable').addEventListener('change', (e) => {
-            document.getElementById('ch1AmpSlider').value = 0;
-            document.getElementById('ch1AmpInput').value = 0;
-            sendCommand(`C1:E:${e.target.checked ? 1 : 0}`);
-            sendCommand(`C1:A:0`);
+            document.getElementById('ch1AmpSlider').value = 0; document.getElementById('ch1AmpInput').value = 0;
+            sendCommand(`C1:E:${e.target.checked?1:0}`); sendCommand('C1:A:0');
         });
         document.getElementById('ch2Enable').addEventListener('change', (e) => {
-            document.getElementById('ch2AmpSlider').value = 0;
-            document.getElementById('ch2AmpInput').value = 0;
-            sendCommand(`C2:E:${e.target.checked ? 1 : 0}`);
-            sendCommand(`C2:A:0`);
+            document.getElementById('ch2AmpSlider').value = 0; document.getElementById('ch2AmpInput').value = 0;
+            sendCommand(`C2:E:${e.target.checked?1:0}`); sendCommand('C2:A:0');
         });
 
         document.getElementById('targetGrip').addEventListener('change', (e) => sendDebounced(`AM:G:${e.target.value}`));
         document.getElementById('targetBicep').addEventListener('change', (e) => sendDebounced(`AM:B:${e.target.value}`));
 
         function updateStatus(msg, success) {
-            const el = document.getElementById('status');
-            el.textContent = msg;
+            const el = document.getElementById('status'); el.textContent = msg;
             el.style.background = success ? '#dff9fb' : '#ff7675';
             el.style.color = success ? '#00b894' : '#fff';
         }
 
         function resetSliders() {
-            ['ch1Amp','ch2Amp'].forEach(id => {
-                document.getElementById(id+'Slider').value = 0;
-                document.getElementById(id+'Input').value = 0;
-            });
-            document.getElementById('ch1Enable').checked = false;
-            document.getElementById('ch2Enable').checked = false;
+            ['ch1Amp','ch2Amp'].forEach(id => { document.getElementById(id+'Slider').value=0; document.getElementById(id+'Input').value=0; });
+            document.getElementById('ch1Enable').checked=false; document.getElementById('ch2Enable').checked=false;
         }
-
+        
+        // Init
+        document.getElementById('pwInput').value = 200;
+        document.getElementById('freqInput').value = 30;
     </script>
 </body>
 </html>
