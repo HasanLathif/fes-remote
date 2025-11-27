@@ -3,585 +3,639 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>RUBIFlex Integrated Remote (v2.20)</title>
+    <title>RUBIFlex Pro Remote (v3.0)</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
-        /* (TEMA WARNA RUBIFLEX v2.10) */
+        /* (TEMA WARNA RUBIFLEX PRO) */
         :root {
-            --background-color: #963930;    /* Red */
-            --card-background: #dac2b3;     /* Pastel gray orange */
-            --text-color: #1c1e21;          /* Dark default */
-            --text-secondary: #a29390;      /* Gray red */
-            --border-color: #a29390;        /* Gray red */
-            --primary-color: #4c949f;       /* Azure */
-            --primary-hover: #3a7f8a;       /* Darker Azure */
-            --success-color: #42b72a;       /* Default Green */
-            --warning-color: #f39c12;       /* Orange */
-            --danger-color: #fa383e;        /* Default Red */
-            --slider-track: #93b6b4;        /* Gray cyan */
-            --angle-text-color: var(--primary-color);
-            --gauge-fill-color: var(--primary-color);
-            --outline-color: rgba(76, 148, 159, 0.4); 
-         }
+            --background-color: #963930;    /* Red Brand */
+            --card-background: #fdf6f2;     /* Lebih terang biar bersih */
+            --text-color: #2d3436;          /* Dark Grey */
+            --text-secondary: #636e72;      /* Grey */
+            --border-color: #dfe6e9;        
+            --primary-color: #0984e3;       /* Azure Blue yang lebih vivid */
+            --primary-hover: #74b9ff;       
+            --success-color: #00b894;       /* Green */
+            --warning-color: #fdcb6e;       /* Orange */
+            --danger-color: #d63031;        /* Red Alert */
+            --slider-track: #b2bec3;
+            --gauge-fill: #0984e3;
+        }
         
-        /* (ANIMASI KEYFRAME v2.20) */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        body { font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color:var(--background-color); color:var(--text-color); margin:0; padding:1rem; display:flex; justify-content:center; min-height:100vh; box-sizing:border-box; }
-        .container { width:100%; max-width:500px; }
-        .card { background-color:var(--card-background); border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.15); padding:1.5rem; margin-bottom:1rem; }
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color:var(--background-color); color:var(--text-color); margin:0; padding:1rem; display:flex; justify-content:center; min-height:100vh; box-sizing:border-box; }
+        .container { width:100%; max-width:550px; padding-top: 40px; /* Space untuk logo */ }
         
-        /* (STYLE LAYAR v2.20) */
-        #homeScreen, #manualModeScreen, #autoModeScreen, #globalSettingsCard { 
-            display: none;
-            animation: fadeIn 0.4s ease-out; /* Terapkan animasi fade-in */
-        }
-        #globalStatusCard {
-             animation: fadeIn 0.4s ease-out; /* Terapkan juga di kartu global */
-        }
-
-        /* (STYLE SPLASH SCREEN v2.20 - Disesuaikan untuk Logo) */
-        #splashScreen {
+        /* LOGO DI POJOK KANAN ATAS (PERSISTENT) */
+        #fixedLogo {
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background-color: var(--background-color);
-            display: flex;
-            flex-direction: column; /* Mengatur item secara vertikal */
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            transition: opacity 0.5s ease-out;
-            color: var(--card-background);
-            font-size: 2rem;
-            font-weight: 600;
-        }
-        #splashScreen.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        /* (STYLE LOGO BARU v2.20) */
-        #splashScreen img {
-            max-width: 50%; /* Ukuran maksimum logo */
+            top: 15px;
+            right: 15px;
+            width: 60px; /* Sesuaikan ukuran */
             height: auto;
-            margin-bottom: 15px; /* Jarak antara logo dan teks */
+            z-index: 2000;
+            filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3));
         }
 
-
-        h1, h2, h3 { margin-top:0; color:var(--text-color); text-align:center; }
-        /* H1 di splash screen akan di-override oleh h1 di #splashScreen, jadi ini untuk h1 di kartu utama */
-        .card h1 { font-size:1.8rem; margin-bottom:1.5rem; } 
-        h2 { font-size:1.3rem; font-weight:600; margin-bottom:1.5rem; text-align:left; border-bottom:1px solid var(--border-color); padding-bottom:0.75rem; }
-        .control-group { margin-bottom:2rem; }
-        .control-group:last-child { margin-bottom:0.5rem; }
-        label { display:block; margin-bottom:0.5rem; font-weight:500; color:var(--text-secondary); }
-        input[type="range"] { -webkit-appearance:none; appearance:none; width:100%; height:8px; background:var(--slider-track); border-radius:5px; outline:none; transition:opacity .2s; cursor:pointer; }
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:24px; height:24px; background:var(--primary-color); cursor:pointer; border-radius:50%; border:4px solid var(--card-background); box-shadow:0 1px 4px rgba(0,0,0,0.2); transition:transform 0.1s ease, box-shadow 0.1s ease; }
-        input[type="range"]:focus::-webkit-slider-thumb { box-shadow:0 0 0 4px var(--outline-color); }
-        .input-value-container { display:flex; align-items:center; justify-content:flex-end; gap:0.5rem; }
-        input[type="number"] { width:70px; padding:0.3rem 0.5rem; border:1px solid var(--border-color); border-radius:6px; font-size:0.95rem; text-align:right; -moz-appearance:textfield; background-color:var(--card-background); color:var(--text-color); transition:border-color 0.2s ease, box-shadow 0.2s ease; }
-        input[type="number"]:focus { border-color:var(--primary-color); box-shadow:0 0 0 3px var(--outline-color); outline:none; }
-        input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
-        .unit-label { font-weight:normal; color:var(--text-secondary); font-size:0.95rem; }
-        button { width:100%; padding:0.9rem 1rem; font-size:1.1rem; font-weight:bold; border:none; border-radius:8px; cursor:pointer; transition:background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease; }
-        button:active { transform:scale(0.98); }
-        button:focus { box-shadow:0 0 0 3px var(--outline-color); outline:none; }
-        #connectButton { background-color:var(--primary-color); color:white; margin-bottom:1rem; }
-        #connectButton:hover { background-color:var(--primary-hover); }
-        #connectButton.connected { background-color:var(--danger-color); }
-        #status { text-align:center; padding:0.8rem; border-radius:8px; font-weight:500; margin-bottom:1rem; display:none; }
+        .card { 
+            background-color:var(--card-background); 
+            border-radius:16px; 
+            box-shadow:0 8px 20px rgba(0,0,0,0.2); 
+            padding:1.5rem; 
+            margin-bottom:1rem; 
+            animation: fadeIn 0.4s ease-out;
+        }
         
-        /* (STYLE BATERAI SVG v2.20) */
-        #batteryStatus { display: none; margin-top: 1rem; }
-        .battery-container { display: flex; align-items: center; justify-content: center; gap: 10px; }
-        svg.battery-svg { width: 60px; height: 28px; }
-        .battery-frame { fill: none; stroke: var(--text-color); stroke-width: 1.5; }
-        .battery-cap { fill: var(--text-color); }
-        #batteryFill { fill: var(--text-secondary); transition: width 0.3s ease, fill 0.3s ease; }
-        #batteryText { font-size: 10px; font-weight: 600; fill: var(--text-color); text-anchor: middle; dominant-baseline: middle; }
-        #batteryVoltageText { font-size: 1.0rem; font-weight: 600; color: var(--text-color); }
+        /* Layar */
+        #loginScreen, #homeScreen, #manualModeScreen, #autoModeScreen, #historyScreen { display:none; }
 
-        .switch { position:relative; display:inline-block; width:50px; height:28px; }
+        h1 { font-size:1.8rem; margin-bottom:0.5rem; text-align: center; color: var(--background-color); }
+        h2 { font-size:1.2rem; font-weight:700; margin-bottom:1rem; border-bottom:2px solid var(--border-color); padding-bottom:0.5rem; color: var(--text-color); }
+        
+        /* Form Login */
+        .login-form input { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
+        .login-form label { display: block; margin-bottom: 5px; font-weight: 600; color: var(--text-secondary); }
+
+        /* Controls */
+        .control-group { margin-bottom:1.5rem; }
+        label { display:block; margin-bottom:0.5rem; font-weight:600; color:var(--text-secondary); }
+        input[type="range"] { -webkit-appearance:none; appearance:none; width:100%; height:10px; background:var(--slider-track); border-radius:5px; outline:none; cursor:pointer; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:24px; height:24px; background:var(--primary-color); cursor:pointer; border-radius:50%; border:3px solid #fff; box-shadow:0 2px 5px rgba(0,0,0,0.2); }
+        
+        .input-value-container { display:flex; align-items:center; justify-content:flex-end; gap:0.5rem; }
+        input[type="number"] { width:70px; padding:5px; border:1px solid var(--border-color); border-radius:6px; font-size:1rem; text-align:right; }
+
+        /* Buttons */
+        button { width:100%; padding:12px; font-size:1rem; font-weight:bold; border:none; border-radius:10px; cursor:pointer; transition:transform 0.1s, opacity 0.2s; color: white; margin-bottom: 10px; }
+        button:active { transform:scale(0.98); }
+        .btn-primary { background: linear-gradient(135deg, var(--primary-color), var(--primary-hover)); }
+        .btn-success { background: linear-gradient(135deg, var(--success-color), #55efc4); }
+        .btn-danger { background: linear-gradient(135deg, var(--danger-color), #fab1a0); }
+        .btn-secondary { background-color: #b2bec3; color: var(--text-color); }
+        .btn-outline { background: transparent; border: 2px solid var(--text-secondary); color: var(--text-secondary); }
+
+        /* Status & Battery */
+        #status { text-align:center; padding:8px; border-radius:8px; font-weight:600; margin-bottom:1rem; background: #eee; font-size: 0.9rem; }
+        #currentUserDisplay { text-align: center; margin-bottom: 1rem; font-size: 0.9rem; color: var(--text-secondary); font-style: italic; }
+        
+        /* Battery SVG */
+        #batteryStatus { display: none; justify-content: center; align-items: center; gap: 10px; margin-top: 10px; }
+        svg.battery-svg { width: 50px; height: 24px; }
+        .battery-frame { fill: none; stroke: var(--text-color); stroke-width: 2; }
+        .battery-cap { fill: var(--text-color); }
+        #batteryFill { fill: var(--success-color); transition: width 0.3s ease, fill 0.3s ease; }
+        #batteryText { font-size: 10px; font-weight: bold; fill: #000; }
+
+        /* Sensors & Gauges */
+        .sensor-row { display: flex; gap: 10px; margin-bottom: 1rem; }
+        .sensor-box { flex: 1; background: #fff; padding: 10px; border-radius: 10px; border: 1px solid var(--border-color); text-align: center; }
+        .sensor-title { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px; }
+        .sensor-val { font-size: 1.5rem; font-weight: 700; color: var(--primary-color); }
+        .gauge-bar { height: 8px; background: var(--slider-track); border-radius: 4px; overflow: hidden; margin-top: 5px; }
+        .gauge-fill { height: 100%; width: 0%; background: var(--gauge-fill); transition: width 0.2s; }
+
+        /* Chart Canvas */
+        .chart-container { position: relative; height: 200px; width: 100%; margin-top: 1rem; }
+
+        /* History Table */
+        .history-item { background: white; border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .history-info { font-size: 0.9rem; }
+        .history-date { font-size: 0.75rem; color: var(--text-secondary); }
+
+        /* Toggle Switch */
+        .switch { position:relative; display:inline-block; width:46px; height:24px; }
         .switch input { opacity:0; width:0; height:0; }
-        .switch-slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:var(--text-secondary); transition:.4s; border-radius:28px; box-shadow:0 0 0 0px var(--outline-color); }
+        .switch-slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.4s; border-radius:24px; }
+        .switch-slider:before { position:absolute; content:""; height:18px; width:18px; left:3px; bottom:3px; background-color:white; transition:.4s; border-radius:50%; }
         input:checked + .switch-slider { background-color:var(--success-color); }
-        .switch-slider:before { position:absolute; content:""; height:20px; width:20px; left:4px; bottom:4px; background-color:var(--card-background); transition:.4s; border-radius:50%; }
-        .switch input:focus + .switch-slider { box-shadow:0 0 0 3px var(--outline-color); }
         input:checked + .switch-slider:before { transform:translateX(22px); }
-        .sensor-display-card { margin-bottom:1.5rem; }
-        .angle-value { font-size:2.5rem; font-weight:600; color:var(--angle-text-color); text-align:center; margin-bottom:1rem; }
-        .gauge-container { width:100%; height:24px; background-color:var(--slider-track); border-radius:12px; overflow:hidden; border:1px solid var(--border-color); }
-        .angle-gauge { height:100%; width:0%; background-color:var(--gauge-fill-color); transition:width 0.1s linear; }
-        .grip-value { font-size: 2.5rem; font-weight: 600; color: var(--primary-color); text-align: center; margin-bottom: 1rem; }
-        .mode-button-container { display:flex; gap:1rem; margin-top:1rem; }
-        .mode-button { background-color:var(--text-secondary); color:white; }
-        .mode-button:hover { background-color:#887a77; }
-        .back-button { background-color:var(--text-secondary); color:white; margin-top:1.5rem; }
-        .back-button:hover { background-color:#887a77; }
-        .auto-mode-setting { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
-        .auto-mode-setting label { margin-bottom:0; font-size:1rem; color:var(--text-color); }
-        .auto-mode-setting input { width:80px; }
-        .auto-mode-readout { text-align:center; font-size:1.2rem; margin-top:1rem; }
-        .auto-mode-readout span { font-weight:600; color:var(--primary-color); }
-        .auto-status-indicator { color:var(--text-secondary); text-align:center; margin-top:1.5rem; font-weight:600; }
-        .control-group-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
-        .control-group-header h3 { margin-bottom: 0; text-align: left; border-bottom: none; padding-bottom: 0; font-size: 1.1rem; }
+        .control-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+
     </style>
 </head>
 <body>
-    <div id="splashScreen">
-        <img src="rubiflex_logo.png" alt="RUBIFlex Logo"> 
-        <h1>RUBIFlex</h1>
-        </div>
+
+    <img id="fixedLogo" src="rubiflex_logo.png" alt="Logo">
 
     <div class="container">
-        
-        <div class="card" id="globalStatusCard">
-            <h1>RUBIFlex Controller</h1>
-            <button id="connectButton">Connect to Device</button>
-            <div id="status">Disconnected</div>
-            <div id="batteryStatus">
-                <div class="battery-container">
-                    <svg class="battery-svg" viewBox="0 0 34 16">
-                        <rect class="battery-frame" x="1" y="1" width="30" height="14" rx="2"></rect>
-                        <rect class="battery-cap" x="31" y="4" width="2" height="8" rx="1"></rect>
-                        <rect id="batteryFill" x="3" y="3" width="0" height="10" rx="1"></rect>
-                        <text id="batteryText" x="16" y="8.5">--%</text>
-                    </svg>
-                    <span id="batteryVoltageText">-- V</span>
+
+        <div id="loginScreen" style="display: block;">
+            <div class="card">
+                <h1>RUBIFlex</h1>
+                <p style="text-align:center; color:var(--text-secondary);">Sistem Rehabilitasi Cerdas</p>
+                <br>
+                <div class="login-form">
+                    <label>Nama Pasien</label>
+                    <input type="text" id="inputName" placeholder="Contoh: Budi Santoso">
+                    
+                    <label>Nomor Telepon (ID)</label>
+                    <input type="number" id="inputPhone" placeholder="Contoh: 08123456789">
+                    
+                    <button class="btn-primary" onclick="handleLogin()">Masuk & Mulai Sesi</button>
+                    <button class="btn-outline" onclick="handleGuest()">Lanjut sebagai Tamu</button>
                 </div>
             </div>
         </div>
 
         <div id="homeScreen">
             <div class="card">
-                <div id="modeSelection" style="display: none;">
-                    <h2>Mode: <span id="currentModeDisplay">Manual</span></h2>
-                    <div class="mode-button-container">
-                        <button id="selectManualButton" class="mode-button">Masuk Mode Manual</button>
-                        <button id="selectAutoButton" class="mode-button">Masuk Mode Otomatis</button>
+                <div id="currentUserDisplay">Halo, Tamu</div>
+                <button id="connectButton" class="btn-primary">Connect Device (Bluetooth)</button>
+                <div id="status">Disconnected</div>
+                
+                <div id="batteryStatus">
+                    <div class="battery-container" style="display:flex; align-items:center; gap:5px;">
+                        <svg class="battery-svg" viewBox="0 0 34 16">
+                            <rect class="battery-frame" x="1" y="1" width="30" height="14" rx="2"></rect>
+                            <rect class="battery-cap" x="31" y="4" width="2" height="8" rx="1"></rect>
+                            <rect id="batteryFill" x="3" y="3" width="0" height="10" rx="1"></rect>
+                        </svg>
+                        <span id="batteryText" style="font-size:0.9rem; font-weight:bold;">--%</span>
                     </div>
+                    <div id="batteryVoltageText" style="font-size:0.8rem; color:var(--text-secondary);">-- V</div>
                 </div>
+
+                <hr style="margin: 1.5rem 0; border-top:1px solid #ddd;">
+
+                <button class="btn-success" onclick="goToManual()">Mode Manual</button>
+                <button class="btn-success" onclick="goToAuto()">Mode Otomatis (Rekam)</button>
+                <button class="btn-secondary" onclick="goToHistory()">Riwayat Pasien</button>
+                <button class="btn-danger" onclick="logout()">Keluar / Ganti Pasien</button>
             </div>
         </div>
 
         <div id="manualModeScreen">
-            <div class="card"> <button id="backButtonManual" class="back-button">Kembali ke Home</button> </div>
-            <div class="card sensor-display-card"> 
-                <h2>Sensor Bicep (C2)</h2> 
-                <div id="manualAngleValue" class="angle-value">0.00°</div> 
-                <div class="gauge-container"> <div id="manualAngleGauge" class="angle-gauge"></div> </div> 
+            <div class="card">
+                <button class="btn-secondary" onclick="goHome()">Kembali</button>
+                <h2>Mode Manual</h2>
+                
+                <div class="sensor-row">
+                    <div class="sensor-box">
+                        <div class="sensor-title">Grip (C1)</div>
+                        <div id="manGripVal" class="sensor-val">0°</div>
+                        <div class="gauge-bar"><div id="manGripGauge" class="gauge-fill"></div></div>
+                    </div>
+                    <div class="sensor-box">
+                        <div class="sensor-title">Bicep (C2)</div>
+                        <div id="manBicepVal" class="sensor-val">0°</div>
+                        <div class="gauge-bar"><div id="manBicepGauge" class="gauge-fill"></div></div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-header"><span>Channel 1 (Grip)</span> <label class="switch"><input type="checkbox" id="ch1Enable"><span class="switch-slider"></span></label></div>
+                    <input type="range" id="ch1AmpSlider" min="0" max="255" value="0">
+                    <div class="input-value-container"><input type="number" id="ch1AmpInput" value="0"></div>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-header"><span>Channel 2 (Bicep)</span> <label class="switch"><input type="checkbox" id="ch2Enable"><span class="switch-slider"></span></label></div>
+                    <input type="range" id="ch2AmpSlider" min="0" max="255" value="0">
+                    <div class="input-value-container"><input type="number" id="ch2AmpInput" value="0"></div>
+                </div>
+
+                <div class="card" style="background:#f1f2f6; margin-top:1rem;">
+                    <h3>Global Settings</h3>
+                    <label>Pulse Width (µs)</label>
+                    <input type="range" id="pwSlider" min="50" max="3000" value="200" step="10">
+                    <div class="input-value-container"><input type="number" id="pwInput" value="200"></div>
+                    
+                    <label style="margin-top:10px;">Frequency (Hz)</label>
+                    <input type="range" id="freqSlider" min="1" max="150" value="30">
+                    <div class="input-value-container"><input type="number" id="freqInput" value="30"></div>
+                </div>
             </div>
-            <div class="card sensor-display-card">
-                <h2>Sensor Grip (C1)</h2>
-                <div id="manualGripValue" class="grip-value">0.0°</div>
-                <div class="gauge-container"> <div id="manualGripGauge" class="angle-gauge"></div> </div>
-            </div>
-            <div class="card"> <h2>Channels</h2> <div class="control-group"> <div class="control-group-header"><h3>Channel 1 (Grip)</h3><label class="switch"><input type="checkbox" id="ch1Enable"><span class="switch-slider"></span></label></div> <label for="ch1AmplitudeSlider">Amplitude</label> <div class="slider-container"><input type="range" id="ch1AmplitudeSlider" min="0" max="255" value="0"></div> <div class="input-value-container"><input type="number" id="ch1AmplitudeInput" min="0" max="255" value="0"></div> </div> <div class="control-group"> <div class="control-group-header"><h3>Channel 2 (Bicep)</h3><label class="switch"><input type="checkbox" id="ch2Enable"><span class="switch-slider"></span></label></div> <label for="ch2AmplitudeSlider">Amplitude</label> <div class="slider-container"><input type="range" id="ch2AmplitudeSlider" min="0" max="255" value="0"></div> <div class="input-value-container"><input type="number" id="ch2AmplitudeInput" min="0" max="255" value="0"></div> </div> </div>
         </div>
 
         <div id="autoModeScreen">
-             <div class="card"> <button id="backButtonAuto" class="back-button">Kembali ke Home</button> </div>
-             <div class="card sensor-display-card"> 
-                <h2>Sensor Bicep (C2)</h2> 
-                <div id="autoAngleValue" class="angle-value">0.00°</div> 
-                <div class="gauge-container"> <div id="autoAngleGauge" class="angle-gauge"></div> </div> 
-             </div>
-            <div class="card sensor-display-card">
-                <h2>Sensor Grip (C1)</h2>
-                <div id="autoGripValue" class="grip-value">0.0°</div>
-                <div class="gauge-container"> <div id="autoGripGauge" class="angle-gauge"></div> </div>
-            </div>
-             <div class="card"> 
-                <h2>Pengaturan Auto-Mode</h2> 
-                <div class="auto-mode-setting"> 
-                    <label for="targetAngleGripInput">Target Grip (C1)</label> 
-                    <div class="input-value-container"> 
-                        <input type="number" id="targetAngleGripInput" min="0" max="270" value="270"> 
-                        <span class="unit-label">deg</span> 
-                    </div> 
+            <div class="card">
+                <button class="btn-secondary" onclick="goHome()">Stop & Simpan</button>
+                <h2>Mode Otomatis (Live)</h2>
+                <div style="text-align:center; color:var(--danger-color); font-weight:bold; font-size:0.9rem; margin-bottom:10px;" id="recordingStatus">🔴 Merekam Data...</div>
+
+                <div class="chart-container">
+                    <canvas id="sessionChart"></canvas>
                 </div>
-                <div class="auto-mode-readout"> Amplitudo C1 (Otomatis): <span id="autoC1AmpReadout">0</span> </div> 
-                <h3 id="autoStatusGrip" class="auto-status-indicator">Menunggu Data...</h3>
-                <hr style="border:0; border-top:1px solid var(--border-color); margin:1.5rem 0;">
-                <div class="auto-mode-setting"> 
-                    <label for="targetAngleBicepInput">Target Bicep (C2)</label> 
-                    <div class="input-value-container"> 
-                        <input type="number" id="targetAngleBicepInput" min="0" max="120" value="90"> 
-                        <span class="unit-label">deg</span> 
-                    </div> 
-                </div> 
-                <div class="auto-mode-readout"> Amplitudo C2 (Otomatis): <span id="autoC2AmpReadout">0</span> </div> 
-                <h3 id="autoStatusBicep" class="auto-status-indicator">Menunggu Data...</h3>
+
+                <div style="display:flex; gap:10px; margin-top:1rem;">
+                    <div style="flex:1;">
+                        <label>Target Grip</label>
+                        <input type="number" id="targetGrip" value="270" style="width:100%">
+                    </div>
+                    <div style="flex:1;">
+                        <label>Target Bicep</label>
+                        <input type="number" id="targetBicep" value="90" style="width:100%">
+                    </div>
+                </div>
+
+                <div style="margin-top:1rem; text-align:center;">
+                    <div>Amp C1 (Auto): <span id="autoC1Readout" style="font-weight:bold; color:var(--primary-color);">0</span></div>
+                    <div>Amp C2 (Auto): <span id="autoC2Readout" style="font-weight:bold; color:var(--primary-color);">0</span></div>
+                </div>
             </div>
         </div>
 
-        <div class="card" id="globalSettingsCard">
-            <h2>Global Settings</h2> 
-            <div class="control-group"> <label for="pulseWidthSlider">Pulse Width</label> <div class="slider-container"><input type="range" id="pulseWidthSlider" min="50" max="3000" value="200" step="10"></div> <div class="input-value-container"><input type="number" id="pulseWidthInput" min="50" max="3000" value="200" step="10"><span class="unit-label">µs</span></div> </div> 
-            <div class="control-group"> <label for="frequencySlider">Frequency</label> <div class="slider-container"><input type="range" id="frequencySlider" min="1" max="150" value="30"></div> <div class="input-value-container"><input type="number" id="frequencyInput" min="1" max="150" value="30"><span class="unit-label">Hz</span></div> </div>
+        <div id="historyScreen">
+            <div class="card">
+                <button class="btn-secondary" onclick="goHome()">Kembali</button>
+                <h2>Riwayat Terapi</h2>
+                <div id="historyList">
+                    <p style="text-align:center; color:#888;">Belum ada data rekaman.</p>
+                </div>
+            </div>
         </div>
-    </div> 
+
+    </div>
 
     <script>
-        // --- Referensi Elemen ---
-        const splashScreen = document.getElementById('splashScreen');
-        const globalStatusCard = document.getElementById('globalStatusCard');
-        const homeScreen = document.getElementById('homeScreen');
-        const manualModeScreen = document.getElementById('manualModeScreen');
-        const autoModeScreen = document.getElementById('autoModeScreen');
-        const globalSettingsCard = document.getElementById('globalSettingsCard');
-        const connectButton = document.getElementById('connectButton');
-        const statusDisplay = document.getElementById('status');
-        const modeSelection = document.getElementById('modeSelection');
-        const currentModeDisplay = document.getElementById('currentModeDisplay');
-        const selectManualButton = document.getElementById('selectManualButton');
-        const selectAutoButton = document.getElementById('selectAutoButton');
-        const backButtonManual = document.getElementById('backButtonManual');
-        const backButtonAuto = document.getElementById('backButtonAuto');
-        const ch1Enable = document.getElementById('ch1Enable');
-        const ch1AmplitudeSlider = document.getElementById('ch1AmplitudeSlider');
-        const ch1AmplitudeInput = document.getElementById('ch1AmplitudeInput');
-        const ch2Enable = document.getElementById('ch2Enable');
-        const ch2AmplitudeSlider = document.getElementById('ch2AmplitudeSlider');
-        const ch2AmplitudeInput = document.getElementById('ch2AmplitudeInput');
-        const pulseWidthSlider = document.getElementById('pulseWidthSlider');
-        const pulseWidthInput = document.getElementById('pulseWidthInput');
-        const frequencySlider = document.getElementById('frequencySlider');
-        const frequencyInput = document.getElementById('frequencyInput');
+        // --- 1. GLOBAL VARIABLES ---
+        // BLE UUIDs
+        const FES_SERVICE = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
+        const FES_CHAR = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
+        const SENSOR_SERVICE = "0000180f-0000-1000-8000-00805f9b34fb";
+        const SENSOR_CHAR = "00002a19-0000-1000-8000-00805f9b34fb";
         
-        // Baterai
-        const batteryStatus = document.getElementById('batteryStatus');
-        const batteryFill = document.getElementById('batteryFill');
-        const batteryText = document.getElementById('batteryText');
-        const batteryVoltageText = document.getElementById('batteryVoltageText');
+        let bleDevice, controlChar, sensorChar;
+        let isConnected = false;
+        const encoder = new TextEncoder();
+        const decoder = new TextDecoder();
 
-        // Sensor
-        const manualAngleValue = document.getElementById('manualAngleValue');
-        const manualAngleGauge = document.getElementById('manualAngleGauge');
-        const autoAngleValue = document.getElementById('autoAngleValue');
-        const autoAngleGauge = document.getElementById('autoAngleGauge');
-        const manualGripValue = document.getElementById('manualGripValue');
-        const manualGripGauge = document.getElementById('manualGripGauge');
-        const autoGripValue = document.getElementById('autoGripValue');
-        const autoGripGauge = document.getElementById('autoGripGauge');
+        // User & Data State
+        let currentUser = null; // Object {name, phone, key}
+        let currentSessionData = []; // Array to store [time, grip, bicep, c1, c2]
+        let isRecording = false;
+        let recordingStartTime = 0;
+        let chartInstance = null;
 
-        // Auto-Mode
-        const targetAngleBicepInput = document.getElementById('targetAngleBicepInput');
-        const targetAngleGripInput = document.getElementById('targetAngleGripInput');
-        const autoC1AmpReadout = document.getElementById('autoC1AmpReadout');
-        const autoC2AmpReadout = document.getElementById('autoC2AmpReadout');
-        const autoStatusBicep = document.getElementById('autoStatusBicep');
-        const autoStatusGrip = document.getElementById('autoStatusGrip');
-
-        // --- Variabel Global ---
-        const FES_SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b"; const FES_CONTROL_CHAR_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"; const SENSOR_SERVICE_UUID = "0000180f-0000-1000-8000-00805f9b34fb"; const FLEX_SENSOR_CHAR_UUID = "00002a19-0000-1000-8000-00805f9b34fb"; let bleDevice, controlCharacteristic, flexSensorCharacteristic; let isConnected = false; const encoder = new TextEncoder('utf-8'); const decoder = new TextDecoder('utf-8');
-        const DEFAULT_PULSE_WIDTH = 200;
-        const DEFAULT_FREQUENCY = 30;
-        const BATTERY_FILL_WIDTH = 26; 
-
-        // --- Fungsi Koneksi ---
-        connectButton.addEventListener('click', () => isConnected ? disconnect() : connect());
-        
-        async function connect() { 
-            console.log("Connect function called (v2.20)."); 
-            try { 
-                if (!navigator.bluetooth) { throw new Error("Web Bluetooth not supported."); } 
-                updateStatus("Requesting Device...", false); 
-                bleDevice = await navigator.bluetooth.requestDevice({ filters: [{ services: [FES_SERVICE_UUID] }], optionalServices: [FES_SERVICE_UUID, SENSOR_SERVICE_UUID] }); 
-                updateStatus("Connecting...", false); 
-                bleDevice.addEventListener('gattserverdisconnected', onDisconnected); 
-                const server = await bleDevice.gatt.connect(); 
-                updateStatus("Getting FES Service...", false); 
-                const fesService = await server.getPrimaryService(FES_SERVICE_UUID); 
-                controlCharacteristic = await fesService.getCharacteristic(FES_CONTROL_CHAR_UUID); 
-                updateStatus("Getting Sensor Service...", false); 
-                const sensorService = await server.getPrimaryService(SENSOR_SERVICE_UUID); 
-                flexSensorCharacteristic = await sensorService.getCharacteristic(FLEX_SENSOR_CHAR_UUID); 
-                updateStatus("Subscribing to Sensor...", false); 
-                await flexSensorCharacteristic.startNotifications(); 
-                flexSensorCharacteristic.addEventListener('characteristicvaluechanged', handleSensorNotification); 
-                console.log("Subscribed to sensor notifications."); 
-                isConnected = true; 
-                updateStatus("Connected!", true); 
-                updateConnectButton(); 
-                modeSelection.style.display = 'block'; 
-                batteryStatus.style.display = 'flex'; 
-                showScreen('home');
-            } catch (error) { 
-                console.error("Connection Error:", error); 
-                updateStatus(`Error: ${error.message}`, false); 
-                if (bleDevice && bleDevice.gatt && bleDevice.gatt.connected) { bleDevice.gatt.disconnect(); } 
-                else { onDisconnected(); } 
-            } 
-        }
-        
-        function disconnect() { 
-            if (flexSensorCharacteristic) { 
-                try { 
-                    flexSensorCharacteristic.stopNotifications(); 
-                    flexSensorCharacteristic.removeEventListener('characteristicvaluechanged', handleSensorNotification); 
-                } catch(error) { console.error("Error stopping/removing listener:", error); } 
-            } 
-            if (bleDevice && bleDevice.gatt.connected) { bleDevice.gatt.disconnect(); } 
-            else { onDisconnected(); } 
-        }
-        
-        function onDisconnected() { 
-            console.log("onDisconnected event triggered. Resetting UI to defaults."); 
-            isConnected = false; controlCharacteristic = null; flexSensorCharacteristic = null; bleDevice = null; 
-            updateStatus("Device Disconnected", false); 
-            updateConnectButton(); 
-            modeSelection.style.display = 'none'; 
-            batteryStatus.style.display = 'none';
+        // --- 2. USER MANAGEMENT (LOGIN/LOGOUT) ---
+        function handleLogin() {
+            const name = document.getElementById('inputName').value.trim();
+            const phone = document.getElementById('inputPhone').value.trim();
             
-            // Reset Baterai SVG
-            if (batteryFill) {
-                batteryFill.setAttribute('width', 0);
-                batteryText.textContent = '--%';
-                batteryVoltageText.textContent = '-- V';
-                batteryFill.style.fill = 'var(--text-secondary)';
+            if(!name || !phone) { alert("Mohon isi Nama dan Nomor Telepon."); return; }
+            
+            // Buat ID unik: 'pasien_nomor' (misal: budi_08123)
+            const userKey = `rubiflex_${name.toLowerCase().replace(/\s/g,'')}_${phone}`;
+            
+            currentUser = { name: name, phone: phone, key: userKey };
+            
+            document.getElementById('currentUserDisplay').textContent = `Pasien: ${name} (${phone})`;
+            showScreen('homeScreen');
+        }
+
+        function handleGuest() {
+            currentUser = null;
+            document.getElementById('currentUserDisplay').textContent = "Mode Tamu (Data tidak disimpan)";
+            showScreen('homeScreen');
+        }
+
+        function logout() {
+            currentUser = null;
+            if(isConnected) disconnect();
+            document.getElementById('inputName').value = "";
+            document.getElementById('inputPhone').value = "";
+            showScreen('loginScreen');
+        }
+
+        // --- 3. NAVIGATION ---
+        function showScreen(id) {
+            const screens = ['loginScreen', 'homeScreen', 'manualModeScreen', 'autoModeScreen', 'historyScreen'];
+            screens.forEach(s => document.getElementById(s).style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+        }
+
+        function goToManual() { 
+            showScreen('manualModeScreen'); 
+            sendCommand('AM:E:0'); // Pastikan Auto mati
+        }
+        
+        function goToAuto() { 
+            showScreen('autoModeScreen');
+            startRecording(); // Mulai rekam & grafik
+            // Kirim target awal
+            const tg = document.getElementById('targetGrip').value;
+            const tb = document.getElementById('targetBicep').value;
+            sendCommand(`AM:G:${tg}`);
+            sendCommand(`AM:B:${tb}`);
+            sendCommand('AM:E:1'); // Nyalakan Auto Mode di alat
+        }
+
+        function goHome() {
+            // Jika pulang dari Auto Mode, stop rekaman
+            if(isRecording) stopRecording();
+            
+            sendCommand('AM:E:0'); // Matikan Auto
+            sendCommand('C1:A:0'); // Reset Amp
+            sendCommand('C2:A:0');
+            resetSliders();
+            showScreen('homeScreen');
+        }
+
+        function goToHistory() {
+            renderHistory();
+            showScreen('historyScreen');
+        }
+
+        // --- 4. RECORDING & CHART LOGIC ---
+        function initChart() {
+            const ctx = document.getElementById('sessionChart').getContext('2d');
+            if(chartInstance) chartInstance.destroy(); // Hapus chart lama jika ada
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [], // Time (detik)
+                    datasets: [
+                        { label: 'Grip (°)', data: [], borderColor: '#e17055', tension: 0.1 }, // Merah bata
+                        { label: 'Bicep (°)', data: [], borderColor: '#0984e3', tension: 0.1 } // Biru
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false, // Matikan animasi biar ringan saat update real-time
+                    scales: { y: { beginAtZero: true, max: 270 } }
+                }
+            });
+        }
+
+        function startRecording() {
+            currentSessionData = []; // Kosongkan data
+            isRecording = true;
+            recordingStartTime = Date.now();
+            
+            if(currentUser) {
+                document.getElementById('recordingStatus').style.display = 'block';
+            } else {
+                document.getElementById('recordingStatus').style.display = 'none'; // Tamu ga direkam
             }
-            
-            // RESET SEMUA SLIDER DI UI
-            pulseWidthSlider.value = DEFAULT_PULSE_WIDTH;
-            pulseWidthInput.value = DEFAULT_PULSE_WIDTH;
-            frequencySlider.value = DEFAULT_FREQUENCY;
-            frequencyInput.value = DEFAULT_FREQUENCY;
-            ch1AmplitudeSlider.value = 0;
-            ch1AmplitudeInput.value = 0;
-            ch1Enable.checked = false;
-            ch2AmplitudeSlider.value = 0;
-            ch2AmplitudeInput.value = 0;
-            ch2Enable.checked = false;
-
-            showScreen('home'); 
+            initChart();
         }
 
-        // --- Manajemen Layar & UI Helper ---
-        function updateStatus(message, isSuccess = false) { if (!statusDisplay) return; statusDisplay.textContent = message; statusDisplay.style.display = 'block'; if (message.toLowerCase().includes('error')) { statusDisplay.style.backgroundColor = 'var(--danger-color)'; statusDisplay.style.color = '#fff'; } else if (isSuccess) { statusDisplay.style.backgroundColor = 'var(--success-color)'; statusDisplay.style.color = '#fff'; } else { statusDisplay.style.backgroundColor = 'var(--border-color)'; statusDisplay.style.color = 'var(--text-color)'; } }
-        function updateConnectButton() { if (isConnected) { connectButton.textContent = "Disconnect"; connectButton.classList.add("connected"); } else { connectButton.textContent = "Connect to Device"; connectButton.classList.remove("connected"); } }
-        
-        function showScreen(screenName) { 
-            homeScreen.style.display = 'none'; 
-            manualModeScreen.style.display = 'none'; 
-            autoModeScreen.style.display = 'none'; 
-            globalSettingsCard.style.display = 'none'; 
-            if (screenName === 'home') { 
-                homeScreen.style.display = 'block'; 
-            } else if (screenName === 'manual') { 
-                manualModeScreen.style.display = 'block'; 
-                globalSettingsCard.style.display = 'block'; 
-                currentModeDisplay.textContent = "Manual"; 
-            } else if (screenName === 'auto') { 
-                autoModeScreen.style.display = 'block'; 
-                globalSettingsCard.style.display = 'block'; 
-                currentModeDisplay.textContent = "Otomatis"; 
-            } 
+        function stopRecording() {
+            isRecording = false;
+            if(!currentUser) return; // Tamu tidak simpan data
+
+            // Simpan ke LocalStorage
+            if(currentSessionData.length > 0) {
+                const sessionRecord = {
+                    date: new Date().toLocaleString(),
+                    duration: ((Date.now() - recordingStartTime)/1000).toFixed(1) + "s",
+                    data: currentSessionData
+                };
+
+                // Ambil history lama
+                let history = JSON.parse(localStorage.getItem(currentUser.key)) || [];
+                history.push(sessionRecord); // Tambah sesi baru
+                localStorage.setItem(currentUser.key, JSON.stringify(history)); // Simpan balik
+                alert("Data sesi berhasil disimpan!");
+            }
         }
 
-        selectManualButton.addEventListener('click', () => { showScreen('manual'); sendCommand('AM:E:0'); });
-        
-        selectAutoButton.addEventListener('click', () => { 
-            showScreen('auto'); 
-            targetAngleGripInput.dispatchEvent(new Event('change'));
-            targetAngleBicepInput.dispatchEvent(new Event('change'));
-            sendCommand('AM:E:1'); 
-        });
+        // --- 5. BLE CONNECTION ---
+        document.getElementById('connectButton').addEventListener('click', () => isConnected ? disconnect() : connect());
 
-        backButtonManual.addEventListener('click', () => showScreen('home'));
-        
-        backButtonAuto.addEventListener('click', () => { 
-            showScreen('home'); 
-            sendCommand('AM:E:0'); 
-            sendCommand('C1:A:0'); 
-            sendCommand('C2:A:0'); 
-            ch1AmplitudeSlider.value = 0; ch1AmplitudeInput.value = 0; ch1Enable.checked = false;
-            ch2AmplitudeSlider.value = 0; ch2AmplitudeInput.value = 0; ch2Enable.checked = false;
-        });
+        async function connect() {
+            try {
+                updateStatus("Mencari Perangkat...", false);
+                bleDevice = await navigator.bluetooth.requestDevice({
+                    filters: [{ services: [FES_SERVICE] }],
+                    optionalServices: [FES_SERVICE, SENSOR_SERVICE]
+                });
+                
+                bleDevice.addEventListener('gattserverdisconnected', onDisconnect);
+                const server = await bleDevice.gatt.connect();
+                
+                // Get Services
+                const fesSvc = await server.getPrimaryService(FES_SERVICE);
+                controlChar = await fesSvc.getCharacteristic(FES_CHAR);
+                
+                const sensSvc = await server.getPrimaryService(SENSOR_SERVICE);
+                sensorChar = await sensSvc.getCharacteristic(SENSOR_CHAR);
+                
+                await sensorChar.startNotifications();
+                sensorChar.addEventListener('characteristicvaluechanged', handleNotifications);
+                
+                isConnected = true;
+                updateStatus("Terhubung ✅", true);
+                document.getElementById('connectButton').textContent = "Disconnect";
+                document.getElementById('batteryStatus').style.display = 'flex';
 
-        // --- Menangani Data Sensor & Baterai SVG ---
-        function handleSensorNotification(event) {
-            const payloadString = decoder.decode(event.target.value);
-            // Format: "BicepAngle:GripAngle:C1_Amp:C2_Amp:Batt%:BattV"
-            const parts = payloadString.split(':');
+            } catch (error) {
+                console.error(error);
+                updateStatus("Gagal Konek: " + error.message, false);
+            }
+        }
+
+        function disconnect() {
+            if(bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect();
+        }
+
+        function onDisconnect() {
+            isConnected = false;
+            updateStatus("Terputus ❌", false);
+            document.getElementById('connectButton').textContent = "Connect Device";
+            document.getElementById('batteryStatus').style.display = 'none';
+            resetSliders();
+            if(isRecording) stopRecording(); // Auto save if disconnect mid-session
+            showScreen('homeScreen'); // Kick to home
+        }
+
+        // --- 6. DATA HANDLING (THE BRAIN) ---
+        function handleNotifications(event) {
+            const str = decoder.decode(event.target.value);
+            // Format v6.9: "Bicep:Grip:C1:C2:Bat%:BatV"
+            const parts = str.split(':');
+            if(parts.length < 6) return;
+
+            const bicep = parseFloat(parts[0]);
+            const grip = parseFloat(parts[1]);
+            const c1 = parseInt(parts[2]);
+            const c2 = parseInt(parts[3]);
+            const batP = parseInt(parts[4]);
+            const batV = parseFloat(parts[5]);
+
+            // Update UI Elements
+            updateSensorUI(grip, bicep);
+            updateBatteryUI(batP, batV);
             
-            if (parts.length < 6) { return; }
+            // Jika di Manual Mode, update slider jika perlu (sync)
+            // (Kode disederhanakan: user yang gerakin slider, jadi ga perlu update slider dari nilai balik kecuali auto)
 
-            const bicepAngle = parseFloat(parts[0]);
-            const gripAngle = parseFloat(parts[1]);
-            const c1Amplitude = parseInt(parts[2]);
-            const c2Amplitude = parseInt(parts[3]);
-            const battPercent = parseInt(parts[4]);
-            const battVoltage = parseFloat(parts[5]);
+            // Jika di Auto Mode, update text readout
+            document.getElementById('autoC1Readout').textContent = c1;
+            document.getElementById('autoC2Readout').textContent = c2;
 
-            if (isNaN(bicepAngle) || isNaN(gripAngle) || isNaN(c1Amplitude) || isNaN(c2Amplitude) || isNaN(battPercent) || isNaN(battVoltage)) {
-                console.warn("NaN value parsed:", payloadString);
+            // RECORDING & CHARTING
+            if(isRecording && currentUser) {
+                const timeSec = ((Date.now() - recordingStartTime) / 1000).toFixed(1);
+                
+                // Masukkan ke data sesi
+                currentSessionData.push({ t: timeSec, b: bicep, g: grip, c1: c1, c2: c2 });
+
+                // Update Chart (Maks 50 poin biar gak berat)
+                if(chartInstance) {
+                    chartInstance.data.labels.push(timeSec);
+                    chartInstance.data.datasets[0].data.push(grip);
+                    chartInstance.data.datasets[1].data.push(bicep);
+                    
+                    if(chartInstance.data.labels.length > 50) {
+                        chartInstance.data.labels.shift();
+                        chartInstance.data.datasets[0].data.shift();
+                        chartInstance.data.datasets[1].data.shift();
+                    }
+                    chartInstance.update();
+                }
+            }
+        }
+
+        function updateSensorUI(grip, bicep) {
+            // Manual Mode UI
+            document.getElementById('manGripVal').textContent = grip.toFixed(0) + "°";
+            document.getElementById('manGripGauge').style.width = Math.min((grip/270)*100, 100) + "%";
+            
+            document.getElementById('manBicepVal').textContent = bicep.toFixed(0) + "°";
+            document.getElementById('manBicepGauge').style.width = Math.min((bicep/120)*100, 100) + "%";
+        }
+
+        function updateBatteryUI(pct, volt) {
+            document.getElementById('batteryText').textContent = pct + "%";
+            document.getElementById('batteryVoltageText').textContent = volt.toFixed(2) + " V";
+            const fill = document.getElementById('batteryFill');
+            const width = (pct / 100) * 26; // 26 is max width inside SVG
+            fill.setAttribute('width', width);
+            
+            if(pct < 20) fill.style.fill = "#d63031"; // Red
+            else if(pct < 50) fill.style.fill = "#fdcb6e"; // Orange
+            else fill.style.fill = "#00b894"; // Green
+        }
+
+        // --- 7. HISTORY & EXPORT ---
+        function renderHistory() {
+            const list = document.getElementById('historyList');
+            list.innerHTML = "";
+            
+            if(!currentUser) {
+                list.innerHTML = "<p>Mode Tamu tidak memiliki riwayat.</p>";
                 return;
             }
 
-            // 1. Update Bicep Sensor (Angle)
-            const maxBicepAngle = 120.0;
-            const bicepGaugePercentage = `${Math.min(100, Math.max(0, (bicepAngle / maxBicepAngle) * 100))}%`;
-            const bicepAngleText = `${bicepAngle.toFixed(2)}°`;
-            manualAngleValue.textContent = bicepAngleText;
-            manualAngleGauge.style.width = bicepGaugePercentage;
-            autoAngleValue.textContent = bicepAngleText;
-            autoAngleGauge.style.width = bicepGaugePercentage;
-
-            // 2. Update Grip Sensor (Angle 0-270)
-            const maxGripAngle = 270.0; 
-            const gripGaugePercentage = `${Math.min(100, Math.max(0, (gripAngle / maxGripAngle) * 100))}%`;
-            const gripValueText = `${gripAngle.toFixed(1)}°`; 
-            manualGripValue.textContent = gripValueText;
-            manualGripGauge.style.width = gripGaugePercentage;
-            autoGripValue.textContent = gripValueText;
-            autoGripGauge.style.width = gripGaugePercentage;
-
-            // 3. Update Auto-Mode Status (Dual)
-            const targetGrip = parseInt(targetAngleGripInput.value) || 270;
-            if (gripAngle >= targetGrip) {
-                autoStatusGrip.textContent = "Target Grip Tercapai 👍";
-                autoStatusGrip.style.color = 'var(--success-color)';
-            } else {
-                autoStatusGrip.textContent = "Mencoba Mencapai Target Grip...";
-                autoStatusGrip.style.color = 'var(--text-secondary)';
-            }
+            const history = JSON.parse(localStorage.getItem(currentUser.key)) || [];
             
-            const targetBicep = parseInt(targetAngleBicepInput.value) || 90;
-            if (bicepAngle >= targetBicep) {
-                autoStatusBicep.textContent = "Target Bicep Tercapai 👍";
-                autoStatusBicep.style.color = 'var(--success-color)';
-            } else {
-                autoStatusBicep.textContent = "Mencoba Mencapai Target Bicep...";
-                autoStatusBicep.style.color = 'var(--text-secondary)';
+            if(history.length === 0) {
+                list.innerHTML = "<p style='text-align:center'>Belum ada data rekaman.</p>";
+                return;
             }
-            
-            // 4. Update Amplitude Readout (Auto & Manual)
-            autoC1AmpReadout.textContent = c1Amplitude;
-            autoC2AmpReadout.textContent = c2Amplitude;
 
-            if (document.activeElement !== ch1AmplitudeSlider && document.activeElement !== ch1AmplitudeInput) {
-                ch1AmplitudeSlider.value = c1Amplitude;
-                ch1AmplitudeInput.value = c1Amplitude;
-            }
-            if (document.activeElement !== ch2AmplitudeSlider && document.activeElement !== ch2AmplitudeInput) {
-                ch2AmplitudeSlider.value = c2Amplitude;
-                ch2AmplitudeInput.value = c2Amplitude;
-            }
-            
-            // 5. Update Status Baterai
-            if (batteryFill) {
-                let fillW = (battPercent / 100) * BATTERY_FILL_WIDTH;
-                batteryFill.setAttribute('width', fillW);
-                batteryText.textContent = `${battPercent}%`;
-                batteryVoltageText.textContent = `${battVoltage.toFixed(2)} V`;
-
-                if (battPercent <= 20) {
-                    batteryFill.style.fill = 'var(--danger-color)';
-                } else if (battPercent <= 50) {
-                    batteryFill.style.fill = 'var(--warning-color)';
-                } else {
-                    batteryFill.style.fill = 'var(--success-color)';
-                }
-            }
-        }
-
-        // --- Fungsi FES (Tidak Berubah) ---
-        
-        async function sendCommand(command) { if (!isConnected || !controlCharacteristic) { return; } try { await controlCharacteristic.writeValue(encoder.encode(command)); } catch (error) { console.error("Send Error:", error); } }
-        const debounce = (func, wait) => { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), wait); }; };
-        const debouncedSendCommand = debounce(sendCommand, 50);
-
-        function syncSliderInput(slider, input, commandPrefix, channelEnable = null) {
-            function updateAndSendCommand() {
-                let value = parseInt(input.value);
-                const min = parseInt(input.min); const max = parseInt(input.max); const step = parseInt(input.step) || 1;
-                if (isNaN(value)) value = min;
-                else { value = Math.max(min, Math.min(max, value)); value = Math.round((value - min) / step) * step + min; }
-                slider.value = value; input.value = value;
-                
-                if ((channelEnable && channelEnable.checked) || !channelEnable) {
-                    sendCommand(`${commandPrefix}:${value}`);
-                }
-            }
-            slider.addEventListener('input', () => {
-                input.value = slider.value;
-                 if ((channelEnable && channelEnable.checked) || !channelEnable) {
-                     debouncedSendCommand(`${commandPrefix}:${slider.value}`); 
-                 }
+            // Urutkan dari yang terbaru
+            history.reverse().forEach((sess, index) => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.innerHTML = `
+                    <div class="history-info">
+                        <strong>Sesi #${history.length - index}</strong><br>
+                        <span class="history-date">${sess.date} • Durasi: ${sess.duration}</span>
+                    </div>
+                    <button class="btn-success" style="width:auto; padding:5px 10px; font-size:0.8rem; margin:0;" onclick='downloadCSV(${index})'>Download CSV</button>
+                `;
+                list.appendChild(item);
             });
-            input.addEventListener('input', updateAndSendCommand);
-            input.addEventListener('change', updateAndSendCommand);
         }
 
-        ch1Enable.addEventListener('change', () => {
-            const isEnabled = ch1Enable.checked; 
-            ch1AmplitudeSlider.value = 0; 
-            ch1AmplitudeInput.value = 0;   
-            sendCommand(`C1:E:${isEnabled ? 1 : 0}`);
-            sendCommand(`C1:A:0`); 
-        });
-        syncSliderInput(ch1AmplitudeSlider, ch1AmplitudeInput, 'C1:A', ch1Enable);
-        
-        ch2Enable.addEventListener('change', () => {
-            const isEnabled = ch2Enable.checked; 
-            ch2AmplitudeSlider.value = 0; 
-            ch2AmplitudeInput.value = 0;   
-            sendCommand(`C2:E:${isEnabled ? 1 : 0}`);
-            sendCommand(`C2:A:0`); 
-        });
-        syncSliderInput(ch2AmplitudeSlider, ch2AmplitudeInput, 'C2:A', ch2Enable);
-        
-        syncSliderInput(pulseWidthSlider, pulseWidthInput, 'C1:W', null);
-        syncSliderInput(frequencySlider, frequencyInput, 'C1:F', null);
+        function downloadCSV(reverseIndex) {
+            // Ambil data asli (karena tadi di-reverse untuk tampilan)
+            const history = JSON.parse(localStorage.getItem(currentUser.key));
+            // Hitung index asli array
+            const realIndex = (history.length - 1) - reverseIndex;
+            const session = history[realIndex];
 
-        targetAngleBicepInput.addEventListener('change', () => { 
-            let target = parseInt(targetAngleBicepInput.value); 
-            if (isNaN(target)) target = 90; 
-            target = Math.max(0, Math.min(120, target)); 
-            targetAngleBicepInput.value = target; 
-            debouncedSendCommand(`AM:B:${target}`);
+            // Buat CSV Content
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Waktu(s),SudutGrip(deg),SudutBicep(deg),AmpC1,AmpC2\n"; // Header
+
+            session.data.forEach(row => {
+                csvContent += `${row.t},${row.g},${row.b},${row.c1},${row.c2}\n`;
+            });
+
+            // Trigger Download
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `RUBIFlex_${currentUser.name}_${session.date.replace(/[/,: ]/g, '_')}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // --- 8. UTILS & SENDERS ---
+        async function sendCommand(cmd) {
+            if(isConnected && controlChar) {
+                try { await controlChar.writeValue(encoder.encode(cmd)); }
+                catch(e) { console.log(e); }
+            }
+        }
+
+        // Slider Listeners with Debounce
+        const debounce = (func, delay) => {
+            let timeout;
+            return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func(...args), delay); };
+        };
+        const sendDebounced = debounce((cmd) => sendCommand(cmd), 50);
+
+        function setupSlider(id, cmdPrefix) {
+            const slider = document.getElementById(id + 'Slider');
+            const input = document.getElementById(id + 'Input');
+            
+            slider.addEventListener('input', (e) => {
+                input.value = e.target.value;
+                sendDebounced(`${cmdPrefix}:${e.target.value}`);
+            });
+        }
+
+        // Init Controls
+        setupSlider('ch1Amp', 'C1:A');
+        setupSlider('ch2Amp', 'C2:A');
+        setupSlider('pw', 'C1:W'); // Global pulse width
+        setupSlider('freq', 'C1:F'); // Global freq
+
+        document.getElementById('ch1Enable').addEventListener('change', (e) => {
+            document.getElementById('ch1AmpSlider').value = 0;
+            document.getElementById('ch1AmpInput').value = 0;
+            sendCommand(`C1:E:${e.target.checked ? 1 : 0}`);
+            sendCommand(`C1:A:0`);
+        });
+        document.getElementById('ch2Enable').addEventListener('change', (e) => {
+            document.getElementById('ch2AmpSlider').value = 0;
+            document.getElementById('ch2AmpInput').value = 0;
+            sendCommand(`C2:E:${e.target.checked ? 1 : 0}`);
+            sendCommand(`C2:A:0`);
         });
 
-        targetAngleGripInput.addEventListener('change', () => { 
-            let target = parseInt(targetAngleGripInput.value); 
-            if (isNaN(target)) target = 270; 
-            target = Math.max(0, Math.min(270, target)); 
-            targetAngleGripInput.value = target; 
-            debouncedSendCommand(`AM:G:${target}`);
-        });
+        document.getElementById('targetGrip').addEventListener('change', (e) => sendDebounced(`AM:G:${e.target.value}`));
+        document.getElementById('targetBicep').addEventListener('change', (e) => sendDebounced(`AM:B:${e.target.value}`));
 
-         // Logika Splash Screen
-         window.addEventListener('load', () => {
-              globalStatusCard.style.display = 'block'; 
-              showScreen(null); 
-              updateStatus("Disconnected", false); 
-              
-              // Set nilai default di UI
-              pulseWidthInput.value = DEFAULT_PULSE_WIDTH;
-              pulseWidthSlider.value = DEFAULT_PULSE_WIDTH;
-              frequencyInput.value = DEFAULT_FREQUENCY;
-              frequencySlider.value = DEFAULT_FREQUENCY;
-              ch1AmplitudeInput.value = 0;
-              ch1AmplitudeSlider.value = 0;
-              ch2AmplitudeInput.value = 0;
-              ch2AmplitudeSlider.value = 0;
+        function updateStatus(msg, success) {
+            const el = document.getElementById('status');
+            el.textContent = msg;
+            el.style.background = success ? '#dff9fb' : '#ff7675';
+            el.style.color = success ? '#00b894' : '#fff';
+        }
 
-              // Logika Splash
-              setTimeout(() => {
-                  if(splashScreen) {
-                    splashScreen.classList.add('hidden');
-                    // Hapus dari layout setelah fade out
-                    setTimeout(() => { splashScreen.style.display = 'none'; }, 500); 
-                  }
-              }, 2000); 
-         });
-         
+        function resetSliders() {
+            ['ch1Amp','ch2Amp'].forEach(id => {
+                document.getElementById(id+'Slider').value = 0;
+                document.getElementById(id+'Input').value = 0;
+            });
+            document.getElementById('ch1Enable').checked = false;
+            document.getElementById('ch2Enable').checked = false;
+        }
+
     </script>
 </body>
 </html>
-
