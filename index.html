@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>RUBIFlex Pro Remote (v3.3)</title>
+    <title>RUBIFlex Pro Remote (v3.4)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         /* --- TEMA WARNA & VARIABEL --- */
         :root {
-            --background-color: #963930;
+            --rubi-red: #963930;
+            --rubi-blue: #0984e3;
             --card-background: #ffffff;
             --text-color: #2d3436;
             --text-secondary: #636e72;
@@ -24,24 +25,65 @@
             --slider-track: #dfe6e9;
             --gauge-fill: #0984e3;
             --shadow-soft: 0 4px 15px rgba(0,0,0,0.05);
-            --shadow-hover: 0 6px 20px rgba(0,0,0,0.1);
         }
         
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* --- ANIMASI BACKGROUND (Gradient Flow) --- */
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
 
-        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color:var(--background-color); color:var(--text-color); margin:0; padding:1rem; display:flex; justify-content:center; min-height:100vh; box-sizing:border-box; }
+        /* --- ANIMASI FADE IN (Card Muncul) --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- ANIMASI DENYUT (Recording Pulse) --- */
+        @keyframes pulse-red {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(214, 48, 49, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(214, 48, 49, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(214, 48, 49, 0); }
+        }
+
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            /* Background Gradasi Animasi */
+            background: linear-gradient(-45deg, var(--rubi-red), #6c2b2b, var(--rubi-blue), #005bb5);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            
+            color: var(--text-color); 
+            margin: 0; 
+            padding: 1rem; 
+            display: flex; 
+            justify-content: center; 
+            min-height: 100vh; 
+            box-sizing: border-box; 
+        }
+
         .container { width:100%; max-width:550px; padding-top: 50px; padding-bottom: 50px; }
         
         /* LOGO */
-        #fixedLogo { position: fixed; top: 15px; right: 15px; width: 60px; height: auto; z-index: 2000; filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3)); }
+        #fixedLogo { position: fixed; top: 15px; right: 15px; width: 60px; height: auto; z-index: 2000; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.4)); }
 
-        .card { background-color:var(--card-background); border-radius:20px; box-shadow:0 10px 25px rgba(0,0,0,0.15); padding:1.5rem; margin-bottom:1rem; animation: fadeIn 0.4s ease-out; border: 1px solid rgba(0,0,0,0.02); }
+        .card { 
+            background-color: var(--card-background); 
+            border-radius: 20px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2); /* Shadow lebih dalam agar kontras dengan BG */
+            padding: 1.5rem; 
+            margin-bottom: 1rem; 
+            animation: fadeIn 0.5s ease-out; 
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        
         #loginScreen, #homeScreen, #manualModeScreen, #autoModeScreen, #historyScreen { display:none; }
 
-        h1 { font-size:1.8rem; margin-bottom:0.5rem; text-align: center; color: var(--background-color); font-weight: 800; }
+        h1 { font-size:1.8rem; margin-bottom:0.5rem; text-align: center; color: var(--rubi-red); font-weight: 800; }
         h2 { font-size:1.3rem; font-weight:700; margin-bottom:1.2rem; border-bottom:2px solid var(--border-color); padding-bottom:0.8rem; color: var(--text-color); display: flex; align-items: center; gap: 10px; }
         
-        /* INPUTS & CONTROLS */
+        /* INPUTS */
         .login-form input { width: 100%; padding: 14px; margin-bottom: 20px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 1rem; box-sizing: border-box; transition: 0.3s; background: #fafafa; }
         .login-form input:focus { border-color: var(--primary-color); outline: none; background: #fff; box-shadow: 0 0 0 4px rgba(9, 132, 227, 0.1); }
         .control-group { margin-bottom:1.5rem; }
@@ -54,35 +96,44 @@
         .input-value-container { display:flex; align-items:center; justify-content:flex-end; gap:0.5rem; margin-top: 5px; }
         input[type="number"] { width:70px; padding:6px; border:1px solid #ccc; border-radius:8px; font-size:1rem; text-align:right; }
 
-        /* --- BUTTONS WITH ICONS (PREMIUM LOOK) --- */
+        /* BUTTONS WITH ICONS */
         button { 
             width:100%; padding:14px; font-size:1rem; font-weight:600; 
             border:none; border-radius:12px; cursor:pointer; color: white; 
             margin-bottom: 12px; transition: all 0.2s ease;
-            display: flex; align-items: center; justify-content: center; gap: 10px; /* Flexbox untuk Ikon + Teks */
+            display: flex; align-items: center; justify-content: center; gap: 10px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         button:active { transform:translateY(2px); box-shadow: none; }
-        
-        /* Icon SVG Styling */
         button svg { width: 20px; height: 20px; fill: currentColor; } 
         
         .btn-primary { background: var(--primary-color); }
-        .btn-primary:hover { background: var(--primary-dark); box-shadow: 0 6px 12px rgba(9, 132, 227, 0.3); }
-        
+        .btn-primary:hover { background: var(--primary-dark); }
         .btn-success { background: var(--success-color); }
-        .btn-success:hover { background: var(--success-dark); box-shadow: 0 6px 12px rgba(0, 184, 148, 0.3); }
-        
+        .btn-success:hover { background: var(--success-dark); }
         .btn-danger { background: var(--danger-color); }
-        .btn-danger:hover { background: var(--danger-dark); box-shadow: 0 6px 12px rgba(214, 48, 49, 0.3); }
-        
+        .btn-danger:hover { background: var(--danger-dark); }
         .btn-secondary { background-color: #636e72; color: white; }
         .btn-secondary:hover { background-color: #2d3436; }
-        
         .btn-outline { background: transparent; border: 2px solid var(--text-secondary); color: var(--text-secondary); box-shadow: none; }
         .btn-outline:hover { background: #f5f5f5; }
-        
         .btn-sm { width: auto; padding: 8px 16px; font-size: 0.85rem; margin: 0; display: inline-flex; }
+
+        /* RECORDING INDICATOR (PULSE) */
+        .recording-container {
+            display: flex; justify-content: center; align-items: center; 
+            margin-bottom: 15px;
+        }
+        .recording-dot {
+            width: 12px; height: 12px;
+            background-color: var(--danger-color);
+            border-radius: 50%;
+            margin-right: 10px;
+            animation: pulse-red 1.5s infinite; /* Animasi Denyut */
+        }
+        .recording-text {
+            color: var(--danger-color); font-weight: bold; font-size: 0.95rem;
+        }
 
         /* BATTERY SVG */
         #batteryStatus { display: none; justify-content: center; align-items: center; gap: 10px; margin-top: 15px; background: #f8f9fa; padding: 8px; border-radius: 12px; }
@@ -101,7 +152,7 @@
         .gauge-fill { height: 100%; width: 0%; background: var(--gauge-fill); transition: width 0.2s ease-out; }
 
         /* CHART & HISTORY */
-        .chart-container { position: relative; height: 220px; width: 100%; margin-top: 1rem; border: 1px solid #eee; border-radius: 12px; padding: 10px; }
+        .chart-container { position: relative; height: 220px; width: 100%; margin-top: 1rem; border: 1px solid #eee; border-radius: 12px; padding: 10px; background: #fff; }
         .history-item { background: white; border: 1px solid #eee; padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: var(--shadow-soft); transition: transform 0.2s; }
         .history-item:hover { transform: translateY(-2px); border-color: var(--primary-color); }
         .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -263,7 +314,11 @@
                     Stop & Simpan
                 </button>
                 <h2>Mode Otomatis</h2>
-                <div style="text-align:center; color:var(--danger-color); font-weight:bold; margin-bottom:10px;" id="recordingStatus">🔴 Merekam Data...</div>
+                
+                <div class="recording-container" id="recordingStatus">
+                    <div class="recording-dot"></div>
+                    <div class="recording-text">Merekam Data...</div>
+                </div>
 
                 <div class="sensor-row">
                     <div class="sensor-box">
@@ -454,7 +509,7 @@
 
         function startRecording() {
             currentSessionData = []; isRecording = true; recordingStartTime = Date.now();
-            document.getElementById('recordingStatus').style.display = currentUser ? 'block' : 'none';
+            document.getElementById('recordingStatus').style.display = currentUser ? 'flex' : 'none'; // Flex for Pulse Icon
             initChart();
         }
 
