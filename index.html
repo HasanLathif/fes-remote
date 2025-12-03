@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>RUBIFlex Pro Remote (v3.4)</title>
+    <title>RUBIFlex Pro Remote (v3.5)</title>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -27,20 +27,18 @@
             --shadow-soft: 0 4px 15px rgba(0,0,0,0.05);
         }
         
-        /* --- ANIMASI BACKGROUND (Gradient Flow) --- */
+        /* --- ANIMASI --- */
         @keyframes gradientBG {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
 
-        /* --- ANIMASI FADE IN (Card Muncul) --- */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- ANIMASI DENYUT (Recording Pulse) --- */
         @keyframes pulse-red {
             0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(214, 48, 49, 0.7); }
             70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(214, 48, 49, 0); }
@@ -49,31 +47,24 @@
 
         body { 
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            /* Background Gradasi Animasi */
             background: linear-gradient(-45deg, var(--rubi-red), #6c2b2b, var(--rubi-blue), #005bb5);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
-            
             color: var(--text-color); 
-            margin: 0; 
-            padding: 1rem; 
-            display: flex; 
-            justify-content: center; 
-            min-height: 100vh; 
-            box-sizing: border-box; 
+            margin: 0; padding: 1rem; 
+            display: flex; justify-content: center; 
+            min-height: 100vh; box-sizing: border-box; 
         }
 
         .container { width:100%; max-width:550px; padding-top: 50px; padding-bottom: 50px; }
         
-        /* LOGO */
         #fixedLogo { position: fixed; top: 15px; right: 15px; width: 60px; height: auto; z-index: 2000; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.4)); }
 
         .card { 
             background-color: var(--card-background); 
             border-radius: 20px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2); /* Shadow lebih dalam agar kontras dengan BG */
-            padding: 1.5rem; 
-            margin-bottom: 1rem; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2); 
+            padding: 1.5rem; margin-bottom: 1rem; 
             animation: fadeIn 0.5s ease-out; 
             border: 1px solid rgba(255,255,255,0.5);
         }
@@ -84,7 +75,7 @@
         h2 { font-size:1.3rem; font-weight:700; margin-bottom:1.2rem; border-bottom:2px solid var(--border-color); padding-bottom:0.8rem; color: var(--text-color); display: flex; align-items: center; gap: 10px; }
         
         /* INPUTS */
-        .login-form input { width: 100%; padding: 14px; margin-bottom: 20px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 1rem; box-sizing: border-box; transition: 0.3s; background: #fafafa; }
+        .login-form input { width: 100%; padding: 14px; margin-bottom: 20px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 1rem; box-sizing: border-box; background: #fafafa; }
         .login-form input:focus { border-color: var(--primary-color); outline: none; background: #fff; box-shadow: 0 0 0 4px rgba(9, 132, 227, 0.1); }
         .control-group { margin-bottom:1.5rem; }
         label { display:block; margin-bottom:0.3rem; font-weight:600; color:var(--text-secondary); font-size: 0.9rem; }
@@ -96,7 +87,7 @@
         .input-value-container { display:flex; align-items:center; justify-content:flex-end; gap:0.5rem; margin-top: 5px; }
         input[type="number"] { width:70px; padding:6px; border:1px solid #ccc; border-radius:8px; font-size:1rem; text-align:right; }
 
-        /* BUTTONS WITH ICONS */
+        /* BUTTONS */
         button { 
             width:100%; padding:14px; font-size:1rem; font-weight:600; 
             border:none; border-radius:12px; cursor:pointer; color: white; 
@@ -108,34 +99,19 @@
         button svg { width: 20px; height: 20px; fill: currentColor; } 
         
         .btn-primary { background: var(--primary-color); }
-        .btn-primary:hover { background: var(--primary-dark); }
         .btn-success { background: var(--success-color); }
-        .btn-success:hover { background: var(--success-dark); }
         .btn-danger { background: var(--danger-color); }
-        .btn-danger:hover { background: var(--danger-dark); }
         .btn-secondary { background-color: #636e72; color: white; }
-        .btn-secondary:hover { background-color: #2d3436; }
         .btn-outline { background: transparent; border: 2px solid var(--text-secondary); color: var(--text-secondary); box-shadow: none; }
-        .btn-outline:hover { background: #f5f5f5; }
         .btn-sm { width: auto; padding: 8px 16px; font-size: 0.85rem; margin: 0; display: inline-flex; }
 
-        /* RECORDING INDICATOR (PULSE) */
-        .recording-container {
-            display: flex; justify-content: center; align-items: center; 
-            margin-bottom: 15px;
-        }
-        .recording-dot {
-            width: 12px; height: 12px;
-            background-color: var(--danger-color);
-            border-radius: 50%;
-            margin-right: 10px;
-            animation: pulse-red 1.5s infinite; /* Animasi Denyut */
-        }
-        .recording-text {
-            color: var(--danger-color); font-weight: bold; font-size: 0.95rem;
-        }
+        /* RECORDING PULSE */
+        .recording-container { display: flex; justify-content: center; align-items: center; margin-bottom: 15px; }
+        .recording-dot { width: 12px; height: 12px; background-color: var(--danger-color); border-radius: 50%; margin-right: 10px; animation: pulse-red 1.5s infinite; }
+        .recording-text { color: var(--danger-color); font-weight: bold; font-size: 0.95rem; }
 
-        /* BATTERY SVG */
+        /* STATUS & BATTERY */
+        #status { text-align:center; padding:8px; background:#f1f2f6; border-radius:8px; font-weight:600; font-size:0.9rem; color: var(--text-secondary); }
         #batteryStatus { display: none; justify-content: center; align-items: center; gap: 10px; margin-top: 15px; background: #f8f9fa; padding: 8px; border-radius: 12px; }
         svg.battery-svg { width: 40px; height: 20px; }
         .battery-frame { fill: none; stroke: var(--text-color); stroke-width: 2; }
@@ -143,28 +119,26 @@
         #batteryFill { fill: var(--success-color); transition: width 0.3s; }
         #batteryText { font-size: 10px; font-weight: bold; fill: #000; }
 
-        /* SENSORS & GAUGES */
+        /* SENSORS */
         .sensor-row { display: flex; gap: 15px; margin-bottom: 1.5rem; }
         .sensor-box { flex: 1; background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #eee; text-align: center; box-shadow: var(--shadow-soft); }
-        .sensor-title { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .sensor-title { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
         .sensor-val { font-size: 1.8rem; font-weight: 800; color: var(--primary-color); }
         .gauge-bar { height: 10px; background: #ecf0f1; border-radius: 5px; overflow: hidden; margin-top: 8px; }
         .gauge-fill { height: 100%; width: 0%; background: var(--gauge-fill); transition: width 0.2s ease-out; }
 
         /* CHART & HISTORY */
         .chart-container { position: relative; height: 220px; width: 100%; margin-top: 1rem; border: 1px solid #eee; border-radius: 12px; padding: 10px; background: #fff; }
-        .history-item { background: white; border: 1px solid #eee; padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: var(--shadow-soft); transition: transform 0.2s; }
-        .history-item:hover { transform: translateY(-2px); border-color: var(--primary-color); }
+        .history-item { background: white; border: 1px solid #eee; padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: var(--shadow-soft); }
         .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .history-tag { font-size: 0.7rem; padding: 3px 8px; border-radius: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .history-tag { font-size: 0.7rem; padding: 3px 8px; border-radius: 20px; font-weight: bold; text-transform: uppercase; }
         .tag-session { background: #e3f2fd; color: #0984e3; }
         .tag-preset { background: #fff3cd; color: #f39c12; }
         .history-detail { font-size: 0.9rem; color: #555; line-height: 1.5; margin-bottom: 10px; }
         .history-actions { display: flex; gap: 8px; justify-content: flex-end; }
-        
         #storageInfo { text-align: center; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem; background: #f1f2f6; padding: 5px; border-radius: 5px; }
 
-        /* TOGGLE SWITCH */
+        /* TOGGLE */
         .switch { position:relative; display:inline-block; width:46px; height:24px; }
         .switch input { opacity:0; width:0; height:0; }
         .switch-slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.4s; border-radius:24px; }
@@ -212,7 +186,7 @@
                     <svg viewBox="0 0 24 24"><path d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/></svg>
                     Connect Device
                 </button>
-                <div id="status" style="text-align:center; padding:8px; background:#f1f2f6; border-radius:8px; font-weight:600; font-size:0.9rem;">Disconnected</div>
+                <div id="status">Disconnected</div>
                 
                 <div id="batteryStatus">
                     <div class="battery-container" style="display:flex; align-items:center; gap:5px;">
@@ -232,17 +206,14 @@
                     <svg viewBox="0 0 24 24"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>
                     Mode Manual
                 </button>
-                
                 <button class="btn-success" onclick="goToAuto()">
                     <svg viewBox="0 0 24 24"><path d="M3 13h2.28l1.52-6.5L8.33 17l1.52-4H12v-2H9.67l-1.52 4L6.67 8.5 5.15 11H3v2zM21 11h-6.83l-1.52 4L11.17 7l-1.52 4H7v2h4.83l1.52-4 1.47 8 1.52-6H21v-2z"/></svg>
                     Mode Otomatis
                 </button>
-                
                 <button class="btn-secondary" onclick="goToHistory()">
                     <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
                     Riwayat Pasien
                 </button>
-                
                 <button class="btn-danger" onclick="logout()">
                     <svg viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
                     Keluar
@@ -253,13 +224,10 @@
         <div id="manualModeScreen">
             <div class="card">
                 <button class="btn-secondary" onclick="goHome()">
-                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-                    Kembali
+                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> Kembali
                 </button>
-                
                 <button class="btn-primary" onclick="saveManualPreset()" style="margin-bottom:15px;">
-                    <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
-                    Simpan Preset
+                    <svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg> Simpan Preset
                 </button>
                 
                 <h2>Mode Manual</h2>
@@ -293,14 +261,13 @@
 
                 <div class="card" style="background:#f8f9fa; margin-top:1rem; border:none; box-shadow:none;">
                     <h3>Global Settings</h3>
-                    
                     <label>Pulse Width (µs)</label>
-                    <span class="param-desc">Lebar denyut. Semakin tinggi, penetrasi otot semakin dalam & kuat.</span>
+                    <span class="param-desc">Lebar denyut. Semakin tinggi, penetrasi otot semakin dalam.</span>
                     <input type="range" id="pwSlider" min="50" max="3000" value="200" step="10">
                     <div class="input-value-container"><input type="number" id="pwInput" value="200"></div>
                     
                     <label style="margin-top:15px;">Frequency (Hz)</label>
-                    <span class="param-desc">Kecepatan denyut per detik. Mengatur kehalusan kontraksi otot.</span>
+                    <span class="param-desc">Kecepatan denyut per detik. Mengatur kehalusan kontraksi.</span>
                     <input type="range" id="freqSlider" min="1" max="150" value="30">
                     <div class="input-value-container"><input type="number" id="freqInput" value="30"></div>
                 </div>
@@ -310,8 +277,7 @@
         <div id="autoModeScreen">
             <div class="card">
                 <button class="btn-secondary" onclick="goHome()">
-                    <svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
-                    Stop & Simpan
+                    <svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg> Stop & Simpan
                 </button>
                 <h2>Mode Otomatis</h2>
                 
@@ -358,16 +324,11 @@
         <div id="historyScreen">
             <div class="card">
                 <button class="btn-secondary" onclick="goHome()">
-                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-                    Kembali
+                    <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> Kembali
                 </button>
                 <h2>Riwayat Terapi</h2>
-                
                 <div id="storageInfo">Memuat Info Penyimpanan...</div>
-
-                <div id="historyList">
-                    <p style="text-align:center; color:#888;">Belum ada data rekaman.</p>
-                </div>
+                <div id="historyList"><p style="text-align:center; color:#888;">Belum ada data rekaman.</p></div>
             </div>
         </div>
 
@@ -389,6 +350,16 @@
         let isRecording = false;
         let recordingStartTime = 0;
         let chartInstance = null;
+
+        // --- UPDATE STATUS HELPER (FIXED) ---
+        function updateStatus(msg, success) {
+            const el = document.getElementById('status');
+            if (el) {
+                el.textContent = msg;
+                el.style.background = success ? '#dff9fb' : (msg.includes('Disconnected') || msg.includes('Error') ? '#ff7675' : '#f1f2f6');
+                el.style.color = success ? '#00b894' : (msg.includes('Disconnected') || msg.includes('Error') ? '#fff' : '#636e72');
+            }
+        }
 
         // --- USER & DATA ---
         function handleLogin() {
@@ -434,25 +405,6 @@
             history.push(preset);
             localStorage.setItem(currentUser.key, JSON.stringify(history));
             alert("Preset Berhasil Disimpan!");
-        }
-
-        // --- STORAGE MANAGEMENT ---
-        function getStorageUsage() {
-            let total = 0;
-            if(currentUser && localStorage.getItem(currentUser.key)){
-                const data = localStorage.getItem(currentUser.key);
-                total = data.length * 2; 
-            }
-            return (total / 1024).toFixed(2);
-        }
-
-        function deleteHistoryItem(reverseIndex) {
-            if(!confirm("Yakin ingin menghapus data ini?")) return;
-            const history = JSON.parse(localStorage.getItem(currentUser.key));
-            const realIndex = (history.length - 1) - reverseIndex; 
-            history.splice(realIndex, 1); 
-            localStorage.setItem(currentUser.key, JSON.stringify(history)); 
-            renderHistory(); 
         }
 
         // --- NAVIGATION ---
@@ -509,7 +461,7 @@
 
         function startRecording() {
             currentSessionData = []; isRecording = true; recordingStartTime = Date.now();
-            document.getElementById('recordingStatus').style.display = currentUser ? 'flex' : 'none'; // Flex for Pulse Icon
+            document.getElementById('recordingStatus').style.display = currentUser ? 'flex' : 'none';
             initChart();
         }
 
@@ -615,17 +567,21 @@
             if(elBar) elBar.style.width = Math.min((val/max)*100, 100) + "%";
         }
 
-        // --- HISTORY RENDERER ---
+        // --- HISTORY & STORAGE ---
+        function getStorageUsage() {
+            let total = 0;
+            if(currentUser && localStorage.getItem(currentUser.key)){
+                const data = localStorage.getItem(currentUser.key);
+                total = data.length * 2; 
+            }
+            return (total / 1024).toFixed(2);
+        }
+
         function renderHistory() {
             const list = document.getElementById('historyList');
             const info = document.getElementById('storageInfo');
             list.innerHTML = "";
-            
-            if(!currentUser) { 
-                list.innerHTML = "<p>Mode Tamu.</p>"; 
-                info.style.display = 'none';
-                return; 
-            }
+            if(!currentUser) { list.innerHTML = "<p>Mode Tamu.</p>"; info.style.display = 'none'; return; }
             
             info.style.display = 'block';
             info.textContent = `Penyimpanan: ${getStorageUsage()} KB Terpakai`;
@@ -636,29 +592,30 @@
             history.reverse().forEach((item, idx) => {
                 const div = document.createElement('div');
                 div.className = 'history-item';
-                
                 let content = "";
                 let actions = "";
 
                 if(item.type === 'preset') {
-                    content = `
-                        <div class="history-header"><span class="history-tag tag-preset">PRESET</span> <span style="font-size:0.8rem">${item.date}</span></div>
-                        <div class="history-detail">
-                            <strong>Disimpan:</strong> Grip Amp: ${item.data.c1}, Bicep Amp: ${item.data.c2}<br>
-                            PW: ${item.data.pw}µs, Freq: ${item.data.freq}Hz
-                        </div>`;
+                    content = `<div class="history-header"><span class="history-tag tag-preset">PRESET</span> <span style="font-size:0.8rem">${item.date}</span></div>
+                        <div class="history-detail"><strong>Disimpan:</strong> Grip Amp: ${item.data.c1}, Bicep Amp: ${item.data.c2}<br>PW: ${item.data.pw}µs, Freq: ${item.data.freq}Hz</div>`;
                 } else {
-                    content = `
-                        <div class="history-header"><span class="history-tag tag-session">SESI</span> <span style="font-size:0.8rem">${item.date}</span></div>
+                    content = `<div class="history-header"><span class="history-tag tag-session">SESI</span> <span style="font-size:0.8rem">${item.date}</span></div>
                         <div class="history-detail">Durasi: ${item.duration}</div>`;
                     actions = `<button class="btn-success btn-sm" onclick="downloadCSV(${idx})"><svg viewBox="0 0 24 24" style="width:16px; height:16px; margin:0;"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg> CSV</button>`;
                 }
-
                 actions += `<button class="btn-danger btn-sm" onclick="deleteHistoryItem(${idx})"><svg viewBox="0 0 24 24" style="width:16px; height:16px; margin:0;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>`;
-
                 div.innerHTML = content + `<div class="history-actions">${actions}</div>`;
                 list.appendChild(div);
             });
+        }
+
+        function deleteHistoryItem(reverseIndex) {
+            if(!confirm("Yakin ingin menghapus?")) return;
+            const history = JSON.parse(localStorage.getItem(currentUser.key));
+            const realIndex = (history.length - 1) - reverseIndex; 
+            history.splice(realIndex, 1); 
+            localStorage.setItem(currentUser.key, JSON.stringify(history)); 
+            renderHistory(); 
         }
 
         function downloadCSV(revIdx) {
